@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bytedance/docmesh/internal/config"
-	"github.com/bytedance/docmesh/internal/mcpserver"
-	"github.com/bytedance/docmesh/internal/service"
-	"github.com/bytedance/docmesh/internal/ui"
-	"github.com/bytedance/docmesh/internal/version"
+	"github.com/ifuryst/docmesh/internal/config"
+	"github.com/ifuryst/docmesh/internal/mcpserver"
+	"github.com/ifuryst/docmesh/internal/service"
+	"github.com/ifuryst/docmesh/internal/ui"
+	"github.com/ifuryst/docmesh/internal/version"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

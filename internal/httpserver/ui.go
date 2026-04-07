@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bytedance/docmesh/internal/api"
-	"github.com/bytedance/docmesh/internal/service"
+	"github.com/ifuryst/docmesh/internal/api"
+	"github.com/ifuryst/docmesh/internal/service"
 	"github.com/gin-gonic/gin"
 )
 

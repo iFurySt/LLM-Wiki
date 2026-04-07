@@ -7,5 +7,5 @@
         	[::1]:32769 (localhost): dial error: dial tcp [::1]:32769: connect: connection refused
         	127.0.0.1:32769 (localhost): dial error: dial tcp 127.0.0.1:32769: connect: connection refused
 FAIL
-FAIL	github.com/bytedance/docmesh/tests/e2e	28.387s
+FAIL	github.com/ifuryst/docmesh/tests/e2e	28.387s
 FAIL

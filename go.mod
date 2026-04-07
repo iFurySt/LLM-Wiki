@@ -1,4 +1,4 @@
-module github.com/bytedance/docmesh
+module github.com/ifuryst/docmesh
 
 go 1.26.1
 

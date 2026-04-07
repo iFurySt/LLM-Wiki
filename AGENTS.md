@@ -6,10 +6,10 @@ This repository builds `DocMesh`, an agent-native knowledge service for multi-te
 
 ## Start Here
 
-- [docs/README.md](/Users/bytedance/projects/github/DocMesh/docs/README.md): docs map and update rules
-- [docs/knowledge/product.md](/Users/bytedance/projects/github/DocMesh/docs/knowledge/product.md): product framing, scope, core concepts
-- [docs/knowledge/architecture.md](/Users/bytedance/projects/github/DocMesh/docs/knowledge/architecture.md): system model and resource boundaries
-- [docs/knowledge/repo-map.md](/Users/bytedance/projects/github/DocMesh/docs/knowledge/repo-map.md): repo structure and implementation status
+- [docs/README.md](/Users/ifuryst/projects/github/DocMesh/docs/README.md): docs map and update rules
+- [docs/knowledge/product.md](/Users/ifuryst/projects/github/DocMesh/docs/knowledge/product.md): product framing, scope, core concepts
+- [docs/knowledge/architecture.md](/Users/ifuryst/projects/github/DocMesh/docs/knowledge/architecture.md): system model and resource boundaries
+- [docs/knowledge/repo-map.md](/Users/ifuryst/projects/github/DocMesh/docs/knowledge/repo-map.md): repo structure and implementation status
 
 ## Working Rules
 

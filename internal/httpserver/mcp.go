@@ -1,7 +1,7 @@
 package httpserver
 
 import (
-	"github.com/bytedance/docmesh/internal/mcpserver"
+	"github.com/ifuryst/docmesh/internal/mcpserver"
 	"github.com/gin-gonic/gin"
 )
 

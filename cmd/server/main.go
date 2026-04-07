@@ -5,9 +5,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/bytedance/docmesh/internal/app"
-	"github.com/bytedance/docmesh/internal/config"
-	"github.com/bytedance/docmesh/internal/logging"
+	"github.com/ifuryst/docmesh/internal/app"
+	"github.com/ifuryst/docmesh/internal/config"
+	"github.com/ifuryst/docmesh/internal/logging"
 )
 
 func main() {

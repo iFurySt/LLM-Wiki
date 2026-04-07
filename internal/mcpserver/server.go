@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bytedance/docmesh/internal/api"
-	"github.com/bytedance/docmesh/internal/service"
-	"github.com/bytedance/docmesh/internal/version"
+	"github.com/ifuryst/docmesh/internal/api"
+	"github.com/ifuryst/docmesh/internal/service"
+	"github.com/ifuryst/docmesh/internal/version"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

@@ -1,1 +1,1 @@
-ok  	github.com/bytedance/docmesh/tests/e2e	7.309s
+ok  	github.com/ifuryst/docmesh/tests/e2e	7.309s

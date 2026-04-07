@@ -2,42 +2,42 @@
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /healthz                  --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/system/info           --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
-[GIN-debug] GET    /readyz                   --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
-[GIN-debug] POST   /v1/namespaces            --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:id        --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
-[GIN-debug] POST   /v1/documents             --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
-[GIN-debug] GET    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
-[GIN-debug] PUT    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
+[GIN-debug] GET    /healthz                  --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
+[GIN-debug] GET    /readyz                   --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
+[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] POST   /v1/documents             --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
+[GIN-debug] PUT    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
 goos: darwin
 goarch: arm64
-pkg: github.com/bytedance/docmesh/tests/e2e
+pkg: github.com/ifuryst/docmesh/tests/e2e
 cpu: Apple M4 Pro
 BenchmarkCreateAndGetDocument-14    	[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /healthz                  --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/system/info           --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
-[GIN-debug] GET    /readyz                   --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
-[GIN-debug] POST   /v1/namespaces            --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:id        --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
-[GIN-debug] POST   /v1/documents             --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
-[GIN-debug] GET    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
-[GIN-debug] PUT    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
+[GIN-debug] GET    /healthz                  --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
+[GIN-debug] GET    /readyz                   --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
+[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] POST   /v1/documents             --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
+[GIN-debug] PUT    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /healthz                  --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/system/info           --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
-[GIN-debug] GET    /readyz                   --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
-[GIN-debug] POST   /v1/namespaces            --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:id        --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
-[GIN-debug] POST   /v1/documents             --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
-[GIN-debug] GET    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
-[GIN-debug] PUT    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
+[GIN-debug] GET    /healthz                  --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
+[GIN-debug] GET    /readyz                   --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
+[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] POST   /v1/documents             --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
+[GIN-debug] PUT    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
      877	   1305579 ns/op	   33237 B/op	     411 allocs/op
 PASS
-ok  	github.com/bytedance/docmesh/tests/e2e	7.069s
+ok  	github.com/ifuryst/docmesh/tests/e2e	7.069s

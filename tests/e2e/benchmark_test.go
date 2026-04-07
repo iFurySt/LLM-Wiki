@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bytedance/docmesh/internal/api"
-	"github.com/bytedance/docmesh/internal/db"
-	"github.com/bytedance/docmesh/internal/httpclient"
-	"github.com/bytedance/docmesh/internal/httpserver"
-	"github.com/bytedance/docmesh/internal/logging"
-	"github.com/bytedance/docmesh/internal/repository"
-	"github.com/bytedance/docmesh/internal/service"
-	"github.com/bytedance/docmesh/internal/testutil"
+	"github.com/ifuryst/docmesh/internal/api"
+	"github.com/ifuryst/docmesh/internal/db"
+	"github.com/ifuryst/docmesh/internal/httpclient"
+	"github.com/ifuryst/docmesh/internal/httpserver"
+	"github.com/ifuryst/docmesh/internal/logging"
+	"github.com/ifuryst/docmesh/internal/repository"
+	"github.com/ifuryst/docmesh/internal/service"
+	"github.com/ifuryst/docmesh/internal/testutil"
 )
 
 func BenchmarkCreateAndGetDocument(b *testing.B) {

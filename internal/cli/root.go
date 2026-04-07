@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/bytedance/docmesh/internal/api"
-	"github.com/bytedance/docmesh/internal/httpclient"
-	"github.com/bytedance/docmesh/internal/version"
+	"github.com/ifuryst/docmesh/internal/api"
+	"github.com/ifuryst/docmesh/internal/httpclient"
+	"github.com/ifuryst/docmesh/internal/version"
 	"github.com/spf13/cobra"
 )
 

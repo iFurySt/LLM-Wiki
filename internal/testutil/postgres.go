@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bytedance/docmesh/internal/config"
+	"github.com/ifuryst/docmesh/internal/config"
 	"github.com/testcontainers/testcontainers-go"
 	pgcontainer "github.com/testcontainers/testcontainers-go/modules/postgres"
 )

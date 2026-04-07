@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/bytedance/docmesh/internal/cli"
+	"github.com/ifuryst/docmesh/internal/cli"
 )
 
 func main() {

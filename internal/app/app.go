@@ -3,11 +3,11 @@ package app
 import (
 	"context"
 
-	"github.com/bytedance/docmesh/internal/config"
-	"github.com/bytedance/docmesh/internal/db"
-	"github.com/bytedance/docmesh/internal/httpserver"
-	"github.com/bytedance/docmesh/internal/repository"
-	"github.com/bytedance/docmesh/internal/service"
+	"github.com/ifuryst/docmesh/internal/config"
+	"github.com/ifuryst/docmesh/internal/db"
+	"github.com/ifuryst/docmesh/internal/httpserver"
+	"github.com/ifuryst/docmesh/internal/repository"
+	"github.com/ifuryst/docmesh/internal/service"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )

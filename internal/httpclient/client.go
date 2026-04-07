@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bytedance/docmesh/internal/api"
+	"github.com/ifuryst/docmesh/internal/api"
 )
 
 type Client struct {
