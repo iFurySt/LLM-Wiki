@@ -1,5 +1,11 @@
 # 2026-04-07 Release Distribution Validation
 
+This record is the initial bootstrap checkpoint only.
+
+For the final npm trusted publishing result and the corrected release path, see:
+
+- `docs/test-results/2026-04-07-trusted-publishing.md`
+
 ## Scope
 
 Validated the first repo-side implementation of tag-driven release distribution for:
@@ -28,8 +34,6 @@ docker build -f Dockerfile -t docmesh:test .
 ## Notes
 
 - The npm publish path is configured in workflow but was not executed locally.
-- The actual registry pushes still depend on GitHub Actions secrets:
-  - `DOCKERHUB_USERNAME`
-  - `DOCKERHUB_TOKEN`
-  - `NPM_TOKEN`
+- The actual registry pushes initially depended on GitHub Actions secrets.
+- That npm token-based path was later replaced by npm trusted publishing over GitHub OIDC.
 - Direct execution of the packaged Linux CLI binary was not validated on this macOS workstation because the host architecture and target binary format do not match.

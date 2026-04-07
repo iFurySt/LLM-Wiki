@@ -67,7 +67,7 @@ Release model:
 - CLI binaries are published to GitHub Releases on pushed tags like `v0.1.0`
 - the installer script downloads the matching archive from GitHub Releases
 - the main service image is published to Docker Hub and GHCR
-- the `docmesh-mcp` stdio bridge is published to npm
+- the `docmesh-mcp` stdio bridge is published to npm through GitHub OIDC trusted publishing
 - local `/install/install-cli.sh` is the hosted delivery surface for the installer script itself
 
 ## For AI
