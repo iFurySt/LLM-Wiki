@@ -15,12 +15,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
+
+      - name: Upgrade npm
+        run: npm install -g npm@^11.5.1
 
       - name: Validate publish inputs
         working-directory: npm/docmesh-mcp
