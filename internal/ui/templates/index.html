@@ -126,9 +126,9 @@
     .tab,
     .pill,
     .tree-meta,
+    .copy-button,
     button,
-    .theme-toggle button,
-    select {
+    .theme-toggle button {
       font-family: var(--pixel);
       text-transform: uppercase;
     }
@@ -166,7 +166,6 @@
       background: var(--panel-soft);
       color: var(--muted);
       box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
-      cursor: pointer;
     }
 
     .tab.active {
@@ -224,11 +223,6 @@
       align-items: start;
     }
 
-    .sidebar,
-    .main {
-      min-height: calc(100vh - 130px);
-    }
-
     .sidebar {
       padding: 16px;
       position: sticky;
@@ -251,24 +245,23 @@
       margin-bottom: 12px;
     }
 
-    .panel-kicker {
-      margin-top: 5px;
+    .panel-kicker,
+    .sub,
+    .desc,
+    .empty,
+    .tree-meta,
+    .doc-meta,
+    .install-copy,
+    .install-label,
+    .revision-note,
+    .code-block,
+    .copy-feedback {
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.6;
+      font-size: 14px;
     }
 
-    .tenant-select {
-      width: 100%;
-      border: 3px solid var(--border);
-      background: var(--panel-raised);
-      color: var(--text);
-      padding: 11px 12px;
-      border-radius: 0;
-    }
-
-    .space-card {
-      margin-top: 12px;
+    .tenant-chip {
       padding: 12px;
       border: 3px solid var(--border);
       background: linear-gradient(135deg, rgba(242, 201, 76, 0.16), rgba(255,255,255,0.02)), var(--panel-raised);
@@ -277,19 +270,6 @@
     .name {
       font: 700 15px/1.35 var(--pixel);
       text-transform: uppercase;
-    }
-
-    .sub,
-    .desc,
-    .empty,
-    .tree-meta,
-    .doc-meta,
-    .install-copy,
-    .markdown-body,
-    .revision-note {
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 14px;
     }
 
     .tree {
@@ -395,8 +375,15 @@
       gap: 16px;
     }
 
-    .hero {
+    .hero,
+    .section {
       padding: 16px;
+      border: 4px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel);
+      box-shadow: 0 12px 26px var(--shadow);
+    }
+
+    .hero {
       display: grid;
       grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
       gap: 16px;
@@ -457,17 +444,6 @@
       font-size: 12px;
     }
 
-    .section {
-      padding: 16px;
-      border: 4px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel);
-      box-shadow: 0 12px 26px var(--shadow);
-    }
-
-    .section.hidden {
-      display: none;
-    }
-
     .doc-header {
       display: flex;
       justify-content: space-between;
@@ -476,21 +452,11 @@
       margin-bottom: 14px;
     }
 
-    .doc-tools,
-    .doc-meta-row,
-    .install-grid,
-    .revision-list,
-    .tool-form,
-    .split {
-      display: grid;
-      gap: 10px;
-    }
-
     .doc-meta-row {
-      grid-auto-flow: column;
-      grid-auto-columns: max-content;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       align-items: center;
-      justify-content: start;
     }
 
     .markdown-wrap {
@@ -504,6 +470,7 @@
     .markdown-body {
       color: var(--text);
       max-width: 82ch;
+      line-height: 1.7;
     }
 
     .markdown-body > :first-child {
@@ -522,22 +489,6 @@
       font-size: 1.1em;
     }
 
-    .markdown-body p,
-    .markdown-body ul,
-    .markdown-body ol,
-    .markdown-body blockquote {
-      margin: 0 0 1em;
-    }
-
-    .markdown-body ul,
-    .markdown-body ol {
-      padding-left: 1.4em;
-    }
-
-    .markdown-body li + li {
-      margin-top: 0.35em;
-    }
-
     .markdown-body code {
       padding: 1px 5px;
       border: 1px solid rgba(255,255,255,0.08);
@@ -554,66 +505,38 @@
       background: #0d0d0d;
     }
 
-    .markdown-body pre code {
-      padding: 0;
-      border: 0;
-      background: transparent;
-      color: #f2f0e6;
-    }
-
-    .markdown-body blockquote {
-      padding: 8px 12px;
-      border-left: 4px solid var(--accent);
-      background: rgba(242, 201, 76, 0.08);
-      color: var(--muted);
-    }
-
-    .markdown-body a {
-      color: var(--accent);
-      text-decoration: underline;
-    }
-
     .install-grid {
+      display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      margin-top: 12px;
+      gap: 14px;
     }
 
     .install-card,
     .revision-card {
-      padding: 12px;
+      padding: 14px;
       border: 3px solid var(--border);
       background: var(--panel-soft);
     }
 
-    input,
-    select,
-    textarea,
-    button {
-      font: inherit;
+    .install-card {
+      display: grid;
+      gap: 12px;
+      align-content: start;
     }
 
-    input,
-    textarea {
-      width: 100%;
-      border: 3px solid var(--border);
-      background: #f3e9c8;
-      color: #24191a;
-      padding: 11px 12px;
-      border-radius: 0;
+    .copy-block {
+      display: grid;
+      gap: 8px;
     }
 
-    :root[data-theme="light"] input,
-    :root[data-theme="light"] textarea {
-      background: #fffaf0;
-      color: #2b2218;
+    .copy-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
     }
 
-    textarea {
-      min-height: 140px;
-      resize: vertical;
-      line-height: 1.55;
-    }
-
+    .copy-button,
     button {
       border: 3px solid var(--border);
       background: var(--accent);
@@ -624,14 +547,39 @@
       box-shadow: 4px 4px 0 rgba(0,0,0,0.24);
     }
 
-    button.secondary {
-      background: var(--accent-3);
-      color: #0d1817;
+    .copy-button {
+      padding: 8px 10px;
+      min-width: 82px;
     }
 
-    button.danger {
-      background: var(--danger);
-      color: #fff;
+    .copy-button.secondary {
+      background: var(--panel-raised);
+      color: var(--text);
+    }
+
+    .copy-feedback {
+      min-height: 1.4em;
+      font-size: 12px;
+    }
+
+    .code-block {
+      margin: 0;
+      padding: 12px;
+      border: 3px solid var(--border);
+      background: #0d0d0d;
+      color: var(--accent-2);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--pixel);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .revision-list,
+    .tool-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
     }
 
     details.tool-box {
@@ -655,6 +603,43 @@
       padding: 0 14px 14px;
     }
 
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 3px solid var(--border);
+      background: #f3e9c8;
+      color: #24191a;
+      padding: 11px 12px;
+      border-radius: 0;
+    }
+
+    :root[data-theme="light"] input,
+    :root[data-theme="light"] select,
+    :root[data-theme="light"] textarea {
+      background: #fffaf0;
+      color: #2b2218;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     .empty-state {
       padding: 24px;
       border: 3px dashed rgba(255,255,255,0.16);
@@ -673,7 +658,6 @@
 
       .sidebar {
         position: static;
-        min-height: auto;
       }
     }
 
@@ -701,15 +685,13 @@
         <div>
           <div class="eyebrow">Pixel Wiki</div>
           <div class="brand-title">DocMesh</div>
-          <div class="brand-subtitle">Wiki browsing for normal users, not an admin console.</div>
+          <div class="brand-subtitle">Wiki and install. Nothing more.</div>
         </div>
       </div>
 
       <nav class="tabs" aria-label="Top tabs">
-        <a class="tab active" href="/ui" data-tab-link="wiki">Wiki</a>
-        <button type="button" class="tab" data-tab-link="install">Install</button>
-        <a class="tab" href="/install/DocMesh.md" target="_blank" rel="noreferrer">Guide</a>
-        <a class="tab" href="/install/install-cli.sh" target="_blank" rel="noreferrer">CLI</a>
+        <a class="tab {{ if eq .CurrentPage "wiki" }}active{{ end }}" href="/ui">Wiki</a>
+        <a class="tab {{ if eq .CurrentPage "install" }}active{{ end }}" href="/ui/install">Install</a>
       </nav>
 
       <div class="top-actions">
@@ -724,34 +706,27 @@
     <div class="flash {{ .Flash.Kind }}">{{ .Flash.Message }}</div>
     {{ end }}
 
+    {{ if eq .CurrentPage "wiki" }}
     <div class="shell">
       <aside class="sidebar frame">
         <section class="panel">
           <div class="panel-head">
             <div>
               <h2>Tenant</h2>
-              <div class="panel-kicker">Workspace switcher stays at the top-left, like a familiar wiki sidebar.</div>
+              <div class="panel-kicker">Current workspace at the top-left, then the wiki tree.</div>
             </div>
           </div>
-          <select class="tenant-select" aria-label="Tenant selector">
-            <option selected>{{ .TenantID }}</option>
-          </select>
-
-          {{ range .Spaces }}
-          <div class="space-card">
-            <div class="name">{{ .DisplayName }}</div>
-            <div class="sub">{{ .Key }} · #{{ .ID }}</div>
+          <div class="tenant-chip">
+            <div class="name">{{ .TenantID }}</div>
+            <div class="sub">{{ .NamespaceCount }} collections · {{ .DocumentCount }} documents</div>
           </div>
-          {{ else }}
-          <div class="empty">No spaces found for this tenant.</div>
-          {{ end }}
         </section>
 
         <section class="panel">
           <div class="panel-head">
             <div>
-              <h2>Navigation</h2>
-              <div class="panel-kicker">Document tree grouped by collection, closer to an IDE project view.</div>
+              <h2>Wiki Tree</h2>
+              <div class="panel-kicker">Click a document on the left. Read it on the right.</div>
             </div>
           </div>
 
@@ -770,10 +745,7 @@
 
               <div class="tree-docs">
                 {{ range .Documents }}
-                <a
-                  class="tree-link {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}selected{{ end }}"
-                  href="/ui?document_id={{ .ID }}&namespace_id={{ .NamespaceID }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}"
-                >
+                <a class="tree-link {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}selected{{ end }}" href="/ui?document_id={{ .ID }}&namespace_id={{ .NamespaceID }}">
                   <div class="name">{{ .Title }}</div>
                   <div class="tree-meta">{{ .Slug }}</div>
                 </a>
@@ -790,13 +762,12 @@
       </aside>
 
       <main class="main">
-        <section class="hero frame">
+        <section class="hero">
           <div>
-            <div class="eyebrow">Reader First</div>
-            <h1 class="hero-title">Keep the old pixel feel. Fix the color. Make the navigation obvious.</h1>
+            <div class="eyebrow">Wiki</div>
+            <h1 class="hero-title">Left side for navigation. Right side for reading.</h1>
             <div class="hero-copy">
-              The left side behaves like a document tree. Click a page and the right side becomes a proper reading surface.
-              The main content is now rendered as markdown so it looks like a real wiki page instead of raw storage text.
+              This page is only for browsing and reading wiki content. Document bodies render as markdown.
             </div>
             <div class="stat-grid">
               <div class="stat">
@@ -816,21 +787,21 @@
 
           <div class="hero-note">
             <div>
-              <strong>Theme</strong>
-              <div class="desc">Black and yellow replace the previous purple-heavy dark palette.</div>
-            </div>
-            <div>
-              <strong>Selected Tenant</strong>
+              <strong>Selected tenant</strong>
               <div class="desc">{{ .TenantID }}</div>
             </div>
             <div>
-              <strong>Interaction</strong>
-              <div class="desc">Tree navigation on the left, markdown article on the right.</div>
+              <strong>Rendering mode</strong>
+              <div class="desc">Markdown first.</div>
+            </div>
+            <div>
+              <strong>Install page</strong>
+              <div class="desc">Go to the separate install page for CLI, skill, and MCP setup.</div>
             </div>
           </div>
         </section>
 
-        <section class="section" data-tab-panel="wiki">
+        <section class="section">
           {{ if .SelectedDocument }}
           <div class="doc-header">
             <div>
@@ -850,7 +821,7 @@
             <div class="markdown-body">{{ markdown .SelectedDocument.Content }}</div>
           </div>
 
-          <div class="doc-tools" style="margin-top: 16px;">
+          <div class="tool-stack">
             <details class="tool-box">
               <summary>Revision History</summary>
               <div class="tool-body">
@@ -867,107 +838,161 @@
                 </div>
               </div>
             </details>
-
-            <details class="tool-box">
-              <summary>Edit Current Document</summary>
-              <div class="tool-body">
-                <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/update" class="tool-form">
-                  <input name="title" value="{{ .SelectedDocument.Title }}" required />
-                  <textarea name="content">{{ .SelectedDocument.Content }}</textarea>
-                  <div class="split">
-                    <input name="author_type" value="user" />
-                    <input name="author_id" value="ui" />
-                  </div>
-                  <input name="change_summary" placeholder="change summary" />
-                  <button type="submit" class="secondary">Save New Revision</button>
-                </form>
-              </div>
-            </details>
-
-            <details class="tool-box">
-              <summary>Create Document</summary>
-              <div class="tool-body">
-                <form method="post" action="/ui/documents" class="tool-form">
-                  <div class="split">
-                    <select name="namespace_id" class="tenant-select" required>
-                      <option value="">select collection</option>
-                      {{ range .Namespaces }}
-                      {{ if ne .Status "archived" }}
-                      <option value="{{ .ID }}" {{ if eq $.SelectedNamespaceID .ID }}selected{{ end }}>{{ .DisplayName }}</option>
-                      {{ end }}
-                      {{ end }}
-                    </select>
-                    <input name="slug" placeholder="document slug" required />
-                  </div>
-                  <input name="title" placeholder="title" required />
-                  <textarea name="content" placeholder="markdown content"></textarea>
-                  <div class="split">
-                    <input name="author_type" value="user" />
-                    <input name="author_id" value="ui" />
-                  </div>
-                  <input name="change_summary" placeholder="change summary" />
-                  <button type="submit">Create Document</button>
-                </form>
-              </div>
-            </details>
-
-            <details class="tool-box">
-              <summary>Archive Current Document</summary>
-              <div class="tool-body">
-                {{ if ne .SelectedDocument.Status "archived" }}
-                <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/archive" class="tool-form">
-                  <div class="split">
-                    <input name="author_type" value="user" />
-                    <input name="author_id" value="ui" />
-                  </div>
-                  <input name="change_summary" placeholder="archive reason" />
-                  <button type="submit" class="danger">Archive Document</button>
-                </form>
-                {{ else }}
-                <div class="empty">This document is already archived.</div>
-                {{ end }}
-              </div>
-            </details>
           </div>
           {{ else }}
           <div class="empty-state">Pick a document from the tree on the left.</div>
           {{ end }}
         </section>
-
-        <section class="section hidden" data-tab-panel="install">
-          <div class="doc-header">
-            <div>
-              <div class="eyebrow">Install</div>
-              <h2>DocMesh Setup</h2>
-              <div class="doc-meta">Top-level install entry points stay one click away from the wiki.</div>
-            </div>
-          </div>
-
-          <div class="install-grid">
-            <a class="install-card" href="/install/DocMesh.md" target="_blank" rel="noreferrer">
-              <div class="name">Read Guide</div>
-              <div class="install-copy">Open the hosted markdown guide for setup and conventions.</div>
-            </a>
-            <a class="install-card" href="/install/skills/DocMesh.skill">
-              <div class="name">Download Skill</div>
-              <div class="install-copy">Fetch the packaged skill bundle from the current host.</div>
-            </a>
-            <a class="install-card" href="/install/install-cli.sh" target="_blank" rel="noreferrer">
-              <div class="name">Install CLI</div>
-              <div class="install-copy">Use the shell installer to pull the matching CLI build.</div>
-            </a>
-          </div>
-        </section>
       </main>
     </div>
+    {{ else }}
+    <main class="main">
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Install</div>
+          <h1 class="hero-title">Three install paths. One page. Human and agent both covered.</h1>
+          <div class="hero-copy">
+            Each card gives you a ready-to-copy prompt for an AI agent, a canonical URL, and a direct shell command for humans.
+          </div>
+        </div>
+
+        <div class="hero-note">
+          <div>
+            <strong>Agent use</strong>
+            <div class="desc">Copy the prompt block and paste it into Codex or another agent.</div>
+          </div>
+          <div>
+            <strong>Human use</strong>
+            <div class="desc">Copy the bash block and run it directly.</div>
+          </div>
+          <div>
+            <strong>Current host</strong>
+            <div class="desc">{{ .InstallBaseURL }}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="panel-head">
+          <div>
+            <h2>Install Paths</h2>
+            <div class="panel-kicker">CLI, skill, and MCP. Nothing else on this page.</div>
+          </div>
+        </div>
+
+        <div class="install-grid">
+          <article class="install-card">
+            <div>
+              <div class="eyebrow">CLI</div>
+              <h3>Install DocMesh CLI</h3>
+              <div class="install-copy">Use the hosted shell installer to install the local CLI, then run commands against your DocMesh server.</div>
+            </div>
+
+            <div class="copy-block">
+              <div class="copy-head">
+                <div class="install-label">Prompt For AI Agent</div>
+                <button type="button" class="copy-button" data-copy-target="cli-agent">Copy</button>
+              </div>
+              <pre id="cli-agent" class="code-block">Install and use the DocMesh CLI for this workspace.
+
+Read:
+{{ .InstallDocURL }}
+
+Then run:
+curl -fsSL {{ .InstallScriptURL }} | sh
+
+After install, use:
+docmesh system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
+            </div>
+
+            <div class="copy-block">
+              <div class="copy-head">
+                <div class="install-label">Command For Humans</div>
+                <button type="button" class="copy-button secondary" data-copy-target="cli-human">Copy</button>
+              </div>
+              <pre id="cli-human" class="code-block">curl -fsSL {{ .InstallScriptURL }} | sh
+docmesh system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
+            </div>
+            <div class="copy-feedback" data-copy-feedback></div>
+          </article>
+
+          <article class="install-card">
+            <div>
+              <div class="eyebrow">Skill</div>
+              <h3>Install Skill Package</h3>
+              <div class="install-copy">Give the agent the hosted guide or the official packaged skill so it can follow your DocMesh conventions directly.</div>
+            </div>
+
+            <div class="copy-block">
+              <div class="copy-head">
+                <div class="install-label">Prompt For AI Agent</div>
+                <button type="button" class="copy-button" data-copy-target="skill-agent">Copy</button>
+              </div>
+              <pre id="skill-agent" class="code-block">Read and follow this DocMesh install guide:
+{{ .InstallDocURL }}
+
+If your runtime supports skill packages, install:
+{{ .InstallSkillURL }}
+
+Use DocMesh as the shared wiki backend for this task.</pre>
+            </div>
+
+            <div class="copy-block">
+              <div class="copy-head">
+                <div class="install-label">Command For Humans</div>
+                <button type="button" class="copy-button secondary" data-copy-target="skill-human">Copy</button>
+              </div>
+              <pre id="skill-human" class="code-block">open {{ .InstallDocURL }}
+curl -O {{ .InstallSkillURL }}</pre>
+            </div>
+            <div class="copy-feedback" data-copy-feedback></div>
+          </article>
+
+          <article class="install-card">
+            <div>
+              <div class="eyebrow">MCP</div>
+              <h3>Connect Through MCP</h3>
+              <div class="install-copy">Use the local MCP bridge or the remote HTTP MCP endpoint so Codex or another client can talk to DocMesh directly.</div>
+            </div>
+
+            <div class="copy-block">
+              <div class="copy-head">
+                <div class="install-label">Prompt For AI Agent</div>
+                <button type="button" class="copy-button" data-copy-target="mcp-agent">Copy</button>
+              </div>
+              <pre id="mcp-agent" class="code-block">Connect to the local DocMesh MCP server.
+
+Remote MCP endpoint:
+{{ .MCPURL }}
+
+Tenant header:
+X-DocMesh-Tenant-ID: default
+
+If local stdio MCP is preferred, run:
+npx --prefix npm/docmesh-mcp docmesh-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
+            </div>
+
+            <div class="copy-block">
+              <div class="copy-head">
+                <div class="install-label">Command For Humans</div>
+                <button type="button" class="copy-button secondary" data-copy-target="mcp-human">Copy</button>
+              </div>
+              <pre id="mcp-human" class="code-block">npm install --prefix npm/docmesh-mcp --package-lock=false
+npx --prefix npm/docmesh-mcp docmesh-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
+            </div>
+            <div class="copy-feedback" data-copy-feedback></div>
+          </article>
+        </div>
+      </section>
+    </main>
+    {{ end }}
   </div>
   <script>
     (function() {
       var root = document.documentElement;
       var storageKey = "docmesh-theme";
       var buttons = document.querySelectorAll("[data-theme-button]");
-      var tabLinks = document.querySelectorAll("[data-tab-link]");
-      var tabPanels = document.querySelectorAll("[data-tab-panel]");
+      var copyButtons = document.querySelectorAll("[data-copy-target]");
 
       function applyTheme(theme) {
         root.setAttribute("data-theme", theme);
@@ -976,19 +1001,9 @@
         });
       }
 
-      function applyTab(tab) {
-        tabLinks.forEach(function(link) {
-          link.classList.toggle("active", link.getAttribute("data-tab-link") === tab);
-        });
-        tabPanels.forEach(function(panel) {
-          panel.classList.toggle("hidden", panel.getAttribute("data-tab-panel") !== tab);
-        });
-      }
-
       var saved = localStorage.getItem(storageKey);
       var initialTheme = saved === "light" || saved === "dark" ? saved : "dark";
       applyTheme(initialTheme);
-      applyTab("wiki");
 
       buttons.forEach(function(button) {
         button.addEventListener("click", function() {
@@ -998,12 +1013,27 @@
         });
       });
 
-      tabLinks.forEach(function(link) {
-        if (link.tagName === "BUTTON") {
-          link.addEventListener("click", function() {
-            applyTab(link.getAttribute("data-tab-link"));
+      copyButtons.forEach(function(button) {
+        button.addEventListener("click", function() {
+          var targetId = button.getAttribute("data-copy-target");
+          var target = document.getElementById(targetId);
+          if (!target) {
+            return;
+          }
+          navigator.clipboard.writeText(target.textContent).then(function() {
+            var card = button.closest(".install-card");
+            var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
+            if (feedback) {
+              feedback.textContent = "Copied.";
+            }
+          }).catch(function() {
+            var card = button.closest(".install-card");
+            var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
+            if (feedback) {
+              feedback.textContent = "Copy failed.";
+            }
           });
-        }
+        });
       });
     })();
   </script>

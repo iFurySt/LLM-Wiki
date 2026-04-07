@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/ifuryst/docmesh/internal/config"
 	"github.com/ifuryst/docmesh/internal/mcpserver"
 	"github.com/ifuryst/docmesh/internal/service"
 	"github.com/ifuryst/docmesh/internal/ui"
 	"github.com/ifuryst/docmesh/internal/version"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -47,8 +47,8 @@ func NewHandler(cfg config.Config, logger *zap.Logger, svc *service.Service) htt
 	registerRoutes(engine, cfg)
 	registerAPIRoutes(engine, svc)
 	registerMCPRoutes(engine, mcpManager)
-	registerInstallRoutes(engine)
-	registerUIRoutes(engine, svc)
+	registerInstallRoutes(engine, cfg)
+	registerUIRoutes(engine, svc, cfg)
 	return engine
 }
 

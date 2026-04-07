@@ -22,9 +22,17 @@ Quick start:
 make dev
 ```
 
+`make dev` now starts the local stack with containerized hot reload for the Go service and hosted install assets. Most Go, HTML, install, skill, and script edits should rebuild automatically without rerunning `make dev`.
+
 Then open:
 
 - `http://127.0.0.1:8234/ui`
+
+If you want hosted install links and UI install prompts to point at a different public host, set:
+
+```bash
+DOCMESH_INSTALL_BASE_URL=https://your-docmesh-host
+```
 
 Install and distribution docs:
 
@@ -56,10 +64,10 @@ go run ./cmd/cli document list
 Install the CLI:
 
 ```bash
-curl -fsSL https://docmesh.amoylab.com/install/install-cli.sh | sh
+curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
 docmesh version
 dm version
-docmesh system info --base-url https://docmesh.amoylab.com
+docmesh system info --base-url http://127.0.0.1:8234
 ```
 
 Release model:
@@ -81,6 +89,12 @@ When bootstrapping locally:
 
 ```bash
 make dev
+```
+
+To watch rebuilds and restart logs while editing:
+
+```bash
+make logs
 ```
 
 When validating:
@@ -106,8 +120,8 @@ Working style:
 
 MCP surfaces:
 
-- Remote MCP endpoint: `https://docmesh.amoylab.com/mcp`
-- Legacy SSE endpoint: `https://docmesh.amoylab.com/sse`
+- Remote MCP endpoint: `/mcp` on your configured DocMesh host
+- Legacy SSE endpoint: `/sse` on your configured DocMesh host
 - `npx` stdio package source: `npm/docmesh-mcp/`
 
 ## Integration
@@ -120,7 +134,7 @@ Copy this for MCP clients that support remote HTTP transport:
 {
   "docmesh": {
     "type": "http",
-    "url": "https://docmesh.amoylab.com/mcp",
+    "url": "https://your-docmesh-host/mcp",
     "headers": {
       "X-DocMesh-Tenant-ID": "default"
     }
@@ -128,7 +142,7 @@ Copy this for MCP clients that support remote HTTP transport:
 }
 ```
 
-If a client only supports the older SSE transport, switch the URL to `https://docmesh.amoylab.com/sse`.
+If a client only supports the older SSE transport, switch the URL to `https://your-docmesh-host/sse`.
 
 ### npx Stdio MCP
 
@@ -142,7 +156,7 @@ For a published npm package, copy this for local process-spawned MCP setups:
       "-y",
       "docmesh-mcp",
       "--base-url",
-      "https://docmesh.amoylab.com",
+      "https://your-docmesh-host",
       "--tenant",
       "default"
     ]
@@ -161,9 +175,9 @@ npx --prefix npm/docmesh-mcp docmesh-mcp --base-url http://127.0.0.1:8234 --tena
 
 Official DocMesh skill artifacts:
 
-- Markdown guide: `https://docmesh.amoylab.com/install/DocMesh.md`
-- Skill package: `https://docmesh.amoylab.com/install/skills/DocMesh.skill`
-- Zip package: `https://docmesh.amoylab.com/install/skills/DocMesh.zip`
+- Markdown guide: `/install/DocMesh.md` on your configured DocMesh host
+- Skill package: `/install/skills/DocMesh.skill` on your configured DocMesh host
+- Zip package: `/install/skills/DocMesh.zip` on your configured DocMesh host
 - In-repo skill source: `skills/docmesh/`
 
 ### Give An AI Agent Direct Instructions
@@ -171,19 +185,19 @@ Official DocMesh skill artifacts:
 If an agent can read a hosted markdown guide, point it here:
 
 ```text
-Read and follow https://docmesh.amoylab.com/install/DocMesh.md
+Read and follow https://your-docmesh-host/install/DocMesh.md
 ```
 
 If an agent is terminal-native, these are the shortest useful starting points:
 
 ```bash
-dm system info --base-url https://docmesh.amoylab.com --tenant default
-dm namespace list --base-url https://docmesh.amoylab.com --tenant default
-dm document list --base-url https://docmesh.amoylab.com --tenant default
+dm system info --base-url https://your-docmesh-host --tenant default
+dm namespace list --base-url https://your-docmesh-host --tenant default
+dm document list --base-url https://your-docmesh-host --tenant default
 
-docmesh system info --base-url https://docmesh.amoylab.com --tenant default
-docmesh namespace list --base-url https://docmesh.amoylab.com --tenant default
-docmesh document list --base-url https://docmesh.amoylab.com --tenant default
+docmesh system info --base-url https://your-docmesh-host --tenant default
+docmesh namespace list --base-url https://your-docmesh-host --tenant default
+docmesh document list --base-url https://your-docmesh-host --tenant default
 ```
 
 ### Docker Images

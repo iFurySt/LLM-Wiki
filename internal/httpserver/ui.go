@@ -3,9 +3,11 @@ package httpserver
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ifuryst/docmesh/internal/api"
+	"github.com/ifuryst/docmesh/internal/config"
 	"github.com/ifuryst/docmesh/internal/service"
 )
 
@@ -51,7 +53,13 @@ type uiFlash struct {
 }
 
 type uiIndexData struct {
+	CurrentPage         string
 	TenantID            string
+	InstallBaseURL      string
+	InstallDocURL       string
+	InstallScriptURL    string
+	InstallSkillURL     string
+	MCPURL              string
 	Spaces              []uiSpaceCard
 	Namespaces          []uiNamespaceCard
 	NamespaceTree       []uiNamespaceTree
@@ -65,167 +73,17 @@ type uiIndexData struct {
 	Flash               *uiFlash
 }
 
-func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
+func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Config) {
 	engine.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, "/ui")
 	})
 
 	engine.GET("/ui", func(c *gin.Context) {
-		tenantID := tenantIDFromRequest(c)
-		var namespaceFilter *int64
-		var selectedNamespaceID int64
-		if raw := c.Query("namespace_id"); raw != "" {
-			parsed, err := strconv.ParseInt(raw, 10, 64)
-			if err != nil {
-				badRequest(c, err)
-				return
-			}
-			namespaceFilter = &parsed
-			selectedNamespaceID = parsed
-		}
+		renderUIPage(c, svc, cfg, "wiki")
+	})
 
-		var statusFilter *string
-		statusRaw := c.Query("status")
-		if statusRaw != "" && statusRaw != "all" {
-			statusFilter = &statusRaw
-		}
-
-		spaces, err := svc.ListSpaces(c.Request.Context(), tenantID)
-		if err != nil {
-			handleError(c, err)
-			return
-		}
-		namespaces, err := svc.ListNamespaces(c.Request.Context(), tenantID)
-		if err != nil {
-			handleError(c, err)
-			return
-		}
-		documents, err := svc.ListDocuments(c.Request.Context(), tenantID, namespaceFilter, statusFilter)
-		if err != nil {
-			handleError(c, err)
-			return
-		}
-
-		namespaceNames := make(map[int64]string, len(namespaces.Items))
-		namespaceDocCount := make(map[int64]int, len(namespaces.Items))
-		for _, item := range namespaces.Items {
-			namespaceNames[item.ID] = item.DisplayName
-		}
-		for _, item := range documents.Items {
-			namespaceDocCount[item.NamespaceID]++
-		}
-
-		var selectedDocument *api.DocumentResponse
-		if raw := c.Query("document_id"); raw != "" {
-			documentID, err := strconv.ParseInt(raw, 10, 64)
-			if err != nil {
-				badRequest(c, err)
-				return
-			}
-			doc, err := svc.GetDocument(c.Request.Context(), tenantID, documentID)
-			if err != nil {
-				handleError(c, err)
-				return
-			}
-			selectedDocument = &doc
-		} else if len(documents.Items) > 0 {
-			doc, err := svc.GetDocument(c.Request.Context(), tenantID, documents.Items[0].ID)
-			if err != nil {
-				handleError(c, err)
-				return
-			}
-			selectedDocument = &doc
-			if selectedNamespaceID == 0 {
-				selectedNamespaceID = doc.NamespaceID
-			}
-		}
-
-		spaceCards := make([]uiSpaceCard, 0, len(spaces.Items))
-		for _, item := range spaces.Items {
-			spaceCards = append(spaceCards, uiSpaceCard{
-				ID:          item.ID,
-				Key:         item.Key,
-				DisplayName: item.DisplayName,
-			})
-		}
-
-		namespaceCards := make([]uiNamespaceCard, 0, len(namespaces.Items))
-		namespaceTree := make([]uiNamespaceTree, 0, len(namespaces.Items))
-		for _, item := range namespaces.Items {
-			namespaceCards = append(namespaceCards, uiNamespaceCard{
-				ID:            item.ID,
-				Key:           item.Key,
-				DisplayName:   item.DisplayName,
-				Description:   item.Description,
-				Visibility:    item.Visibility,
-				Status:        item.Status,
-				DocumentCount: namespaceDocCount[item.ID],
-			})
-			namespaceTree = append(namespaceTree, uiNamespaceTree{
-				ID:          item.ID,
-				Key:         item.Key,
-				DisplayName: item.DisplayName,
-				Status:      item.Status,
-			})
-		}
-
-		documentCards := make([]uiDocumentCard, 0, len(documents.Items))
-		archivedCount := 0
-		for _, item := range documents.Items {
-			if item.Status == "archived" {
-				archivedCount++
-			}
-			documentCards = append(documentCards, uiDocumentCard{
-				ID:                item.ID,
-				NamespaceID:       item.NamespaceID,
-				NamespaceLabel:    namespaceNames[item.NamespaceID],
-				Slug:              item.Slug,
-				Title:             item.Title,
-				ContentPreview:    item.Content,
-				Status:            item.Status,
-				CurrentRevisionNo: item.CurrentRevisionNo,
-				UpdatedAt:         item.UpdatedAt,
-			})
-			for index := range namespaceTree {
-				if namespaceTree[index].ID == item.NamespaceID {
-					namespaceTree[index].Documents = append(namespaceTree[index].Documents, uiDocumentCard{
-						ID:                item.ID,
-						NamespaceID:       item.NamespaceID,
-						NamespaceLabel:    namespaceNames[item.NamespaceID],
-						Slug:              item.Slug,
-						Title:             item.Title,
-						ContentPreview:    item.Content,
-						Status:            item.Status,
-						CurrentRevisionNo: item.CurrentRevisionNo,
-						UpdatedAt:         item.UpdatedAt,
-					})
-					break
-				}
-			}
-		}
-
-		var flash *uiFlash
-		if message := c.Query("message"); message != "" {
-			flash = &uiFlash{
-				Kind:    c.DefaultQuery("kind", "info"),
-				Message: message,
-			}
-		}
-
-		c.HTML(http.StatusOK, "index.html", uiIndexData{
-			TenantID:            tenantID,
-			Spaces:              spaceCards,
-			Namespaces:          namespaceCards,
-			NamespaceTree:       namespaceTree,
-			Documents:           documentCards,
-			SelectedDocument:    selectedDocument,
-			SelectedNamespaceID: selectedNamespaceID,
-			StatusFilter:        c.DefaultQuery("status", "all"),
-			DocumentCount:       len(documentCards),
-			ArchivedCount:       archivedCount,
-			NamespaceCount:      len(namespaceCards),
-			Flash:               flash,
-		})
+	engine.GET("/ui/install", func(c *gin.Context) {
+		renderUIPage(c, svc, cfg, "install")
 	})
 
 	engine.POST("/ui/namespaces", func(c *gin.Context) {
@@ -314,4 +172,162 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 		}
 		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+archived&document_id="+strconv.FormatInt(documentID, 10))
 	})
+}
+
+func renderUIPage(c *gin.Context, svc *service.Service, cfg config.Config, currentPage string) {
+	data, err := buildUIIndexData(c, svc, cfg)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	data.CurrentPage = currentPage
+	c.HTML(http.StatusOK, "index.html", data)
+}
+
+func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (uiIndexData, error) {
+	tenantID := tenantIDFromRequest(c)
+	baseURL := strings.TrimRight(cfg.Install.BaseURL, "/")
+	var namespaceFilter *int64
+	var selectedNamespaceID int64
+	if raw := c.Query("namespace_id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil {
+			return uiIndexData{}, err
+		}
+		namespaceFilter = &parsed
+		selectedNamespaceID = parsed
+	}
+
+	var statusFilter *string
+	statusRaw := c.Query("status")
+	if statusRaw != "" && statusRaw != "all" {
+		statusFilter = &statusRaw
+	}
+
+	spaces, err := svc.ListSpaces(c.Request.Context(), tenantID)
+	if err != nil {
+		return uiIndexData{}, err
+	}
+	namespaces, err := svc.ListNamespaces(c.Request.Context(), tenantID)
+	if err != nil {
+		return uiIndexData{}, err
+	}
+	documents, err := svc.ListDocuments(c.Request.Context(), tenantID, namespaceFilter, statusFilter)
+	if err != nil {
+		return uiIndexData{}, err
+	}
+
+	namespaceNames := make(map[int64]string, len(namespaces.Items))
+	namespaceDocCount := make(map[int64]int, len(namespaces.Items))
+	for _, item := range namespaces.Items {
+		namespaceNames[item.ID] = item.DisplayName
+	}
+	for _, item := range documents.Items {
+		namespaceDocCount[item.NamespaceID]++
+	}
+
+	var selectedDocument *api.DocumentResponse
+	if raw := c.Query("document_id"); raw != "" {
+		documentID, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil {
+			return uiIndexData{}, err
+		}
+		doc, err := svc.GetDocument(c.Request.Context(), tenantID, documentID)
+		if err != nil {
+			return uiIndexData{}, err
+		}
+		selectedDocument = &doc
+	} else if len(documents.Items) > 0 {
+		doc, err := svc.GetDocument(c.Request.Context(), tenantID, documents.Items[0].ID)
+		if err != nil {
+			return uiIndexData{}, err
+		}
+		selectedDocument = &doc
+		if selectedNamespaceID == 0 {
+			selectedNamespaceID = doc.NamespaceID
+		}
+	}
+
+	spaceCards := make([]uiSpaceCard, 0, len(spaces.Items))
+	for _, item := range spaces.Items {
+		spaceCards = append(spaceCards, uiSpaceCard{
+			ID:          item.ID,
+			Key:         item.Key,
+			DisplayName: item.DisplayName,
+		})
+	}
+
+	namespaceCards := make([]uiNamespaceCard, 0, len(namespaces.Items))
+	namespaceTree := make([]uiNamespaceTree, 0, len(namespaces.Items))
+	for _, item := range namespaces.Items {
+		namespaceCards = append(namespaceCards, uiNamespaceCard{
+			ID:            item.ID,
+			Key:           item.Key,
+			DisplayName:   item.DisplayName,
+			Description:   item.Description,
+			Visibility:    item.Visibility,
+			Status:        item.Status,
+			DocumentCount: namespaceDocCount[item.ID],
+		})
+		namespaceTree = append(namespaceTree, uiNamespaceTree{
+			ID:          item.ID,
+			Key:         item.Key,
+			DisplayName: item.DisplayName,
+			Status:      item.Status,
+		})
+	}
+
+	documentCards := make([]uiDocumentCard, 0, len(documents.Items))
+	archivedCount := 0
+	for _, item := range documents.Items {
+		if item.Status == "archived" {
+			archivedCount++
+		}
+		card := uiDocumentCard{
+			ID:                item.ID,
+			NamespaceID:       item.NamespaceID,
+			NamespaceLabel:    namespaceNames[item.NamespaceID],
+			Slug:              item.Slug,
+			Title:             item.Title,
+			ContentPreview:    item.Content,
+			Status:            item.Status,
+			CurrentRevisionNo: item.CurrentRevisionNo,
+			UpdatedAt:         item.UpdatedAt,
+		}
+		documentCards = append(documentCards, card)
+		for index := range namespaceTree {
+			if namespaceTree[index].ID == item.NamespaceID {
+				namespaceTree[index].Documents = append(namespaceTree[index].Documents, card)
+				break
+			}
+		}
+	}
+
+	var flash *uiFlash
+	if message := c.Query("message"); message != "" {
+		flash = &uiFlash{
+			Kind:    c.DefaultQuery("kind", "info"),
+			Message: message,
+		}
+	}
+
+	return uiIndexData{
+		TenantID:            tenantID,
+		InstallBaseURL:      baseURL,
+		InstallDocURL:       baseURL + "/install/DocMesh.md",
+		InstallScriptURL:    baseURL + "/install/install-cli.sh",
+		InstallSkillURL:     baseURL + "/install/skills/DocMesh.skill",
+		MCPURL:              baseURL + "/mcp",
+		Spaces:              spaceCards,
+		Namespaces:          namespaceCards,
+		NamespaceTree:       namespaceTree,
+		Documents:           documentCards,
+		SelectedDocument:    selectedDocument,
+		SelectedNamespaceID: selectedNamespaceID,
+		StatusFilter:        c.DefaultQuery("status", "all"),
+		DocumentCount:       len(documentCards),
+		ArchivedCount:       archivedCount,
+		NamespaceCount:      len(namespaceCards),
+		Flash:               flash,
+	}, nil
 }

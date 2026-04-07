@@ -25,13 +25,59 @@ need_cmd mktemp
 need_cmd tar
 
 if command -v curl >/dev/null 2>&1; then
-  FETCH="curl -fsSL"
+  DOWNLOADER="curl"
 elif command -v wget >/dev/null 2>&1; then
-  FETCH="wget -qO-"
+  DOWNLOADER="wget"
 else
   echo "missing downloader: need curl or wget" >&2
   exit 1
 fi
+
+fetch_to_file() {
+  url="$1"
+  output="$2"
+  if [ "$DOWNLOADER" = "curl" ]; then
+    curl -fsSL "$url" -o "$output"
+  else
+    wget -qO "$output" "$url"
+  fi
+}
+
+fetch_text() {
+  url="$1"
+  if [ "$DOWNLOADER" = "curl" ]; then
+    curl -fsSL "$url"
+  else
+    wget -qO- "$url"
+  fi
+}
+
+extract_version() {
+  binary="$1"
+  if [ ! -x "$binary" ]; then
+    return 1
+  fi
+  "$binary" version 2>/dev/null | awk 'NF >= 2 { print $2; exit }'
+}
+
+resolve_target_version() {
+  if [ "$VERSION" != "latest" ]; then
+    printf '%s\n' "$VERSION"
+    return 0
+  fi
+  if [ -n "$DOWNLOAD_BASE_URL" ]; then
+    printf '%s\n' "latest"
+    return 0
+  fi
+
+  release_json="$(fetch_text "https://api.github.com/repos/${RELEASE_REPO}/releases/latest")"
+  target_version="$(printf '%s\n' "$release_json" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+  if [ -z "$target_version" ]; then
+    echo "failed to resolve latest release version" >&2
+    exit 1
+  fi
+  printf '%s\n' "$target_version"
+}
 
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
 ARCH="$(uname -m)"
@@ -54,26 +100,40 @@ case "$ARCH" in
     ;;
 esac
 
-ARCHIVE="docmesh_${VERSION}_${OS}_${ARCH}.tar.gz"
 ARCHIVE="docmesh_${OS}_${ARCH}.tar.gz"
+TARGET_VERSION="$(resolve_target_version)"
+
+BIN_TARGET="$INSTALL_DIR/docmesh"
+ALIAS_TARGET="$INSTALL_DIR/dm"
+
+CURRENT_VERSION=""
+if [ -x "$BIN_TARGET" ]; then
+  CURRENT_VERSION="$(extract_version "$BIN_TARGET" || true)"
+elif command -v docmesh >/dev/null 2>&1; then
+  CURRENT_VERSION="$(extract_version "$(command -v docmesh)" || true)"
+fi
+
+if [ -n "$CURRENT_VERSION" ] && [ "$TARGET_VERSION" != "latest" ] && [ "$CURRENT_VERSION" = "$TARGET_VERSION" ]; then
+  echo "docmesh ${CURRENT_VERSION} is already installed"
+  echo "no update needed"
+  exit 0
+fi
 
 if [ -n "$DOWNLOAD_BASE_URL" ]; then
   ARCHIVE_URL="${DOWNLOAD_BASE_URL%/}/${ARCHIVE}"
-elif [ "$VERSION" = "latest" ]; then
+elif [ "$TARGET_VERSION" = "latest" ]; then
   ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/latest/download/${ARCHIVE}"
 else
-  ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/download/${VERSION}/${ARCHIVE}"
+  ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/download/${TARGET_VERSION}/${ARCHIVE}"
 fi
 
 echo "downloading ${ARCHIVE_URL}"
-$FETCH "$ARCHIVE_URL" > "$TMP_DIR/$ARCHIVE"
+fetch_to_file "$ARCHIVE_URL" "$TMP_DIR/$ARCHIVE"
 
 mkdir -p "$INSTALL_DIR"
 tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"
 
 BIN_SOURCE="$TMP_DIR/docmesh"
-BIN_TARGET="$INSTALL_DIR/docmesh"
-ALIAS_TARGET="$INSTALL_DIR/dm"
 
 if [ ! -f "$BIN_SOURCE" ]; then
   echo "archive did not contain docmesh binary" >&2
@@ -91,7 +151,12 @@ else
 fi
 chmod +x "$ALIAS_TARGET"
 
-echo "installed docmesh to $BIN_TARGET"
+INSTALLED_VERSION="$(extract_version "$BIN_TARGET" || true)"
+if [ -n "$CURRENT_VERSION" ]; then
+  echo "updated docmesh from ${CURRENT_VERSION} to ${INSTALLED_VERSION:-unknown}"
+else
+  echo "installed docmesh ${INSTALLED_VERSION:-unknown} to $BIN_TARGET"
+fi
 echo "installed dm alias to $ALIAS_TARGET"
 echo "run: $BIN_TARGET version"
 echo "or:  $ALIAS_TARGET version"

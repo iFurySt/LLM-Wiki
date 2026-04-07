@@ -13,6 +13,7 @@ type Config struct {
 	AutoMigrate bool
 	Server      ServerConfig
 	CLI         CLIConfig
+	Install     InstallConfig
 	Postgres    PostgresConfig
 	Redis       RedisConfig
 	MinIO       MinIOConfig
@@ -27,6 +28,10 @@ type ServerConfig struct {
 type CLIConfig struct {
 	BaseURL string
 	Timeout string
+}
+
+type InstallConfig struct {
+	BaseURL string
 }
 
 type PostgresConfig struct {
@@ -81,6 +86,9 @@ func Load() (Config, error) {
 			BaseURL: v.GetString("cli.base_url"),
 			Timeout: v.GetString("cli.timeout"),
 		},
+		Install: InstallConfig{
+			BaseURL: v.GetString("install.base_url"),
+		},
 		Postgres: PostgresConfig{
 			Host:     v.GetString("postgres.host"),
 			Port:     v.GetInt("postgres.port"),
@@ -112,6 +120,9 @@ func Load() (Config, error) {
 	if strings.TrimSpace(cfg.CLI.BaseURL) == "" {
 		return Config{}, fmt.Errorf("cli.base_url is required")
 	}
+	if strings.TrimSpace(cfg.Install.BaseURL) == "" {
+		cfg.Install.BaseURL = cfg.CLI.BaseURL
+	}
 
 	return cfg, nil
 }
@@ -124,6 +135,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.port", 8234)
 	v.SetDefault("cli.base_url", "http://127.0.0.1:8234")
 	v.SetDefault("cli.timeout", "10s")
+	v.SetDefault("install.base_url", "")
 
 	v.SetDefault("postgres.host", "127.0.0.1")
 	v.SetDefault("postgres.port", 15432)

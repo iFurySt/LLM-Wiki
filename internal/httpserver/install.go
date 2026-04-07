@@ -10,15 +10,16 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ifuryst/docmesh/internal/config"
 )
 
-func registerInstallRoutes(engine *gin.Engine) {
+func registerInstallRoutes(engine *gin.Engine, cfg config.Config) {
 	engine.GET("/install", func(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, "/install/DocMesh.md")
 	})
 
 	engine.GET("/install/DocMesh.md", func(c *gin.Context) {
-		serveInstallFile(c, "install/DocMesh.md", "text/markdown; charset=utf-8")
+		serveInstallMarkdown(c, cfg)
 	})
 
 	engine.GET("/install/install-cli.sh", func(c *gin.Context) {
@@ -34,6 +35,28 @@ func registerInstallRoutes(engine *gin.Engine) {
 	})
 
 	engine.StaticFS("/install/releases", gin.Dir(resolveInstallPath("dist/install/releases"), false))
+}
+
+func serveInstallMarkdown(c *gin.Context, cfg config.Config) {
+	target := resolveInstallPath("install/DocMesh.md")
+	body, err := os.ReadFile(target)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "install asset not found",
+			"path":  "install/DocMesh.md",
+		})
+		return
+	}
+
+	baseURL := strings.TrimRight(cfg.Install.BaseURL, "/")
+	replacer := strings.NewReplacer(
+		"{{DOCMESH_BASE_URL}}", baseURL,
+		"{{DOCMESH_INSTALL_DOC_URL}}", baseURL+"/install/DocMesh.md",
+		"{{DOCMESH_INSTALL_SCRIPT_URL}}", baseURL+"/install/install-cli.sh",
+	)
+
+	c.Header("Content-Type", "text/markdown; charset=utf-8")
+	c.String(http.StatusOK, replacer.Replace(string(body)))
 }
 
 func serveInstallFile(c *gin.Context, relativePath string, contentType string) {
