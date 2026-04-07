@@ -1,0 +1,2 @@
+FAIL	github.com/bytedance/docmesh/tests/e2e [build failed]
+FAIL

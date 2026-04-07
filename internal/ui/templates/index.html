@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocMesh</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f5f7;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #5b6673;
+      --border: #d9e0e7;
+      --accent: #0f6fff;
+      --accent-soft: #eaf2ff;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f9fbfc 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 40px;
+      letter-spacing: -0.03em;
+    }
+    .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 36px rgba(18, 38, 63, 0.06);
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    form {
+      display: grid;
+      gap: 10px;
+    }
+    input, select, textarea, button {
+      font: inherit;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 14px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #fcfdff;
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-weight: 700;
+    }
+    .card-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .pill {
+      display: inline-flex;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef2f6;
+      color: #415264;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .pill.archived {
+      background: #fbe9e7;
+      color: var(--danger);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .full {
+      grid-column: 1 / -1;
+    }
+    @media (max-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .hero {
+        flex-direction: column;
+        align-items: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div>
+        <div class="badge">DocMesh v0 UI</div>
+        <h1>Agent-Native Document Control</h1>
+        <div class="subtitle">
+          Minimal operator view served directly by Gin. This page is intentionally simple and
+          uses the same server process and APIs as the CLI.
+        </div>
+      </div>
+      <div class="badge">Tenant: {{ .TenantID }}</div>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Create Namespace</h2>
+        <div class="meta">Namespace writes land in the tenant's default space.</div>
+        <form method="post" action="/ui/namespaces">
+          <div class="row">
+            <input name="key" placeholder="namespace key" required />
+            <input name="display_name" placeholder="display name" required />
+          </div>
+          <div class="row">
+            <input name="description" placeholder="description" />
+            <select name="visibility">
+              <option value="private">private</option>
+              <option value="tenant">tenant</option>
+              <option value="team">team</option>
+              <option value="restricted">restricted</option>
+            </select>
+          </div>
+          <button type="submit">Create Namespace</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Create Document</h2>
+        <div class="meta">Documents create revision `1` immediately.</div>
+        <form method="post" action="/ui/documents">
+          <div class="row">
+            <select name="namespace_id" required>
+              <option value="">select namespace</option>
+              {{ range .Namespaces }}
+              <option value="{{ .ID }}">{{ .Key }}</option>
+              {{ end }}
+            </select>
+            <input name="slug" placeholder="document slug" required />
+          </div>
+          <input name="title" placeholder="title" required />
+          <textarea name="content" placeholder="markdown content"></textarea>
+          <div class="row">
+            <input name="author_type" value="user" />
+            <input name="author_id" value="ui" />
+          </div>
+          <input name="change_summary" placeholder="change summary" />
+          <button type="submit">Create Document</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Spaces</h2>
+        <div class="list">
+          {{ range .Spaces }}
+          <div class="card">
+            <div class="card-top">
+              <div>
+                <div class="card-title">{{ .DisplayName }}</div>
+                <div class="card-sub">key={{ .Key }} id={{ .ID }}</div>
+              </div>
+            </div>
+          </div>
+          {{ else }}
+          <div class="meta">No spaces yet.</div>
+          {{ end }}
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Namespaces</h2>
+        <div class="list">
+          {{ range .Namespaces }}
+          <div class="card">
+            <div class="card-top">
+              <div>
+                <div class="card-title">{{ .DisplayName }}</div>
+                <div class="card-sub">{{ .Key }} · visibility={{ .Visibility }} · id={{ .ID }}</div>
+              </div>
+              <span class="pill {{ if eq .Status "archived" }}archived{{ end }}">{{ .Status }}</span>
+            </div>
+            <div class="card-sub">{{ .Description }}</div>
+          </div>
+          {{ else }}
+          <div class="meta">No namespaces yet.</div>
+          {{ end }}
+        </div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>Documents</h2>
+      <div class="list">
+        {{ range .Documents }}
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-title">{{ .Title }}</div>
+              <div class="card-sub">
+                slug={{ .Slug }} · namespace_id={{ .NamespaceID }} · revision={{ .CurrentRevisionNo }} · id={{ .ID }}
+              </div>
+            </div>
+            <span class="pill {{ if eq .Status "archived" }}archived{{ end }}">{{ .Status }}</span>
+          </div>
+          <div class="card-sub">{{ .Content }}</div>
+        </div>
+        {{ else }}
+        <div class="meta">No documents yet.</div>
+        {{ end }}
+      </div>
+    </section>
+  </div>
+</body>
+</html>

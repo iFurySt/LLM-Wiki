@@ -1,0 +1,58 @@
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /healthz                  --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/system/info           --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
+[GIN-debug] GET    /readyz                   --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/namespaces            --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] POST   /v1/namespaces            --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:id        --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] POST   /v1/documents             --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
+[GIN-debug] GET    /v1/documents             --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
+[GIN-debug] GET    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /healthz                  --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/system/info           --> github.com/bytedance/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
+[GIN-debug] GET    /readyz                   --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/namespaces            --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] POST   /v1/namespaces            --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:id        --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] POST   /v1/documents             --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
+[GIN-debug] GET    /v1/documents             --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
+[GIN-debug] GET    /v1/documents/:id         --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
+--- FAIL: TestReadyz (3.21s)
+panic: ':namespaceID' in new path '/v1/namespaces/:namespaceID/documents/:slug' conflicts with existing wildcard ':id' in existing prefix '/v1/namespaces/:id' [recovered, repanicked]
+
+goroutine 67 [running]:
+testing.tRunner.func1.2({0x101e69460, 0x5d081a2b50e0})
+	/usr/local/go/src/testing/testing.go:1974 +0x1a0
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1977 +0x318
+panic({0x101e69460?, 0x5d081a2b50e0?})
+	/usr/local/go/src/runtime/panic.go:860 +0x12c
+github.com/gin-gonic/gin.(*node).addRoute(0x10126e427?, {0x5d081a30c600, 0x2b}, {0x5d0819fc6a08, 0x3, 0x3})
+	/Users/bytedance/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/tree.go:230 +0x888
+github.com/gin-gonic/gin.(*Engine).addRoute(0x5d081a142000, {0x10126e427, 0x3}, {0x5d081a30c600, 0x2b}, {0x5d0819fc6a08, 0x3, 0x3})
+	/Users/bytedance/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:377 +0x1f0
+github.com/gin-gonic/gin.(*RouterGroup).handle(0x5d081a2af0c0, {0x10126e427, 0x3}, {0x1012a4981?, 0x0?}, {0x5d081a5122a0, 0x1, 0x0?})
+	/Users/bytedance/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:89 +0x100
+github.com/gin-gonic/gin.(*RouterGroup).GET(...)
+	/Users/bytedance/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:117
+github.com/bytedance/docmesh/internal/httpserver.registerAPIRoutes(0x5d081a142000, 0x5d081a512200)
+	/Users/bytedance/projects/github/llm-wiki/internal/httpserver/handlers.go:114 +0x488
+github.com/bytedance/docmesh/internal/httpserver.NewHandler({{0x10126ee9f, 0x4}, {0x101270189, 0x5}, 0x1, {{0x10127b5ff, 0x9}, 0x0}, {{0x10128572f, 0x12}, ...}, ...}, ...)
+	/Users/bytedance/projects/github/llm-wiki/internal/httpserver/server.go:42 +0x174
+github.com/bytedance/docmesh/tests/e2e.TestReadyz(0x5d081a0f5b08)
+	/Users/bytedance/projects/github/llm-wiki/tests/e2e/readyz_test.go:40 +0x340
+testing.tRunner(0x5d081a0f5b08, 0x102092b30)
+	/usr/local/go/src/testing/testing.go:2036 +0xc4
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2101 +0x3a8
+FAIL	github.com/bytedance/docmesh/tests/e2e	3.833s
+FAIL
