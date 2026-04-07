@@ -1,0 +1,44 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install packaging dependencies
+        run: sudo apt-get update && sudo apt-get install -y zip
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Package install assets
+        env:
+          DOCMESH_VERSION: ${{ github.ref_name }}
+        run: ./scripts/release/package-install.sh
+
+      - name: Upload GitHub release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/install/releases/*
+            dist/install/skills/*
+            dist/install/checksums.txt
+            dist/install/version.txt
+            install/install-cli.sh
+            install/DocMesh.md

@@ -51,7 +51,7 @@ Both packages contain the same official `docmesh` skill directory:
 
 ## Option 3: Install The CLI
 
-Install the DocMesh CLI with the hosted shell installer:
+Install the DocMesh CLI with the hosted shell installer. The script downloads the matching binary from GitHub Releases:
 
 ```sh
 curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
@@ -60,8 +60,18 @@ curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
 You can override the server host used by the installer:
 
 ```sh
-DOCMESH_BASE_URL=http://127.0.0.1:8234 curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
+DOCMESH_RELEASE_REPO=iFurySt/DocMesh curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
 ```
+
+To install a specific release tag:
+
+```sh
+DOCMESH_VERSION=v0.1.0 curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
+```
+
+GitHub Releases page:
+
+- `https://github.com/iFurySt/DocMesh/releases`
 
 ## Post-Install Check
 

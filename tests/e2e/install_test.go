@@ -64,6 +64,6 @@ func TestInstallRoutes(t *testing.T) {
 	}
 
 	assertBodyContains("/install/DocMesh.md", "DocMesh Skill Install")
-	assertBodyContains("/install/install-cli.sh", "DOCMESH_BASE_URL")
+	assertBodyContains("/install/install-cli.sh", "DOCMESH_RELEASE_REPO")
 	assertBodyContains("/install/skills/DocMesh.skill", "docmesh/SKILL.md")
 }

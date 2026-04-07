@@ -36,7 +36,7 @@ for target in "${targets[@]}"; do
 
   GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "$stage/$binary_name" "$ROOT_DIR/cmd/cli"
 
-  archive_base="docmesh_${VERSION}_${os}_${arch}"
+  archive_base="docmesh_${os}_${arch}"
   if [[ "$os" == "windows" ]]; then
     (
       cd "$stage"
@@ -66,4 +66,5 @@ cp "$SKILL_DIR/DocMesh.zip" "$SKILL_DIR/DocMesh.skill"
   else
     sha256sum releases/* skills/* > checksums.txt
   fi
+  printf '%s\n' "$VERSION" > version.txt
 )

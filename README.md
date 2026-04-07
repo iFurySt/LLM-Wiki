@@ -62,6 +62,12 @@ docmesh version
 docmesh system info --base-url http://127.0.0.1:8234
 ```
 
+Release model:
+
+- CLI binaries are published to GitHub Releases on pushed tags like `v0.1.0`
+- the installer script downloads the matching archive from GitHub Releases
+- local `/install/install-cli.sh` is only the delivery surface for the installer script itself
+
 ## For AI
 
 Start here:
@@ -173,6 +179,22 @@ docmesh system info --base-url http://127.0.0.1:8234 --tenant default
 docmesh namespace list --base-url http://127.0.0.1:8234 --tenant default
 docmesh document list --base-url http://127.0.0.1:8234 --tenant default
 ```
+
+### Release Downloads
+
+GitHub release assets live under:
+
+```text
+https://github.com/iFurySt/DocMesh/releases
+```
+
+Asset naming:
+
+- `docmesh_darwin_amd64.tar.gz`
+- `docmesh_darwin_arm64.tar.gz`
+- `docmesh_linux_amd64.tar.gz`
+- `docmesh_linux_arm64.tar.gz`
+- `docmesh_windows_amd64.zip`
 
 ## Credits
 
