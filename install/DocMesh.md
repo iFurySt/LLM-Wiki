@@ -48,6 +48,7 @@ Both packages contain the same official `docmesh` skill directory:
 - `SKILL.md`
 - `references/installation.md`
 - `references/cli.md`
+- `references/agent-workflow.md`
 - `references/http-api.md`
 
 ## Option 3: Install The CLI
@@ -147,9 +148,24 @@ Example stdio MCP config shape:
 For Codex or Claude Code, the intended flow is:
 
 1. Read or install the `docmesh` skill.
-2. Use the CLI or HTTP API to inspect spaces, namespaces, and documents.
-3. Create or update documents with explicit `author_type`, `author_id`, and `change_summary`.
-4. Treat DocMesh as the shared wiki backend instead of a disposable chat transcript.
+2. Use `SKILL.md` as the index, then read the installation, CLI, and agent workflow references.
+3. Inspect spaces, namespaces, and existing documents before creating new pages.
+4. Create or update documents with explicit `author_type`, `author_id`, and `change_summary`.
+5. Treat DocMesh as the shared wiki backend instead of a disposable chat transcript.
+
+## Default Agent Prompt
+
+Use this instruction in host systems that allow custom prompts:
+
+```text
+Use DocMesh as the shared durable memory for this workspace.
+
+At the start of a task, inspect DocMesh for relevant existing documents before creating new ones or re-deriving project knowledge.
+
+During the task, when you discover stable facts, durable decisions, reusable procedures, or progress that will matter in future sessions, update the relevant DocMesh document instead of leaving that knowledge only in chat.
+
+At the end of the task, write back the final durable state. Prefer updating existing pages over creating duplicates. Do not store transient scratch work, hidden reasoning, or low-value chat residue.
+```
 
 ## Core Endpoints
 

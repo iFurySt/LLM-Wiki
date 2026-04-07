@@ -20,6 +20,13 @@ docmesh version
 docmesh system info --base-url http://127.0.0.1:8234
 ```
 
+The installer also places a short alias:
+
+```sh
+dm version
+dm system info --base-url http://127.0.0.1:8234
+```
+
 ## Skill Package
 
 If your agent platform installs packaged skills, use either of these downloads:
@@ -28,3 +35,15 @@ If your agent platform installs packaged skills, use either of these downloads:
 - `http://127.0.0.1:8234/install/skills/DocMesh.zip`
 
 Both archives contain the same `docmesh` skill directory.
+
+## Hosted Guide
+
+If the agent can read markdown instructions from a URL, point it to:
+
+- `http://127.0.0.1:8234/install/DocMesh.md`
+
+That hosted guide explains:
+
+- how to install or connect through CLI, MCP, or `npx`
+- how to use `SKILL.md` as the entry index
+- how the agent should keep accumulating durable knowledge into DocMesh during normal tasks
