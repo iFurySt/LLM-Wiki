@@ -23,6 +23,8 @@ The structure follows two ideas:
   Chronological notable milestones.
 - `references/`
   Distilled notes from important external references that shape repo practice.
+- `install/`
+  Durable installation and release-distribution guidance for humans and AI agents.
 
 ## Update Rules
 
@@ -65,3 +67,4 @@ Update `test-results/` when:
 4. `plans/active/`
 5. `todos/`
 6. `test-results/`
+7. `install/`

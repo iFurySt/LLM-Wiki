@@ -26,12 +26,11 @@ Then open:
 
 - `http://127.0.0.1:8234/ui`
 
-Install surfaces:
+Install and distribution docs:
 
-- `http://127.0.0.1:8234/install/DocMesh.md`
-- `http://127.0.0.1:8234/install/install-cli.sh`
-- `http://127.0.0.1:8234/install/skills/DocMesh.skill`
-- `http://127.0.0.1:8234/install/skills/DocMesh.zip`
+- [docs/install/README.md](/Users/bytedance/projects/github/llm-wiki/docs/install/README.md)
+- [docs/install/agent-install.md](/Users/bytedance/projects/github/llm-wiki/docs/install/agent-install.md)
+- [docs/install/release-distribution.md](/Users/bytedance/projects/github/llm-wiki/docs/install/release-distribution.md)
 
 Useful local endpoints:
 
@@ -57,17 +56,19 @@ go run ./cmd/cli document list
 Install the CLI:
 
 ```bash
-curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
+curl -fsSL https://docmesh.amoylab.com/install/install-cli.sh | sh
 docmesh version
 dm version
-docmesh system info --base-url http://127.0.0.1:8234
+docmesh system info --base-url https://docmesh.amoylab.com
 ```
 
 Release model:
 
 - CLI binaries are published to GitHub Releases on pushed tags like `v0.1.0`
 - the installer script downloads the matching archive from GitHub Releases
-- local `/install/install-cli.sh` is only the delivery surface for the installer script itself
+- the main service image is published to Docker Hub and GHCR
+- the `docmesh-mcp` stdio bridge is published to npm
+- local `/install/install-cli.sh` is the hosted delivery surface for the installer script itself
 
 ## For AI
 
@@ -105,8 +106,8 @@ Working style:
 
 MCP surfaces:
 
-- Remote MCP endpoint: `http://127.0.0.1:8234/mcp`
-- Legacy SSE endpoint: `http://127.0.0.1:8234/sse`
+- Remote MCP endpoint: `https://docmesh.amoylab.com/mcp`
+- Legacy SSE endpoint: `https://docmesh.amoylab.com/sse`
 - `npx` stdio package source: `npm/docmesh-mcp/`
 
 ## Integration
@@ -119,7 +120,7 @@ Copy this for MCP clients that support remote HTTP transport:
 {
   "docmesh": {
     "type": "http",
-    "url": "http://127.0.0.1:8234/mcp",
+    "url": "https://docmesh.amoylab.com/mcp",
     "headers": {
       "X-DocMesh-Tenant-ID": "default"
     }
@@ -127,7 +128,7 @@ Copy this for MCP clients that support remote HTTP transport:
 }
 ```
 
-If a client only supports the older SSE transport, switch the URL to `http://127.0.0.1:8234/sse`.
+If a client only supports the older SSE transport, switch the URL to `https://docmesh.amoylab.com/sse`.
 
 ### npx Stdio MCP
 
@@ -141,7 +142,7 @@ For a published npm package, copy this for local process-spawned MCP setups:
       "-y",
       "docmesh-mcp",
       "--base-url",
-      "http://127.0.0.1:8234",
+      "https://docmesh.amoylab.com",
       "--tenant",
       "default"
     ]
@@ -160,9 +161,9 @@ npx --prefix npm/docmesh-mcp docmesh-mcp --base-url http://127.0.0.1:8234 --tena
 
 Official DocMesh skill artifacts:
 
-- Markdown guide: `http://127.0.0.1:8234/install/DocMesh.md`
-- Skill package: `http://127.0.0.1:8234/install/skills/DocMesh.skill`
-- Zip package: `http://127.0.0.1:8234/install/skills/DocMesh.zip`
+- Markdown guide: `https://docmesh.amoylab.com/install/DocMesh.md`
+- Skill package: `https://docmesh.amoylab.com/install/skills/DocMesh.skill`
+- Zip package: `https://docmesh.amoylab.com/install/skills/DocMesh.zip`
 - In-repo skill source: `skills/docmesh/`
 
 ### Give An AI Agent Direct Instructions
@@ -170,19 +171,28 @@ Official DocMesh skill artifacts:
 If an agent can read a hosted markdown guide, point it here:
 
 ```text
-Read and follow http://127.0.0.1:8234/install/DocMesh.md
+Read and follow https://docmesh.amoylab.com/install/DocMesh.md
 ```
 
 If an agent is terminal-native, these are the shortest useful starting points:
 
 ```bash
-dm system info --base-url http://127.0.0.1:8234 --tenant default
-dm namespace list --base-url http://127.0.0.1:8234 --tenant default
-dm document list --base-url http://127.0.0.1:8234 --tenant default
+dm system info --base-url https://docmesh.amoylab.com --tenant default
+dm namespace list --base-url https://docmesh.amoylab.com --tenant default
+dm document list --base-url https://docmesh.amoylab.com --tenant default
 
-docmesh system info --base-url http://127.0.0.1:8234 --tenant default
-docmesh namespace list --base-url http://127.0.0.1:8234 --tenant default
-docmesh document list --base-url http://127.0.0.1:8234 --tenant default
+docmesh system info --base-url https://docmesh.amoylab.com --tenant default
+docmesh namespace list --base-url https://docmesh.amoylab.com --tenant default
+docmesh document list --base-url https://docmesh.amoylab.com --tenant default
+```
+
+### Docker Images
+
+Published service image:
+
+```text
+docker.io/ifuryst/docmesh
+ghcr.io/ifuryst/docmesh
 ```
 
 ### Release Downloads
@@ -200,6 +210,14 @@ Asset naming:
 - `docmesh_linux_amd64.tar.gz`
 - `docmesh_linux_arm64.tar.gz`
 - `docmesh_windows_amd64.zip`
+
+### npm Package
+
+Published stdio MCP bridge:
+
+```text
+https://www.npmjs.com/package/docmesh-mcp
+```
 
 ## Credits
 

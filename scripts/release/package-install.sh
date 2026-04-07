@@ -6,6 +6,7 @@ VERSION="${DOCMESH_VERSION:-$(cd "$ROOT_DIR" && go run ./cmd/cli version | awk '
 RELEASE_DIR="$ROOT_DIR/dist/install/releases"
 SKILL_DIR="$ROOT_DIR/dist/install/skills"
 TMP_DIR="$(mktemp -d)"
+VERSION_LDFLAGS="-X github.com/ifuryst/docmesh/internal/version.Version=${VERSION}"
 
 cleanup() {
   rm -rf "$TMP_DIR"
@@ -34,7 +35,9 @@ for target in "${targets[@]}"; do
     binary_name="docmesh.exe"
   fi
 
-  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -o "$stage/$binary_name" "$ROOT_DIR/cmd/cli"
+  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build \
+    -ldflags "$VERSION_LDFLAGS" \
+    -o "$stage/$binary_name" "$ROOT_DIR/cmd/cli"
 
   archive_base="docmesh_${os}_${arch}"
   if [[ "$os" == "windows" ]]; then

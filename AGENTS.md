@@ -6,10 +6,11 @@ This repository builds `DocMesh`, an agent-native knowledge service for multi-te
 
 ## Start Here
 
-- [docs/README.md](/Users/ifuryst/projects/github/DocMesh/docs/README.md): docs map and update rules
-- [docs/knowledge/product.md](/Users/ifuryst/projects/github/DocMesh/docs/knowledge/product.md): product framing, scope, core concepts
-- [docs/knowledge/architecture.md](/Users/ifuryst/projects/github/DocMesh/docs/knowledge/architecture.md): system model and resource boundaries
-- [docs/knowledge/repo-map.md](/Users/ifuryst/projects/github/DocMesh/docs/knowledge/repo-map.md): repo structure and implementation status
+- [docs/README.md](/Users/bytedance/projects/github/llm-wiki/docs/README.md): docs map and update rules
+- [docs/knowledge/product.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/product.md): product framing, scope, core concepts
+- [docs/knowledge/architecture.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/architecture.md): system model and resource boundaries
+- [docs/knowledge/repo-map.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/repo-map.md): repo structure and implementation status
+- [docs/install/README.md](/Users/bytedance/projects/github/llm-wiki/docs/install/README.md): install and distribution entrypoint
 
 ## Working Rules
 
@@ -27,6 +28,7 @@ This repository builds `DocMesh`, an agent-native knowledge service for multi-te
 - `docs/test-results/`: durable records of unit, e2e, and performance runs
 - `docs/worklog/`: chronological milestone log
 - `docs/references/`: distilled external references that affect repo practice
+- `docs/install/`: durable install and release-distribution guidance
 
 ## Current Focus
 

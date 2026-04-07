@@ -10,6 +10,7 @@ The repository is in bootstrap phase.
 - `cmd/`: entrypoints for the HTTP service and the thin CLI wrapper
 - `internal/`: private Go packages for app wiring, config, logging, HTTP server, CLI, and client code
 - `deploy/dev/`: local development infrastructure definitions
+- `Dockerfile`: production-oriented container build for the main DocMesh service
 - `.github/workflows/`: CI and release automation
 - `docs/`: durable repository knowledge and execution artifacts
 - `install/`: hosted install docs and scripts served from `:8234/install/*`
@@ -30,6 +31,7 @@ The repository is in bootstrap phase.
 - `docs/test-results/`: durable validation and benchmark records
 - `docs/worklog/`: chronological milestones
 - `docs/references/`: distilled external references
+- `docs/install/`: durable install and release-distribution references
 
 ## Planned Layout
 
@@ -56,5 +58,5 @@ Expected directories as implementation grows:
 - dockerized dev entrypoint: `make dev`
 - install surfaces: hosted markdown guide, shell installer, and skill package download endpoints implemented
 - release packaging: multi-platform CLI archives and packaged skill assets generated into `dist/install/`
-- GitHub release automation: pushed tags now publish CLI and install assets to GitHub Releases
+- GitHub release automation: pushed tags now publish CLI and install assets to GitHub Releases, push the main service image to Docker Hub and GHCR, and publish `docmesh-mcp` to npm
 - npm stdio bridge: `docmesh-mcp` package source added for `npx`-style MCP usage

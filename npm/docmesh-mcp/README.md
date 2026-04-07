@@ -9,6 +9,12 @@
 ## Run
 
 ```bash
+npx -y docmesh-mcp --base-url https://docmesh.amoylab.com --tenant default
+```
+
+Local dev equivalent:
+
+```bash
 npx -y docmesh-mcp --base-url http://127.0.0.1:8234 --tenant default
 ```
 

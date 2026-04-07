@@ -1,0 +1,11 @@
+.git
+.github
+.idea
+bin
+dist
+tmp
+vendor
+node_modules
+npm/docmesh-mcp/node_modules
+.env
+.env.local

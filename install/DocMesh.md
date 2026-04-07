@@ -8,8 +8,8 @@ It also exposes MCP server endpoints for clients that support remote MCP directl
 
 ## MCP Endpoints
 
-- Streamable HTTP: `http://127.0.0.1:8234/mcp`
-- Legacy SSE: `http://127.0.0.1:8234/sse`
+- Streamable HTTP: `https://docmesh.amoylab.com/mcp`
+- Legacy SSE: `https://docmesh.amoylab.com/sse`
 
 If your MCP client supports remote MCP over Streamable HTTP, prefer `/mcp`.
 
@@ -19,7 +19,7 @@ Example remote MCP config shape:
 {
   "docmesh": {
     "type": "http",
-    "url": "http://127.0.0.1:8234/mcp",
+    "url": "https://docmesh.amoylab.com/mcp",
     "headers": {
       "X-DocMesh-Tenant-ID": "default"
     }
@@ -31,7 +31,8 @@ Example remote MCP config shape:
 
 If your agent can fetch markdown instructions from a URL, point it here:
 
-- `http://127.0.0.1:8234/install/DocMesh.md`
+- `https://docmesh.amoylab.com/install/DocMesh.md`
+- local dev equivalent: `http://127.0.0.1:8234/install/DocMesh.md`
 
 If your DocMesh server is not running on local dev defaults, replace the host and port accordingly.
 
@@ -39,8 +40,8 @@ If your DocMesh server is not running on local dev defaults, replace the host an
 
 Download one of these packages and install it into your local Skills directory:
 
-- `.skill`: `http://127.0.0.1:8234/install/skills/DocMesh.skill`
-- `.zip`: `http://127.0.0.1:8234/install/skills/DocMesh.zip`
+- `.skill`: `https://docmesh.amoylab.com/install/skills/DocMesh.skill`
+- `.zip`: `https://docmesh.amoylab.com/install/skills/DocMesh.zip`
 
 Both packages contain the same official `docmesh` skill directory:
 
@@ -54,41 +55,66 @@ Both packages contain the same official `docmesh` skill directory:
 Install the DocMesh CLI with the hosted shell installer. The script downloads the matching binary from GitHub Releases:
 
 ```sh
-curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
+curl -fsSL https://docmesh.amoylab.com/install/install-cli.sh | sh
 ```
 
 You can override the server host used by the installer:
 
 ```sh
-DOCMESH_RELEASE_REPO=iFurySt/DocMesh curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
+DOCMESH_RELEASE_REPO=iFurySt/DocMesh curl -fsSL https://docmesh.amoylab.com/install/install-cli.sh | sh
 ```
 
 To install a specific release tag:
 
 ```sh
-DOCMESH_VERSION=v0.1.0 curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
+DOCMESH_VERSION=v0.1.0 curl -fsSL https://docmesh.amoylab.com/install/install-cli.sh | sh
 ```
 
 GitHub Releases page:
 
 - `https://github.com/iFurySt/DocMesh/releases`
 
+## Option 4: Run The Main Service With Docker
+
+Published images:
+
+- `docker.io/ifuryst/docmesh`
+- `ghcr.io/ifuryst/docmesh`
+
+Example:
+
+```sh
+docker run --rm -p 8234:8234 \
+  -e DOCMESH_SERVER_HOST=0.0.0.0 \
+  -e DOCMESH_SERVER_PORT=8234 \
+  -e DOCMESH_POSTGRES_HOST=host.docker.internal \
+  -e DOCMESH_POSTGRES_PORT=5432 \
+  -e DOCMESH_POSTGRES_USER=docmesh \
+  -e DOCMESH_POSTGRES_PASSWORD=docmesh \
+  -e DOCMESH_POSTGRES_DATABASE=docmesh \
+  -e DOCMESH_POSTGRES_SSLMODE=disable \
+  -e DOCMESH_REDIS_ADDR=host.docker.internal:6379 \
+  docker.io/ifuryst/docmesh:latest
+```
+
+The Docker image only contains the DocMesh main service. PostgreSQL and Redis remain external dependencies.
+
 ## Post-Install Check
 
 ```sh
 docmesh version
-docmesh system info --base-url http://127.0.0.1:8234
+docmesh system info --base-url https://docmesh.amoylab.com
 dm version
 ```
 
 The installer also creates a lightweight `dm` alias next to the main `docmesh` binary, without editing shell startup files.
 
-## Option 4: Run The Stdio MCP Package With npx
+## Option 5: Run The Stdio MCP Package With npx
 
 For a published npm package, local process-spawned MCP setups can use:
 
 ```sh
-npx -y docmesh-mcp --base-url http://127.0.0.1:8234 --tenant default
+npx -y docmesh-mcp --base-url https://docmesh.amoylab.com --tenant default
 ```
 
 Before the package is published, use the in-repo package directly:
@@ -108,7 +134,7 @@ Example stdio MCP config shape:
       "-y",
       "docmesh-mcp",
       "--base-url",
-      "http://127.0.0.1:8234",
+      "https://docmesh.amoylab.com",
       "--tenant",
       "default"
     ]
