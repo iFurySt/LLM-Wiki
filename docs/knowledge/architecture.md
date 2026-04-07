@@ -6,11 +6,13 @@ DocMesh starts as a standalone Go service with:
 
 - HTTP API
 - thin CLI wrapper over HTTP
+- MCP server over Streamable HTTP and SSE
 - PostgreSQL persistence
+- hosted install surfaces under `/install/*`
+- an npm stdio MCP bridge for `npx`-style local integrations
 
-Likely later additions:
+Supporting infrastructure already wired for local development:
 
-- MCP server
 - Redis for cache and coordination
 - MinIO for object storage
 - OpenSearch for search and indexing
@@ -73,3 +75,16 @@ The service is intended to integrate with agent platforms like `as-next` as a sh
 - agents can propose patches into it
 - approved results can be written back into it
 - admin surfaces can inspect revision and audit history
+
+## Current Agent Integration Surfaces
+
+DocMesh currently exposes these agent-facing entry points:
+
+- HTTP API for direct JSON integrations
+- thin `docmesh` CLI for terminal-first workflows
+- remote MCP endpoint at `/mcp`
+- legacy MCP SSE endpoint at `/sse`
+- official in-repo `docmesh` skill
+- `docmesh-mcp` npm package for stdio MCP via `npx`
+
+This keeps the same backend reachable from hosted agents, local coding agents, and process-spawned MCP clients.

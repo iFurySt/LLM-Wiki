@@ -1,6 +1,7 @@
-.PHONY: dev down run-server run-cli build tidy fmt
+.PHONY: dev down run-server run-cli build tidy fmt package-install
 
 dev:
+	./scripts/release/package-install.sh
 	docker compose -f deploy/dev/docker-compose.yml up --build -d
 
 down:
@@ -14,6 +15,9 @@ run-cli:
 
 build:
 	go build ./...
+
+package-install:
+	./scripts/release/package-install.sh
 
 tidy:
 	go mod tidy

@@ -14,7 +14,7 @@ It is built for cases where many AI agents need to read, create, update, and org
 - source grounding
 - namespace and ACL boundaries
 - approval-aware write paths
-- compatibility with HTTP, CLI, and later MCP
+- compatibility with HTTP, CLI, remote MCP, and stdio MCP
 
 ## Product Framing
 
@@ -26,6 +26,7 @@ It is a shared document system for agents:
 - derived documents can be maintained over time
 - drafts can exist before publication
 - writes can be proposed, reviewed, applied, and audited
+- agent runtimes can integrate through hosted install docs, skills, CLI, or MCP
 
 ## Target Users
 
@@ -56,3 +57,4 @@ Within a tenant space, documents are expected to live in domains such as:
 - namespace and document ACL determine visibility, not author alone
 - not every chat detail deserves durable storage
 - only information with repeat value should graduate into formal knowledge
+- the same service should be easy to consume from both remote and local agent runtimes

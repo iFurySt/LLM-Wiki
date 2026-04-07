@@ -6,10 +6,10 @@ This repository builds `DocMesh`, an agent-native knowledge service for multi-te
 
 ## Start Here
 
-- [docs/README.md](/Users/bytedance/projects/github/llm-wiki/docs/README.md): docs map and update rules
-- [docs/knowledge/product.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/product.md): product framing, scope, core concepts
-- [docs/knowledge/architecture.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/architecture.md): system model and resource boundaries
-- [docs/knowledge/repo-map.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/repo-map.md): repo structure and implementation status
+- [docs/README.md](/Users/bytedance/projects/github/DocMesh/docs/README.md): docs map and update rules
+- [docs/knowledge/product.md](/Users/bytedance/projects/github/DocMesh/docs/knowledge/product.md): product framing, scope, core concepts
+- [docs/knowledge/architecture.md](/Users/bytedance/projects/github/DocMesh/docs/knowledge/architecture.md): system model and resource boundaries
+- [docs/knowledge/repo-map.md](/Users/bytedance/projects/github/DocMesh/docs/knowledge/repo-map.md): repo structure and implementation status
 
 ## Working Rules
 
@@ -30,6 +30,6 @@ This repository builds `DocMesh`, an agent-native knowledge service for multi-te
 
 ## Current Focus
 
-- bootstrap the Go service and thin CLI
-- establish the initial data model and HTTP surface
-- keep repo knowledge structured from day one
+- evolve the shared document model and revision workflows
+- improve agent integration through MCP, CLI, and hosted install surfaces
+- keep repo knowledge structured and current as the codebase grows

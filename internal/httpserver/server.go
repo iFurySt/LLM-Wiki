@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/bytedance/docmesh/internal/config"
+	"github.com/bytedance/docmesh/internal/mcpserver"
 	"github.com/bytedance/docmesh/internal/service"
 	"github.com/bytedance/docmesh/internal/ui"
 	"github.com/bytedance/docmesh/internal/version"
@@ -41,9 +42,12 @@ func NewHandler(cfg config.Config, logger *zap.Logger, svc *service.Service) htt
 	if templates, err := ui.ParseTemplates(); err == nil {
 		engine.SetHTMLTemplate(templates)
 	}
+	mcpManager := mcpserver.NewManager(svc)
 
 	registerRoutes(engine, cfg)
 	registerAPIRoutes(engine, svc)
+	registerMCPRoutes(engine, mcpManager)
+	registerInstallRoutes(engine)
 	registerUIRoutes(engine, svc)
 	return engine
 }

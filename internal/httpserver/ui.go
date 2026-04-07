@@ -9,11 +9,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type uiSpaceCard struct {
+	ID          int64
+	Key         string
+	DisplayName string
+}
+
+type uiNamespaceCard struct {
+	ID            int64
+	Key           string
+	DisplayName   string
+	Description   string
+	Visibility    string
+	Status        string
+	DocumentCount int
+}
+
+type uiDocumentCard struct {
+	ID                int64
+	NamespaceID       int64
+	NamespaceLabel    string
+	Slug              string
+	Title             string
+	ContentPreview    string
+	Status            string
+	CurrentRevisionNo int32
+	UpdatedAt         string
+}
+
+type uiFlash struct {
+	Kind    string
+	Message string
+}
+
 type uiIndexData struct {
-	TenantID   string
-	Spaces     []api.SpaceResponse
-	Namespaces []api.NamespaceResponse
-	Documents  []api.DocumentResponse
+	TenantID            string
+	Spaces              []uiSpaceCard
+	Namespaces          []uiNamespaceCard
+	Documents           []uiDocumentCard
+	SelectedDocument    *api.DocumentResponse
+	SelectedNamespaceID int64
+	StatusFilter        string
+	DocumentCount       int
+	ArchivedCount       int
+	NamespaceCount      int
+	Flash               *uiFlash
 }
 
 func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
@@ -23,6 +63,23 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 
 	engine.GET("/ui", func(c *gin.Context) {
 		tenantID := tenantIDFromRequest(c)
+		var namespaceFilter *int64
+		var selectedNamespaceID int64
+		if raw := c.Query("namespace_id"); raw != "" {
+			parsed, err := strconv.ParseInt(raw, 10, 64)
+			if err != nil {
+				badRequest(c, err)
+				return
+			}
+			namespaceFilter = &parsed
+			selectedNamespaceID = parsed
+		}
+
+		var statusFilter *string
+		statusRaw := c.Query("status")
+		if statusRaw != "" && statusRaw != "all" {
+			statusFilter = &statusRaw
+		}
 
 		spaces, err := svc.ListSpaces(c.Request.Context(), tenantID)
 		if err != nil {
@@ -34,17 +91,97 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 			handleError(c, err)
 			return
 		}
-		documents, err := svc.ListDocuments(c.Request.Context(), tenantID, nil, nil)
+		documents, err := svc.ListDocuments(c.Request.Context(), tenantID, namespaceFilter, statusFilter)
 		if err != nil {
 			handleError(c, err)
 			return
 		}
 
+		namespaceNames := make(map[int64]string, len(namespaces.Items))
+		namespaceDocCount := make(map[int64]int, len(namespaces.Items))
+		for _, item := range namespaces.Items {
+			namespaceNames[item.ID] = item.DisplayName
+		}
+		for _, item := range documents.Items {
+			namespaceDocCount[item.NamespaceID]++
+		}
+
+		var selectedDocument *api.DocumentResponse
+		if raw := c.Query("document_id"); raw != "" {
+			documentID, err := strconv.ParseInt(raw, 10, 64)
+			if err != nil {
+				badRequest(c, err)
+				return
+			}
+			doc, err := svc.GetDocument(c.Request.Context(), tenantID, documentID)
+			if err != nil {
+				handleError(c, err)
+				return
+			}
+			selectedDocument = &doc
+		}
+
+		spaceCards := make([]uiSpaceCard, 0, len(spaces.Items))
+		for _, item := range spaces.Items {
+			spaceCards = append(spaceCards, uiSpaceCard{
+				ID:          item.ID,
+				Key:         item.Key,
+				DisplayName: item.DisplayName,
+			})
+		}
+
+		namespaceCards := make([]uiNamespaceCard, 0, len(namespaces.Items))
+		for _, item := range namespaces.Items {
+			namespaceCards = append(namespaceCards, uiNamespaceCard{
+				ID:            item.ID,
+				Key:           item.Key,
+				DisplayName:   item.DisplayName,
+				Description:   item.Description,
+				Visibility:    item.Visibility,
+				Status:        item.Status,
+				DocumentCount: namespaceDocCount[item.ID],
+			})
+		}
+
+		documentCards := make([]uiDocumentCard, 0, len(documents.Items))
+		archivedCount := 0
+		for _, item := range documents.Items {
+			if item.Status == "archived" {
+				archivedCount++
+			}
+			documentCards = append(documentCards, uiDocumentCard{
+				ID:                item.ID,
+				NamespaceID:       item.NamespaceID,
+				NamespaceLabel:    namespaceNames[item.NamespaceID],
+				Slug:              item.Slug,
+				Title:             item.Title,
+				ContentPreview:    item.Content,
+				Status:            item.Status,
+				CurrentRevisionNo: item.CurrentRevisionNo,
+				UpdatedAt:         item.UpdatedAt,
+			})
+		}
+
+		var flash *uiFlash
+		if message := c.Query("message"); message != "" {
+			flash = &uiFlash{
+				Kind:    c.DefaultQuery("kind", "info"),
+				Message: message,
+			}
+		}
+
 		c.HTML(http.StatusOK, "index.html", uiIndexData{
-			TenantID:   tenantID,
-			Spaces:     spaces.Items,
-			Namespaces: namespaces.Items,
-			Documents:  documents.Items,
+			TenantID:            tenantID,
+			Spaces:              spaceCards,
+			Namespaces:          namespaceCards,
+			Documents:           documentCards,
+			SelectedDocument:    selectedDocument,
+			SelectedNamespaceID: selectedNamespaceID,
+			StatusFilter:        c.DefaultQuery("status", "all"),
+			DocumentCount:       len(documentCards),
+			ArchivedCount:       archivedCount,
+			NamespaceCount:      len(namespaceCards),
+			Flash:               flash,
 		})
 	})
 
@@ -59,7 +196,20 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui")
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=namespace+created")
+	})
+
+	engine.POST("/ui/namespaces/:id/archive", func(c *gin.Context) {
+		namespaceID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			badRequest(c, err)
+			return
+		}
+		if _, err := svc.ArchiveNamespace(c.Request.Context(), tenantIDFromRequest(c), namespaceID); err != nil {
+			handleError(c, err)
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=namespace+archived")
 	})
 
 	engine.POST("/ui/documents", func(c *gin.Context) {
@@ -81,6 +231,44 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui")
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+created")
+	})
+
+	engine.POST("/ui/documents/:id/update", func(c *gin.Context) {
+		documentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			badRequest(c, err)
+			return
+		}
+		req := api.UpdateDocumentRequest{
+			Title:         c.PostForm("title"),
+			Content:       c.PostForm("content"),
+			AuthorType:    c.PostForm("author_type"),
+			AuthorID:      c.PostForm("author_id"),
+			ChangeSummary: c.PostForm("change_summary"),
+		}
+		if _, err := svc.UpdateDocument(c.Request.Context(), tenantIDFromRequest(c), documentID, req); err != nil {
+			handleError(c, err)
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+updated&document_id="+strconv.FormatInt(documentID, 10))
+	})
+
+	engine.POST("/ui/documents/:id/archive", func(c *gin.Context) {
+		documentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			badRequest(c, err)
+			return
+		}
+		req := api.ArchiveDocumentRequest{
+			AuthorType:    c.PostForm("author_type"),
+			AuthorID:      c.PostForm("author_id"),
+			ChangeSummary: c.PostForm("change_summary"),
+		}
+		if _, err := svc.ArchiveDocument(c.Request.Context(), tenantIDFromRequest(c), documentID, req); err != nil {
+			handleError(c, err)
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+archived&document_id="+strconv.FormatInt(documentID, 10))
 	})
 }

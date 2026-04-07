@@ -1,0 +1,20 @@
+{
+  "name": "docmesh-mcp",
+  "version": "0.1.0-dev",
+  "description": "DocMesh MCP stdio bridge for npx-based local agent integrations.",
+  "type": "module",
+  "bin": {
+    "docmesh-mcp": "./bin/docmesh-mcp.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  }
+}

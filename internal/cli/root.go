@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/bytedance/docmesh/internal/api"
@@ -22,7 +23,7 @@ func NewRootCommand() *cobra.Command {
 		Short: "DocMesh CLI",
 	}
 
-	root.PersistentFlags().StringVar(&baseURL, "base-url", "http://127.0.0.1:8080", "DocMesh server base URL")
+	root.PersistentFlags().StringVar(&baseURL, "base-url", defaultString("DOCMESH_CLI_BASE_URL", "http://127.0.0.1:8234"), "DocMesh server base URL")
 	root.PersistentFlags().DurationVar(&timeout, "timeout", 10*time.Second, "HTTP timeout")
 	root.PersistentFlags().StringVar(&tenantID, "tenant", "default", "DocMesh tenant ID")
 
@@ -33,6 +34,14 @@ func NewRootCommand() *cobra.Command {
 	root.AddCommand(newDocumentCommand(&baseURL, &timeout, &tenantID))
 
 	return root
+}
+
+func defaultString(key string, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+	return value
 }
 
 func newSpaceCommand(baseURL *string, timeout *time.Duration, tenantID *string) *cobra.Command {

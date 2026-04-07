@@ -11,6 +11,10 @@ The repository is in bootstrap phase.
 - `internal/`: private Go packages for app wiring, config, logging, HTTP server, CLI, and client code
 - `deploy/dev/`: local development infrastructure definitions
 - `docs/`: durable repository knowledge and execution artifacts
+- `install/`: hosted install docs and scripts served from `:8234/install/*`
+- `skills/`: official DocMesh agent skill source files
+- `npm/`: publishable npm packages maintained in-repo
+- `scripts/`: helper scripts for testing and release packaging
 - `README.md`: quickstart and local setup notes
 - `.env.example`: environment variable template
 - `Makefile`: common development commands
@@ -32,7 +36,6 @@ Expected directories as implementation grows:
 
 - `pkg/`: reusable public packages if needed
 - `configs/`: local or example configuration
-- `scripts/`: helper scripts
 - `test/` or `tests/`: integration and end-to-end tests
 - `internal/db/migrations/`: embedded SQL migrations used at startup
 
@@ -45,7 +48,11 @@ Expected directories as implementation grows:
 - test-result tracking structure: initialized
 - database schema: initial v0 migration implemented
 - HTTP API: readiness, structured error responses, space list, namespace CRUD/list/archive, document CRUD/list/filter, slug lookup, and archive
+- MCP: streamable HTTP and legacy SSE endpoints with DocMesh tools and resources
 - CLI: system, space, namespace, and document commands implemented, including list and archive flows
-- UI: simple Gin-served HTML page for manual inspection and creation
+- UI: retro wiki-style Gin-served HTML page for browsing, creating, editing, archiving, and install flows
 - infra manifests: local development compose initialized
 - dockerized dev entrypoint: `make dev`
+- install surfaces: hosted markdown guide, shell installer, and skill package download endpoints implemented
+- release packaging: multi-platform CLI archives and packaged skill assets generated into `dist/install/`
+- npm stdio bridge: `docmesh-mcp` package source added for `npx`-style MCP usage
