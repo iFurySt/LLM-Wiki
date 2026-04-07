@@ -67,3 +67,4 @@ The dedicated npm workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-d
   - repository: `iFurySt/DocMesh`
   - workflow: `publish-npm.yml`
   - environment: empty
+- npm trusted publishing currently requires a modern runtime in CI; keep the publish workflow on Node 22 or newer.
