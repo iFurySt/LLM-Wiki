@@ -219,7 +219,7 @@ Published stdio MCP bridge:
 https://www.npmjs.com/package/docmesh-mcp
 ```
 
-For CI publishing, `NPM_TOKEN` must be a token that can publish with 2FA bypass enabled, or the repo must later move to npm trusted publishing.
+CI publishing now uses npm trusted publishing over GitHub OIDC instead of a long-lived `NPM_TOKEN`.
 
 ## Credits
 
