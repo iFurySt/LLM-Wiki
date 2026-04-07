@@ -1,33 +1,32 @@
-FROM golang:1.26 AS build
+FROM --platform=$BUILDPLATFORM golang:1.26 AS build
 
 ARG DOCMESH_VERSION=0.1.0-dev
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /src
 
-RUN apt-get update && apt-get install -y zip unzip && rm -rf /var/lib/apt/lists/*
-
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 
 COPY . .
 
-RUN chmod +x /src/scripts/release/package-install.sh /src/install/install-cli.sh
-RUN DOCMESH_VERSION="${DOCMESH_VERSION}" /src/scripts/release/package-install.sh
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-  -ldflags "-X github.com/ifuryst/docmesh/internal/version.Version=${DOCMESH_VERSION}" \
-  -o /out/docmesh-server ./cmd/server
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build \
+    -trimpath \
+    -ldflags "-s -w -X github.com/ifuryst/docmesh/internal/version.Version=${DOCMESH_VERSION}" \
+    -o /out/docmesh-server ./cmd/server
 
-FROM debian:stable-slim
-
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM gcr.io/distroless/static-debian12:nonroot
 
 WORKDIR /app
 
 COPY --from=build /out/docmesh-server /usr/local/bin/docmesh-server
 COPY --from=build /src/install /app/install
 COPY --from=build /src/skills /app/skills
-COPY --from=build /src/dist/install /app/dist/install
 
 EXPOSE 8234
 
-CMD ["docmesh-server"]
+ENTRYPOINT ["/usr/local/bin/docmesh-server"]

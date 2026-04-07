@@ -2,8 +2,11 @@
 .idea/
 .env
 .env.local
-bin/
+/bin/
 dist/
 tmp/
 vendor/
 node_modules/
+npm/docmesh-mcp/package-lock.json
+!npm/docmesh-mcp/bin/
+!npm/docmesh-mcp/bin/docmesh-mcp.js

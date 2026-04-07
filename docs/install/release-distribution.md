@@ -51,12 +51,15 @@ The workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-dev` to the pus
 - `DOCKERHUB_TOKEN`
 - `NPM_TOKEN`
 
+`NPM_TOKEN` must be able to publish packages with 2FA bypass enabled. A plain read/write token without publish bypass will fail with npm `E403`.
+
 ## Permission Model
 
 - GitHub Releases uses `contents: write`
 - GHCR publish uses `packages: write` with `GITHUB_TOKEN`
 - Docker Hub publish uses `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
 - npm publish uses `NPM_TOKEN`
+- if npm account policy enforces publish-time 2FA, the token must explicitly support bypass, or the repo must move to npm trusted publishing
 
 ## Notes
 
