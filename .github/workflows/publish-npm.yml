@@ -1,0 +1,38 @@
+name: publish-npm
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Validate publish inputs
+        working-directory: npm/docmesh-mcp
+        run: |
+          test -f bin/docmesh-mcp.js
+          npm pack --dry-run
+
+      - name: Set package version from tag
+        working-directory: npm/docmesh-mcp
+        run: npm pkg set version="${GITHUB_REF_NAME#v}"
+
+      - name: Publish npm package
+        working-directory: npm/docmesh-mcp
+        run: npm publish --access public --provenance

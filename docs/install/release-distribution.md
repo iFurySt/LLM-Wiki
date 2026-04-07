@@ -43,7 +43,7 @@ Published package:
 
 - `docmesh-mcp`
 
-The workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-dev` to the pushed git tag version before publish.
+The dedicated npm workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-dev` to the pushed git tag version before publish.
 
 ## Required GitHub Secrets
 
@@ -65,5 +65,5 @@ The workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-dev` to the pus
 - The installer script downloads CLI archives from GitHub Releases instead of from the running DocMesh service.
 - npm trusted publisher configuration must match:
   - repository: `iFurySt/DocMesh`
-  - workflow: `release.yml`
+  - workflow: `publish-npm.yml`
   - environment: empty
