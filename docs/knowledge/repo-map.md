@@ -55,7 +55,7 @@ Expected directories as implementation grows:
 - CLI: system, space, namespace, and document commands implemented, including list and archive flows
 - UI: retro wiki-style Gin-served HTML page for browsing, creating, editing, archiving, and install flows
 - infra manifests: local development compose initialized
-- dockerized dev entrypoint: `make dev`
+- dockerized dev entrypoint: `make dev` with containerized hot reload for the app service
 - install surfaces: hosted markdown guide, shell installer, and skill package download endpoints implemented
 - release packaging: multi-platform CLI archives and packaged skill assets generated into `dist/install/`
 - GitHub release automation: pushed tags now publish CLI and install assets to GitHub Releases, push the main service image to Docker Hub and GHCR, and publish `docmesh-mcp` to npm

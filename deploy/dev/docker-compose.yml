@@ -4,6 +4,8 @@ services:
       context: ../..
       dockerfile: deploy/dev/Dockerfile
     container_name: docmesh-app
+    working_dir: /workspace
+    command: air -c .air.toml
     restart: unless-stopped
     depends_on:
       - postgres
@@ -35,6 +37,10 @@ services:
       DOCMESH_OPENSEARCH_URL: http://opensearch:9200
     ports:
       - "8234:8234"
+    volumes:
+      - ../..:/workspace
+      - go_mod_cache:/go/pkg/mod
+      - go_build_cache:/root/.cache/go-build
 
   postgres:
     image: postgres:17
@@ -88,3 +94,5 @@ volumes:
   postgres_data:
   minio_data:
   opensearch_data:
+  go_mod_cache:
+  go_build_cache:

@@ -1,11 +1,13 @@
-.PHONY: dev down run-server run-cli build tidy fmt package-install
+.PHONY: dev down logs run-server run-cli build tidy fmt package-install
 
 dev:
-	./scripts/release/package-install.sh
-	docker compose -f deploy/dev/docker-compose.yml up --build -d
+	docker compose -f deploy/dev/docker-compose.yml up --build --force-recreate -d
 
 down:
 	docker compose -f deploy/dev/docker-compose.yml down
+
+logs:
+	docker compose -f deploy/dev/docker-compose.yml logs -f app
 
 run-server:
 	go run ./cmd/server
