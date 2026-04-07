@@ -8,49 +8,45 @@
     :root,
     :root[data-theme="dark"] {
       color-scheme: dark;
-      --bg: #0a0b0d;
-      --bg-2: #121418;
-      --panel: rgba(20, 23, 28, 0.92);
-      --panel-soft: rgba(27, 31, 37, 0.9);
-      --panel-strong: rgba(14, 16, 20, 0.98);
-      --line: #262a31;
-      --line-soft: rgba(255, 255, 255, 0.08);
-      --text: #f4f4ef;
-      --muted: #9ca1aa;
-      --accent: #f3efe2;
-      --accent-2: #79ffd2;
-      --accent-3: #ff8d57;
-      --danger: #ff6f61;
-      --success: #83f28f;
-      --shadow: rgba(0, 0, 0, 0.42);
+      --bg: #121212;
+      --bg-grid: rgba(255, 255, 255, 0.04);
+      --panel: #1a1a1a;
+      --panel-raised: #242424;
+      --panel-soft: #161616;
+      --panel-muted: #1f1f1f;
+      --text: #f5f1e8;
+      --muted: #b8b0a2;
+      --accent: #f2c94c;
+      --accent-2: #fff1bf;
+      --accent-3: #7ee0d6;
+      --danger: #ff7676;
+      --success: #88e48f;
+      --border: #080808;
+      --shadow: rgba(0, 0, 0, 0.46);
       --pixel: "Courier New", "SFMono-Regular", Consolas, monospace;
       --body: "Trebuchet MS", "Verdana", sans-serif;
     }
 
     :root[data-theme="light"] {
       color-scheme: light;
-      --bg: #ece8de;
-      --bg-2: #dfdbd1;
-      --panel: rgba(249, 247, 241, 0.94);
-      --panel-soft: rgba(255, 253, 248, 0.92);
-      --panel-strong: rgba(255, 255, 255, 0.98);
-      --line: #b8b0a4;
-      --line-soft: rgba(38, 42, 49, 0.12);
-      --text: #191b1f;
-      --muted: #646b74;
-      --accent: #191b1f;
-      --accent-2: #0d8a67;
-      --accent-3: #d96330;
-      --danger: #c74e3f;
-      --success: #1f8e46;
-      --shadow: rgba(54, 44, 29, 0.12);
+      --bg: #eee8d8;
+      --bg-grid: rgba(70, 56, 36, 0.10);
+      --panel: #fff8ea;
+      --panel-raised: #ffe9ad;
+      --panel-soft: #fffdf7;
+      --panel-muted: #f5ecd7;
+      --text: #2a241a;
+      --muted: #6d5d49;
+      --accent: #d59a12;
+      --accent-2: #8b6200;
+      --accent-3: #12756b;
+      --danger: #c94d4d;
+      --success: #237f4d;
+      --border: #5a4022;
+      --shadow: rgba(58, 32, 8, 0.18);
     }
 
     * { box-sizing: border-box; }
-
-    html {
-      background: var(--bg);
-    }
 
     body {
       margin: 0;
@@ -58,12 +54,20 @@
       color: var(--text);
       font-family: var(--body);
       background:
-        linear-gradient(var(--line-soft) 1px, transparent 1px),
-        linear-gradient(90deg, var(--line-soft) 1px, transparent 1px),
-        radial-gradient(circle at top, rgba(121, 255, 210, 0.08), transparent 32%),
-        radial-gradient(circle at right, rgba(255, 141, 87, 0.10), transparent 26%),
-        linear-gradient(180deg, var(--bg-2), var(--bg));
-      background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%, 100% 100%;
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+        radial-gradient(circle at top, rgba(242, 201, 76, 0.12), transparent 34%),
+        linear-gradient(180deg, #1c1c1c 0%, var(--bg) 48%, #0f0f0f 100%);
+      background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%;
+    }
+
+    :root[data-theme="light"] body {
+      background:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+        radial-gradient(circle at top, rgba(213, 154, 18, 0.15), transparent 30%),
+        linear-gradient(180deg, #f4eddc 0%, var(--bg) 50%, #eadfca 100%);
+      background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%;
     }
 
     a {
@@ -71,10 +75,7 @@
       text-decoration: none;
     }
 
-    h1,
-    h2,
-    h3,
-    h4 {
+    h1, h2, h3 {
       margin: 0;
       font-family: var(--pixel);
       text-transform: uppercase;
@@ -82,16 +83,15 @@
     }
 
     .page {
-      max-width: 1540px;
+      max-width: 1520px;
       margin: 0 auto;
-      padding: 18px;
+      padding: 22px 18px 32px;
     }
 
     .frame {
-      border: 4px solid var(--line);
-      background: var(--panel);
-      box-shadow: 0 18px 40px var(--shadow);
-      backdrop-filter: blur(10px);
+      border: 4px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.08)), var(--panel);
+      box-shadow: 0 0 0 3px rgba(242, 201, 76, 0.12), 0 20px 40px var(--shadow);
     }
 
     .topbar {
@@ -99,7 +99,7 @@
       grid-template-columns: auto 1fr auto;
       gap: 16px;
       align-items: center;
-      padding: 14px 18px;
+      padding: 14px 16px;
       margin-bottom: 16px;
     }
 
@@ -109,39 +109,32 @@
       gap: 12px;
     }
 
-    .brand-badge {
+    .brand-mark {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 44px;
+      width: 44px;
       height: 44px;
-      padding: 0 10px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
-      color: var(--accent-2);
-      font: 700 13px/1 var(--pixel);
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18);
-    }
-
-    .brand-copy {
-      display: grid;
-      gap: 4px;
+      border: 3px solid var(--border);
+      background: var(--accent);
+      color: #191511;
+      font: 700 14px/1 var(--pixel);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
     }
 
     .eyebrow,
-    .tiny,
-    .meta-chip,
     .tab,
-    .status-pill,
-    .tenant-select,
+    .pill,
+    .tree-meta,
+    button,
     .theme-toggle button,
-    button {
+    select {
       font-family: var(--pixel);
       text-transform: uppercase;
     }
 
     .eyebrow {
-      color: var(--accent-2);
+      color: var(--accent);
       font-size: 11px;
       letter-spacing: 0.08em;
     }
@@ -151,15 +144,15 @@
     }
 
     .brand-subtitle {
+      margin-top: 4px;
       color: var(--muted);
       font-size: 13px;
     }
 
-    .topnav {
+    .tabs {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      align-items: center;
       justify-content: center;
     }
 
@@ -169,61 +162,62 @@
       justify-content: center;
       min-height: 42px;
       padding: 0 14px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
+      border: 3px solid var(--border);
+      background: var(--panel-soft);
       color: var(--muted);
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.14);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
+      cursor: pointer;
     }
 
     .tab.active {
-      color: var(--text);
-      background: linear-gradient(135deg, rgba(121, 255, 210, 0.16), rgba(255, 141, 87, 0.10)), var(--panel-strong);
+      background: var(--accent);
+      color: #1a1610;
     }
 
-    .topbar-actions {
+    .top-actions {
       display: flex;
+      gap: 10px;
       align-items: center;
-      gap: 12px;
       justify-content: flex-end;
     }
 
     .theme-toggle {
       display: inline-flex;
-      padding: 6px;
+      align-items: center;
       gap: 6px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
+      border: 3px solid var(--border);
+      background: var(--panel-soft);
+      padding: 6px;
     }
 
     .theme-toggle button {
       min-width: 72px;
-      padding: 8px 10px;
       border: 0;
       background: transparent;
       color: var(--muted);
-      cursor: pointer;
+      padding: 8px 10px;
       box-shadow: none;
+      cursor: pointer;
     }
 
     .theme-toggle button.active {
       background: var(--accent);
-      color: var(--bg);
+      color: #1a1610;
     }
 
     .flash {
       margin-bottom: 16px;
       padding: 12px 14px;
-      border: 3px solid var(--line);
+      border: 3px solid var(--border);
+      background: rgba(242, 201, 76, 0.14);
       font: 700 13px/1.4 var(--pixel);
-      background: rgba(121, 255, 210, 0.10);
-      color: var(--text);
     }
 
     .flash.success {
       color: var(--success);
     }
 
-    .layout {
+    .shell {
       display: grid;
       grid-template-columns: 320px minmax(0, 1fr);
       gap: 16px;
@@ -231,213 +225,226 @@
     }
 
     .sidebar,
-    .content {
+    .main {
       min-height: calc(100vh - 130px);
     }
 
     .sidebar {
       padding: 16px;
-      display: grid;
-      gap: 16px;
       position: sticky;
       top: 18px;
+      display: grid;
+      gap: 16px;
     }
 
-    .sidebar-section,
-    .content-section,
-    .hero-card,
-    .doc-panel,
-    .tools-panel,
-    .install-card {
-      border: 3px solid var(--line);
-      background: var(--panel-soft);
-    }
-
-    .sidebar-section,
-    .content-section,
-    .hero-card,
-    .doc-panel,
-    .tools-panel {
+    .panel {
       padding: 14px;
+      border: 3px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel-soft);
     }
 
-    .section-head {
+    .panel-head {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       align-items: start;
       margin-bottom: 12px;
     }
 
-    .section-title {
-      display: grid;
-      gap: 4px;
-    }
-
-    .section-kicker {
+    .panel-kicker {
+      margin-top: 5px;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
+      font-size: 13px;
+      line-height: 1.5;
     }
 
     .tenant-select {
       width: 100%;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
+      border: 3px solid var(--border);
+      background: var(--panel-raised);
       color: var(--text);
-      padding: 12px;
+      padding: 11px 12px;
       border-radius: 0;
     }
 
-    .tenant-meta {
-      margin-top: 10px;
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 13px;
-    }
-
-    .space-list,
-    .nav-list,
-    .install-grid,
-    .revision-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .space-card,
-    .nav-item,
-    .install-card,
-    .revision-card {
-      padding: 12px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
-    }
-
     .space-card {
-      background: linear-gradient(135deg, rgba(121, 255, 210, 0.10), rgba(255, 141, 87, 0.10)), var(--panel-strong);
-    }
-
-    .nav-item {
-      display: grid;
-      gap: 8px;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(135deg, rgba(243, 239, 226, 0.10), rgba(121, 255, 210, 0.10)), var(--panel-strong);
-      box-shadow: inset 4px 0 0 var(--accent-2);
-    }
-
-    .nav-item:hover,
-    .install-card:hover {
-      transform: translate(-2px, -2px);
-      transition: transform .14s ease;
+      margin-top: 12px;
+      padding: 12px;
+      border: 3px solid var(--border);
+      background: linear-gradient(135deg, rgba(242, 201, 76, 0.16), rgba(255,255,255,0.02)), var(--panel-raised);
     }
 
     .name {
-      font: 700 16px/1.35 var(--pixel);
+      font: 700 15px/1.35 var(--pixel);
+      text-transform: uppercase;
     }
 
     .sub,
     .desc,
     .empty,
-    .snippet,
-    .body-copy,
-    .doc-content,
-    .tenant-meta,
-    .revision-copy {
+    .tree-meta,
+    .doc-meta,
+    .install-copy,
+    .markdown-body,
+    .revision-note {
       color: var(--muted);
       line-height: 1.6;
       font-size: 14px;
     }
 
-    .meta-row,
-    .doc-meta,
-    .hero-meta,
-    .mini-meta {
+    .tree {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tree-group {
+      border: 3px solid var(--border);
+      background: var(--panel-muted);
+    }
+
+    .tree-group summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 10px 12px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 10px;
       align-items: center;
     }
 
-    .status-pill,
-    .meta-chip {
+    .tree-group summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .tree-group[open] summary {
+      border-bottom: 3px solid rgba(255,255,255,0.05);
+    }
+
+    .tree-folder {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .tree-folder::before {
+      content: "▣";
+      color: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .tree-docs {
+      padding: 8px 8px 10px 22px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .tree-link {
+      display: grid;
+      gap: 4px;
+      padding: 9px 10px 9px 16px;
+      border: 2px solid transparent;
+      position: relative;
+      background: transparent;
+    }
+
+    .tree-link::before {
+      content: "•";
+      position: absolute;
+      left: 4px;
+      top: 10px;
+      color: var(--accent);
+      font: 700 14px/1 var(--pixel);
+    }
+
+    .tree-link:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.06);
+    }
+
+    .tree-link.selected {
+      background: linear-gradient(135deg, rgba(242, 201, 76, 0.18), rgba(255,255,255,0.03)), var(--panel-soft);
+      border-color: var(--accent);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+
+    .pill {
       display: inline-flex;
       align-items: center;
-      min-height: 26px;
+      min-height: 24px;
       padding: 4px 8px;
-      border: 2px solid var(--line);
-      background: rgba(255, 255, 255, 0.04);
+      border: 2px solid var(--border);
+      background: rgba(255,255,255,0.05);
       color: var(--text);
       font-size: 11px;
       line-height: 1;
     }
 
-    .status-pill.active {
+    .pill.archived {
+      background: rgba(255, 118, 118, 0.16);
+      color: #ffd2d2;
+    }
+
+    .pill.active {
+      background: rgba(242, 201, 76, 0.16);
       color: var(--accent-2);
-      background: rgba(121, 255, 210, 0.12);
     }
 
-    .status-pill.archived {
-      color: #ffc1b1;
-      background: rgba(255, 111, 97, 0.14);
-    }
-
-    .content {
+    .main {
       display: grid;
       gap: 16px;
     }
 
-    .hero-card {
+    .hero {
+      padding: 16px;
       display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.8fr);
-      gap: 14px;
-      background:
-        linear-gradient(135deg, rgba(243, 239, 226, 0.08), transparent 56%),
-        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.10)),
-        var(--panel-soft);
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      gap: 16px;
     }
 
     .hero-title {
-      font-size: clamp(26px, 4vw, 40px);
-      line-height: 1.08;
-      max-width: 15ch;
+      margin-top: 8px;
+      font-size: clamp(24px, 3.4vw, 38px);
+      line-height: 1.1;
+      max-width: 18ch;
     }
 
     .hero-copy {
       margin-top: 12px;
       max-width: 64ch;
       color: var(--muted);
-      line-height: 1.7;
+      line-height: 1.65;
     }
 
-    .hero-stat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
+    .stat-grid {
       margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
 
-    .hero-stat {
+    .stat {
       padding: 12px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
+      border: 3px solid var(--border);
+      background: var(--panel-raised);
     }
 
-    .hero-stat-label {
+    .stat-label {
       color: var(--muted);
       font: 700 11px/1.4 var(--pixel);
+      text-transform: uppercase;
     }
 
-    .hero-stat-value {
+    .stat-value {
       margin-top: 8px;
-      font: 700 26px/1 var(--pixel);
+      font: 700 28px/1 var(--pixel);
+      color: var(--accent);
     }
 
     .hero-note {
       padding: 14px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
+      border: 3px solid var(--border);
+      background: var(--panel-soft);
       display: grid;
       gap: 10px;
       align-content: start;
@@ -450,34 +457,15 @@
       font-size: 12px;
     }
 
-    .hero-note-line {
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 14px;
+    .section {
+      padding: 16px;
+      border: 4px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel);
+      box-shadow: 0 12px 26px var(--shadow);
     }
 
-    .content-section {
-      display: grid;
-      gap: 14px;
-    }
-
-    .install-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .install-card {
-      display: grid;
-      gap: 10px;
-    }
-
-    .install-title {
-      font: 700 15px/1.3 var(--pixel);
-    }
-
-    .doc-panel {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06)),
-        var(--panel-soft);
+    .section.hidden {
+      display: none;
     }
 
     .doc-header {
@@ -485,34 +473,116 @@
       justify-content: space-between;
       gap: 12px;
       align-items: start;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
-    .doc-content {
-      white-space: pre-wrap;
-      color: var(--text);
-      max-width: 86ch;
-      min-height: 180px;
-    }
-
-    .doc-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .filter-form,
+    .doc-tools,
+    .doc-meta-row,
+    .install-grid,
+    .revision-list,
     .tool-form,
-    .tool-grid,
-    .doc-tools {
+    .split {
       display: grid;
       gap: 10px;
     }
 
-    .tool-grid.two {
-      grid-template-columns: 1fr 1fr;
+    .doc-meta-row {
+      grid-auto-flow: column;
+      grid-auto-columns: max-content;
+      align-items: center;
+      justify-content: start;
+    }
+
+    .markdown-wrap {
+      margin-top: 14px;
+      padding: 14px;
+      border: 3px solid var(--border);
+      background: var(--panel-soft);
+      overflow: auto;
+    }
+
+    .markdown-body {
+      color: var(--text);
+      max-width: 82ch;
+    }
+
+    .markdown-body > :first-child {
+      margin-top: 0;
+    }
+
+    .markdown-body > :last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3 {
+      margin: 1.2em 0 0.6em;
+      color: var(--accent);
+      font-size: 1.1em;
+    }
+
+    .markdown-body p,
+    .markdown-body ul,
+    .markdown-body ol,
+    .markdown-body blockquote {
+      margin: 0 0 1em;
+    }
+
+    .markdown-body ul,
+    .markdown-body ol {
+      padding-left: 1.4em;
+    }
+
+    .markdown-body li + li {
+      margin-top: 0.35em;
+    }
+
+    .markdown-body code {
+      padding: 1px 5px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.24);
+      color: var(--accent-2);
+      font-family: var(--pixel);
+      font-size: 0.92em;
+    }
+
+    .markdown-body pre {
+      overflow: auto;
+      padding: 12px;
+      border: 3px solid var(--border);
+      background: #0d0d0d;
+    }
+
+    .markdown-body pre code {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #f2f0e6;
+    }
+
+    .markdown-body blockquote {
+      padding: 8px 12px;
+      border-left: 4px solid var(--accent);
+      background: rgba(242, 201, 76, 0.08);
+      color: var(--muted);
+    }
+
+    .markdown-body a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .install-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 12px;
+    }
+
+    .install-card,
+    .revision-card {
+      padding: 12px;
+      border: 3px solid var(--border);
+      background: var(--panel-soft);
     }
 
     input,
@@ -523,40 +593,40 @@
     }
 
     input,
-    select,
     textarea {
       width: 100%;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
-      color: var(--text);
+      border: 3px solid var(--border);
+      background: #f3e9c8;
+      color: #24191a;
       padding: 11px 12px;
       border-radius: 0;
+    }
+
+    :root[data-theme="light"] input,
+    :root[data-theme="light"] textarea {
+      background: #fffaf0;
+      color: #2b2218;
     }
 
     textarea {
       min-height: 140px;
       resize: vertical;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
     button {
-      border: 3px solid var(--line);
+      border: 3px solid var(--border);
       background: var(--accent);
-      color: var(--bg);
+      color: #24191a;
       padding: 11px 12px;
+      font: 700 13px/1 var(--pixel);
       cursor: pointer;
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18);
-      font-size: 12px;
-      line-height: 1;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.24);
     }
 
     button.secondary {
-      background: var(--accent-2);
-    }
-
-    button.ghost {
-      background: transparent;
-      color: var(--text);
+      background: var(--accent-3);
+      color: #0d1817;
     }
 
     button.danger {
@@ -564,12 +634,12 @@
       color: #fff;
     }
 
-    details {
-      border: 3px solid var(--line);
+    details.tool-box {
+      border: 3px solid var(--border);
       background: var(--panel-soft);
     }
 
-    summary {
+    details.tool-box summary {
       list-style: none;
       cursor: pointer;
       padding: 12px 14px;
@@ -577,24 +647,27 @@
       text-transform: uppercase;
     }
 
-    summary::-webkit-details-marker {
+    details.tool-box summary::-webkit-details-marker {
       display: none;
     }
 
-    .details-body {
+    .tool-body {
       padding: 0 14px 14px;
     }
 
     .empty-state {
       padding: 24px;
-      border: 3px dashed var(--line);
+      border: 3px dashed rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.03);
       color: var(--muted);
       text-align: center;
-      background: rgba(255, 255, 255, 0.02);
     }
 
     @media (max-width: 1180px) {
-      .layout {
+      .shell,
+      .hero,
+      .install-grid,
+      .split {
         grid-template-columns: 1fr;
       }
 
@@ -602,30 +675,19 @@
         position: static;
         min-height: auto;
       }
-
-      .content {
-        min-height: auto;
-      }
-
-      .install-grid,
-      .hero-card,
-      .tool-grid.two {
-        grid-template-columns: 1fr;
-      }
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 940px) {
       .topbar {
         grid-template-columns: 1fr;
-        justify-items: start;
       }
 
-      .topnav,
-      .topbar-actions {
+      .tabs,
+      .top-actions {
         justify-content: flex-start;
       }
 
-      .hero-stat-grid {
+      .stat-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -635,23 +697,22 @@
   <div class="page">
     <header class="topbar frame">
       <div class="brand">
-        <div class="brand-badge">DM</div>
-        <div class="brand-copy">
+        <div class="brand-mark">DM</div>
+        <div>
           <div class="eyebrow">Pixel Wiki</div>
           <div class="brand-title">DocMesh</div>
-          <div class="brand-subtitle">Simple tenant wiki for everyday users</div>
+          <div class="brand-subtitle">Wiki browsing for normal users, not an admin console.</div>
         </div>
       </div>
 
-      <nav class="topnav" aria-label="Primary navigation">
-        <a class="tab active" href="/ui">Wiki</a>
-        <a class="tab" href="#install">Install</a>
+      <nav class="tabs" aria-label="Top tabs">
+        <a class="tab active" href="/ui" data-tab-link="wiki">Wiki</a>
+        <button type="button" class="tab" data-tab-link="install">Install</button>
         <a class="tab" href="/install/DocMesh.md" target="_blank" rel="noreferrer">Guide</a>
         <a class="tab" href="/install/install-cli.sh" target="_blank" rel="noreferrer">CLI</a>
-        <a class="tab" href="/mcp" target="_blank" rel="noreferrer">MCP</a>
       </nav>
 
-      <div class="topbar-actions">
+      <div class="top-actions">
         <div class="theme-toggle" aria-label="Theme toggle">
           <button type="button" data-theme-button="dark">Night</button>
           <button type="button" data-theme-button="light">Day</button>
@@ -663,213 +724,157 @@
     <div class="flash {{ .Flash.Kind }}">{{ .Flash.Message }}</div>
     {{ end }}
 
-    <div class="layout">
+    <div class="shell">
       <aside class="sidebar frame">
-        <section class="sidebar-section">
-          <div class="section-head">
-            <div class="section-title">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
               <h2>Tenant</h2>
-              <div class="section-kicker">Switch workspace like a normal wiki, not an admin dashboard.</div>
+              <div class="panel-kicker">Workspace switcher stays at the top-left, like a familiar wiki sidebar.</div>
             </div>
           </div>
-
           <select class="tenant-select" aria-label="Tenant selector">
             <option selected>{{ .TenantID }}</option>
           </select>
-          <div class="tenant-meta">Current tenant ID: {{ .TenantID }}</div>
 
-          <div class="space-list" style="margin-top: 12px;">
-            {{ range .Spaces }}
-            <div class="space-card">
-              <div class="name">{{ .DisplayName }}</div>
-              <div class="sub">{{ .Key }} · #{{ .ID }}</div>
-            </div>
-            {{ else }}
-            <div class="empty">No spaces found for this tenant.</div>
-            {{ end }}
+          {{ range .Spaces }}
+          <div class="space-card">
+            <div class="name">{{ .DisplayName }}</div>
+            <div class="sub">{{ .Key }} · #{{ .ID }}</div>
           </div>
+          {{ else }}
+          <div class="empty">No spaces found for this tenant.</div>
+          {{ end }}
         </section>
 
-        <section class="sidebar-section">
-          <div class="section-head">
-            <div class="section-title">
-              <h2>Docs</h2>
-              <div class="section-kicker">Left-side navigation stays focused on readable document groups.</div>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Navigation</h2>
+              <div class="panel-kicker">Document tree grouped by collection, closer to an IDE project view.</div>
             </div>
           </div>
 
-          <form method="get" action="/ui" class="filter-form">
-            <select name="namespace_id">
-              <option value="">all collections</option>
-              {{ range .Namespaces }}
-              <option value="{{ .ID }}" {{ if eq $.SelectedNamespaceID .ID }}selected{{ end }}>{{ .DisplayName }}</option>
-              {{ end }}
-            </select>
-            <select name="status">
-              <option value="all" {{ if eq .StatusFilter "all" }}selected{{ end }}>all statuses</option>
-              <option value="active" {{ if eq .StatusFilter "active" }}selected{{ end }}>active</option>
-              <option value="archived" {{ if eq .StatusFilter "archived" }}selected{{ end }}>archived</option>
-            </select>
-            <button type="submit" class="ghost">Apply Filter</button>
-          </form>
+          <div class="tree">
+            {{ range .NamespaceTree }}
+            <details class="tree-group" {{ if or (eq $.SelectedNamespaceID .ID) (and $.SelectedDocument (eq $.SelectedDocument.NamespaceID .ID)) }}open{{ end }}>
+              <summary>
+                <div class="tree-folder">
+                  <div>
+                    <div class="name">{{ .DisplayName }}</div>
+                    <div class="tree-meta">{{ .Key }}</div>
+                  </div>
+                </div>
+                <span class="pill {{ .Status }}">{{ .Status }}</span>
+              </summary>
 
-          <div class="nav-list">
-            {{ range .Documents }}
-            <a
-              class="nav-item {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}active{{ end }}"
-              href="/ui?document_id={{ .ID }}{{ if $.SelectedNamespaceID }}&namespace_id={{ $.SelectedNamespaceID }}{{ end }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}"
-            >
-              <div class="name">{{ .Title }}</div>
-              <div class="sub">{{ .NamespaceLabel }} / {{ .Slug }}</div>
-              <div class="mini-meta">
-                <span class="status-pill {{ .Status }}">{{ .Status }}</span>
-                <span class="meta-chip">rev {{ .CurrentRevisionNo }}</span>
+              <div class="tree-docs">
+                {{ range .Documents }}
+                <a
+                  class="tree-link {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}selected{{ end }}"
+                  href="/ui?document_id={{ .ID }}&namespace_id={{ .NamespaceID }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}"
+                >
+                  <div class="name">{{ .Title }}</div>
+                  <div class="tree-meta">{{ .Slug }}</div>
+                </a>
+                {{ else }}
+                <div class="empty">No documents in this collection.</div>
+                {{ end }}
               </div>
-            </a>
+            </details>
             {{ else }}
-            <div class="empty">No documents match the current filter.</div>
+            <div class="empty-state">No collections yet.</div>
             {{ end }}
           </div>
         </section>
       </aside>
 
-      <main class="content">
-        <section class="hero-card frame">
+      <main class="main">
+        <section class="hero frame">
           <div>
-            <div class="eyebrow">Everyday Knowledge</div>
-            <h1 class="hero-title">A wiki home page normal people can read in one glance.</h1>
+            <div class="eyebrow">Reader First</div>
+            <h1 class="hero-title">Keep the old pixel feel. Fix the color. Make the navigation obvious.</h1>
             <div class="hero-copy">
-              The left side behaves like a familiar document tree. The center stays focused on the current page.
-              Install and integration entry points live in top tabs and a compact section below instead of crowding the whole UI.
+              The left side behaves like a document tree. Click a page and the right side becomes a proper reading surface.
+              The main content is now rendered as markdown so it looks like a real wiki page instead of raw storage text.
             </div>
-
-            <div class="hero-stat-grid">
-              <div class="hero-stat">
-                <div class="hero-stat-label">Collections</div>
-                <div class="hero-stat-value">{{ .NamespaceCount }}</div>
+            <div class="stat-grid">
+              <div class="stat">
+                <div class="stat-label">Collections</div>
+                <div class="stat-value">{{ .NamespaceCount }}</div>
               </div>
-              <div class="hero-stat">
-                <div class="hero-stat-label">Documents</div>
-                <div class="hero-stat-value">{{ .DocumentCount }}</div>
+              <div class="stat">
+                <div class="stat-label">Documents</div>
+                <div class="stat-value">{{ .DocumentCount }}</div>
               </div>
-              <div class="hero-stat">
-                <div class="hero-stat-label">Archived</div>
-                <div class="hero-stat-value">{{ .ArchivedCount }}</div>
+              <div class="stat">
+                <div class="stat-label">Archived</div>
+                <div class="stat-value">{{ .ArchivedCount }}</div>
               </div>
             </div>
           </div>
 
           <div class="hero-note">
             <div>
-              <strong>Current mode</strong>
-              <div class="hero-note-line">Reader-first wiki surface with pixel styling and a quieter dark palette.</div>
+              <strong>Theme</strong>
+              <div class="desc">Black and yellow replace the previous purple-heavy dark palette.</div>
             </div>
             <div>
-              <strong>Selected tenant</strong>
-              <div class="hero-note-line">{{ .TenantID }}</div>
+              <strong>Selected Tenant</strong>
+              <div class="desc">{{ .TenantID }}</div>
             </div>
             <div>
-              <strong>Navigation model</strong>
-              <div class="hero-note-line">Tenant switcher on the left, document list below, full article on the right.</div>
+              <strong>Interaction</strong>
+              <div class="desc">Tree navigation on the left, markdown article on the right.</div>
             </div>
           </div>
         </section>
 
-        <section class="content-section frame" id="install">
-          <div class="section-head">
-            <div class="section-title">
-              <h2>Install</h2>
-              <div class="section-kicker">Top-level entry points, similar to a public skills or docs landing page.</div>
-            </div>
-          </div>
-
-          <div class="install-grid">
-            <a class="install-card" href="/install/DocMesh.md" target="_blank" rel="noreferrer">
-              <div class="install-title">Read Guide</div>
-              <div class="body-copy">Open the hosted setup guide for agents, CLI usage, and service conventions.</div>
-              <div class="meta-row">
-                <span class="status-pill active">Markdown</span>
-              </div>
-            </a>
-            <a class="install-card" href="/install/skills/DocMesh.skill">
-              <div class="install-title">Download Skill</div>
-              <div class="body-copy">Pull the official packaged skill archive from the same host.</div>
-              <div class="meta-row">
-                <span class="status-pill">Package</span>
-              </div>
-            </a>
-            <a class="install-card" href="/install/install-cli.sh" target="_blank" rel="noreferrer">
-              <div class="install-title">Install CLI</div>
-              <div class="body-copy">Use the cross-platform install script for local CLI setup.</div>
-              <div class="meta-row">
-                <span class="status-pill">Shell</span>
-              </div>
-            </a>
-          </div>
-        </section>
-
-        {{ if .SelectedDocument }}
-        <article class="doc-panel frame">
+        <section class="section" data-tab-panel="wiki">
+          {{ if .SelectedDocument }}
           <div class="doc-header">
-            <div class="section-title">
+            <div>
               <div class="eyebrow">Document</div>
               <h2>{{ .SelectedDocument.Title }}</h2>
-              <div class="section-kicker">{{ .SelectedDocument.Slug }} · namespace {{ .SelectedDocument.NamespaceID }}</div>
+              <div class="doc-meta">{{ .SelectedDocument.Slug }} · namespace {{ .SelectedDocument.NamespaceID }}</div>
             </div>
-            <span class="status-pill {{ .SelectedDocument.Status }}">{{ .SelectedDocument.Status }}</span>
+            <span class="pill {{ .SelectedDocument.Status }}">{{ .SelectedDocument.Status }}</span>
           </div>
 
-          <div class="doc-toolbar">
-            <div class="doc-meta">
-              <span class="meta-chip">Doc {{ .SelectedDocument.ID }}</span>
-              <span class="meta-chip">Revision {{ .SelectedDocument.CurrentRevisionNo }}</span>
-            </div>
-            <div class="body-copy">The reading area stays primary. Editing tools are collapsed below.</div>
+          <div class="doc-meta-row">
+            <span class="pill active">Doc {{ .SelectedDocument.ID }}</span>
+            <span class="pill">Revision {{ .SelectedDocument.CurrentRevisionNo }}</span>
           </div>
 
-          <div class="doc-content" style="margin-top: 16px;">{{ .SelectedDocument.Content }}</div>
-        </article>
-
-        <section class="content-section frame">
-          <div class="section-head">
-            <div class="section-title">
-              <h2>Revision History</h2>
-              <div class="section-kicker">Recent edits stay visible without turning the page into an operator console.</div>
-            </div>
+          <div class="markdown-wrap">
+            <div class="markdown-body">{{ markdown .SelectedDocument.Content }}</div>
           </div>
 
-          <div class="revision-list">
-            {{ range .SelectedDocument.Revisions }}
-            <div class="revision-card">
-              <div class="meta-row" style="justify-content: space-between; margin-bottom: 8px;">
-                <div class="name">Revision {{ .RevisionNo }}</div>
-                <div class="meta-chip">{{ .CreatedAt }}</div>
+          <div class="doc-tools" style="margin-top: 16px;">
+            <details class="tool-box">
+              <summary>Revision History</summary>
+              <div class="tool-body">
+                <div class="revision-list">
+                  {{ range .SelectedDocument.Revisions }}
+                  <div class="revision-card">
+                    <div class="name">Revision {{ .RevisionNo }}</div>
+                    <div class="revision-note">{{ .CreatedAt }} · {{ .AuthorType }} / {{ .AuthorID }}</div>
+                    <div class="desc">{{ snippet .ChangeSummary 140 }}</div>
+                  </div>
+                  {{ else }}
+                  <div class="empty">No revisions found.</div>
+                  {{ end }}
+                </div>
               </div>
-              <div class="revision-copy">{{ .AuthorType }} / {{ .AuthorID }}</div>
-              <div class="snippet">{{ snippet .ChangeSummary 140 }}</div>
-            </div>
-            {{ else }}
-            <div class="empty">No revisions found.</div>
-            {{ end }}
-          </div>
-        </section>
+            </details>
 
-        <section class="content-section frame">
-          <div class="section-head">
-            <div class="section-title">
-              <h2>Editing Tools</h2>
-              <div class="section-kicker">Advanced actions are still here, but they no longer dominate the main layout.</div>
-            </div>
-          </div>
-
-          <div class="doc-tools">
-            <details>
+            <details class="tool-box">
               <summary>Edit Current Document</summary>
-              <div class="details-body">
+              <div class="tool-body">
                 <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/update" class="tool-form">
                   <input name="title" value="{{ .SelectedDocument.Title }}" required />
                   <textarea name="content">{{ .SelectedDocument.Content }}</textarea>
-                  <div class="tool-grid two">
+                  <div class="split">
                     <input name="author_type" value="user" />
                     <input name="author_id" value="ui" />
                   </div>
@@ -879,12 +884,12 @@
               </div>
             </details>
 
-            <details>
+            <details class="tool-box">
               <summary>Create Document</summary>
-              <div class="details-body">
+              <div class="tool-body">
                 <form method="post" action="/ui/documents" class="tool-form">
-                  <div class="tool-grid two">
-                    <select name="namespace_id" required>
+                  <div class="split">
+                    <select name="namespace_id" class="tenant-select" required>
                       <option value="">select collection</option>
                       {{ range .Namespaces }}
                       {{ if ne .Status "archived" }}
@@ -896,7 +901,7 @@
                   </div>
                   <input name="title" placeholder="title" required />
                   <textarea name="content" placeholder="markdown content"></textarea>
-                  <div class="tool-grid two">
+                  <div class="split">
                     <input name="author_type" value="user" />
                     <input name="author_id" value="ui" />
                   </div>
@@ -906,12 +911,12 @@
               </div>
             </details>
 
-            <details>
+            <details class="tool-box">
               <summary>Archive Current Document</summary>
-              <div class="details-body">
+              <div class="tool-body">
                 {{ if ne .SelectedDocument.Status "archived" }}
                 <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/archive" class="tool-form">
-                  <div class="tool-grid two">
+                  <div class="split">
                     <input name="author_type" value="user" />
                     <input name="author_id" value="ui" />
                   </div>
@@ -919,26 +924,50 @@
                   <button type="submit" class="danger">Archive Document</button>
                 </form>
                 {{ else }}
-                <div class="body-copy">This document is already archived.</div>
+                <div class="empty">This document is already archived.</div>
                 {{ end }}
               </div>
             </details>
           </div>
+          {{ else }}
+          <div class="empty-state">Pick a document from the tree on the left.</div>
+          {{ end }}
         </section>
-        {{ else }}
-        <section class="content-section frame">
-          <div class="empty-state">No document is available yet. Create one from the editing tools once a collection exists.</div>
+
+        <section class="section hidden" data-tab-panel="install">
+          <div class="doc-header">
+            <div>
+              <div class="eyebrow">Install</div>
+              <h2>DocMesh Setup</h2>
+              <div class="doc-meta">Top-level install entry points stay one click away from the wiki.</div>
+            </div>
+          </div>
+
+          <div class="install-grid">
+            <a class="install-card" href="/install/DocMesh.md" target="_blank" rel="noreferrer">
+              <div class="name">Read Guide</div>
+              <div class="install-copy">Open the hosted markdown guide for setup and conventions.</div>
+            </a>
+            <a class="install-card" href="/install/skills/DocMesh.skill">
+              <div class="name">Download Skill</div>
+              <div class="install-copy">Fetch the packaged skill bundle from the current host.</div>
+            </a>
+            <a class="install-card" href="/install/install-cli.sh" target="_blank" rel="noreferrer">
+              <div class="name">Install CLI</div>
+              <div class="install-copy">Use the shell installer to pull the matching CLI build.</div>
+            </a>
+          </div>
         </section>
-        {{ end }}
       </main>
     </div>
   </div>
-
   <script>
     (function() {
       var root = document.documentElement;
       var storageKey = "docmesh-theme";
       var buttons = document.querySelectorAll("[data-theme-button]");
+      var tabLinks = document.querySelectorAll("[data-tab-link]");
+      var tabPanels = document.querySelectorAll("[data-tab-panel]");
 
       function applyTheme(theme) {
         root.setAttribute("data-theme", theme);
@@ -947,9 +976,19 @@
         });
       }
 
+      function applyTab(tab) {
+        tabLinks.forEach(function(link) {
+          link.classList.toggle("active", link.getAttribute("data-tab-link") === tab);
+        });
+        tabPanels.forEach(function(panel) {
+          panel.classList.toggle("hidden", panel.getAttribute("data-tab-panel") !== tab);
+        });
+      }
+
       var saved = localStorage.getItem(storageKey);
-      var initial = saved === "light" || saved === "dark" ? saved : "dark";
-      applyTheme(initial);
+      var initialTheme = saved === "light" || saved === "dark" ? saved : "dark";
+      applyTheme(initialTheme);
+      applyTab("wiki");
 
       buttons.forEach(function(button) {
         button.addEventListener("click", function() {
@@ -957,6 +996,14 @@
           localStorage.setItem(storageKey, theme);
           applyTheme(theme);
         });
+      });
+
+      tabLinks.forEach(function(link) {
+        if (link.tagName === "BUTTON") {
+          link.addEventListener("click", function() {
+            applyTab(link.getAttribute("data-tab-link"));
+          });
+        }
       });
     })();
   </script>

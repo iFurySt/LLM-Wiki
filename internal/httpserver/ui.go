@@ -37,6 +37,14 @@ type uiDocumentCard struct {
 	UpdatedAt         string
 }
 
+type uiNamespaceTree struct {
+	ID          int64
+	Key         string
+	DisplayName string
+	Status      string
+	Documents   []uiDocumentCard
+}
+
 type uiFlash struct {
 	Kind    string
 	Message string
@@ -46,6 +54,7 @@ type uiIndexData struct {
 	TenantID            string
 	Spaces              []uiSpaceCard
 	Namespaces          []uiNamespaceCard
+	NamespaceTree       []uiNamespaceTree
 	Documents           []uiDocumentCard
 	SelectedDocument    *api.DocumentResponse
 	SelectedNamespaceID int64
@@ -141,6 +150,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 		}
 
 		namespaceCards := make([]uiNamespaceCard, 0, len(namespaces.Items))
+		namespaceTree := make([]uiNamespaceTree, 0, len(namespaces.Items))
 		for _, item := range namespaces.Items {
 			namespaceCards = append(namespaceCards, uiNamespaceCard{
 				ID:            item.ID,
@@ -150,6 +160,12 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 				Visibility:    item.Visibility,
 				Status:        item.Status,
 				DocumentCount: namespaceDocCount[item.ID],
+			})
+			namespaceTree = append(namespaceTree, uiNamespaceTree{
+				ID:          item.ID,
+				Key:         item.Key,
+				DisplayName: item.DisplayName,
+				Status:      item.Status,
 			})
 		}
 
@@ -170,6 +186,22 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 				CurrentRevisionNo: item.CurrentRevisionNo,
 				UpdatedAt:         item.UpdatedAt,
 			})
+			for index := range namespaceTree {
+				if namespaceTree[index].ID == item.NamespaceID {
+					namespaceTree[index].Documents = append(namespaceTree[index].Documents, uiDocumentCard{
+						ID:                item.ID,
+						NamespaceID:       item.NamespaceID,
+						NamespaceLabel:    namespaceNames[item.NamespaceID],
+						Slug:              item.Slug,
+						Title:             item.Title,
+						ContentPreview:    item.Content,
+						Status:            item.Status,
+						CurrentRevisionNo: item.CurrentRevisionNo,
+						UpdatedAt:         item.UpdatedAt,
+					})
+					break
+				}
+			}
 		}
 
 		var flash *uiFlash
@@ -184,6 +216,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 			TenantID:            tenantID,
 			Spaces:              spaceCards,
 			Namespaces:          namespaceCards,
+			NamespaceTree:       namespaceTree,
 			Documents:           documentCards,
 			SelectedDocument:    selectedDocument,
 			SelectedNamespaceID: selectedNamespaceID,
