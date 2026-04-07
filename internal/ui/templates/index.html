@@ -8,60 +8,62 @@
     :root,
     :root[data-theme="dark"] {
       color-scheme: dark;
-      --bg: #15111a;
-      --bg-grid: rgba(255, 255, 255, 0.05);
-      --panel: #231a2b;
-      --panel-raised: #2f2339;
-      --panel-soft: #1b1422;
-      --text: #f8f3dc;
-      --muted: #c0b7aa;
-      --accent: #ffbf47;
-      --accent-2: #58d1c9;
-      --danger: #ff6b6b;
-      --success: #7be495;
-      --border: #120d17;
-      --shadow: rgba(0, 0, 0, 0.45);
+      --bg: #0a0b0d;
+      --bg-2: #121418;
+      --panel: rgba(20, 23, 28, 0.92);
+      --panel-soft: rgba(27, 31, 37, 0.9);
+      --panel-strong: rgba(14, 16, 20, 0.98);
+      --line: #262a31;
+      --line-soft: rgba(255, 255, 255, 0.08);
+      --text: #f4f4ef;
+      --muted: #9ca1aa;
+      --accent: #f3efe2;
+      --accent-2: #79ffd2;
+      --accent-3: #ff8d57;
+      --danger: #ff6f61;
+      --success: #83f28f;
+      --shadow: rgba(0, 0, 0, 0.42);
       --pixel: "Courier New", "SFMono-Regular", Consolas, monospace;
       --body: "Trebuchet MS", "Verdana", sans-serif;
     }
 
     :root[data-theme="light"] {
       color-scheme: light;
-      --bg: #f3ead0;
-      --bg-grid: rgba(96, 72, 46, 0.10);
-      --panel: #fff8e6;
-      --panel-raised: #ffeab5;
-      --panel-soft: #fffdf6;
-      --text: #2f2418;
-      --muted: #6f5d4d;
-      --accent: #d97b18;
-      --accent-2: #1f9d8b;
-      --danger: #c94f4f;
-      --success: #228b55;
-      --border: #5b4025;
-      --shadow: rgba(58, 32, 8, 0.18);
+      --bg: #ece8de;
+      --bg-2: #dfdbd1;
+      --panel: rgba(249, 247, 241, 0.94);
+      --panel-soft: rgba(255, 253, 248, 0.92);
+      --panel-strong: rgba(255, 255, 255, 0.98);
+      --line: #b8b0a4;
+      --line-soft: rgba(38, 42, 49, 0.12);
+      --text: #191b1f;
+      --muted: #646b74;
+      --accent: #191b1f;
+      --accent-2: #0d8a67;
+      --accent-3: #d96330;
+      --danger: #c74e3f;
+      --success: #1f8e46;
+      --shadow: rgba(54, 44, 29, 0.12);
     }
 
     * { box-sizing: border-box; }
 
+    html {
+      background: var(--bg);
+    }
+
     body {
       margin: 0;
+      min-height: 100vh;
       color: var(--text);
       font-family: var(--body);
       background:
-        linear-gradient(var(--bg-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
-        radial-gradient(circle at top, #342246 0%, #1a1321 48%, #120d17 100%);
-      background-size: 24px 24px, 24px 24px, 100% 100%;
-      min-height: 100vh;
-    }
-
-    :root[data-theme="light"] body {
-      background:
-        linear-gradient(var(--bg-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
-        radial-gradient(circle at top, #ffeeb9 0%, #f6dd98 38%, #ecd0a2 100%);
-      background-size: 24px 24px, 24px 24px, 100% 100%;
+        linear-gradient(var(--line-soft) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-soft) 1px, transparent 1px),
+        radial-gradient(circle at top, rgba(121, 255, 210, 0.08), transparent 32%),
+        radial-gradient(circle at right, rgba(255, 141, 87, 0.10), transparent 26%),
+        linear-gradient(180deg, var(--bg-2), var(--bg));
+      background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%, 100% 100%;
     }
 
     a {
@@ -69,252 +71,448 @@
       text-decoration: none;
     }
 
-    .page {
-      max-width: 1480px;
-      margin: 0 auto;
-      padding: 28px 18px 42px;
-    }
-
-    .frame {
-      border: 4px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.08)), var(--panel);
-      box-shadow: 0 0 0 3px rgba(255, 191, 71, 0.18), 0 20px 40px var(--shadow);
-    }
-
-    .hero {
-      padding: 22px;
-      margin-bottom: 18px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
-      gap: 18px;
-    }
-
-    .eyebrow {
-      display: inline-block;
-      padding: 6px 10px;
-      margin-bottom: 12px;
-      border: 2px solid var(--border);
-      background: var(--accent);
-      color: #221613;
-      font: 700 12px/1 var(--pixel);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.28);
-    }
-
-    h1, h2, h3 {
+    h1,
+    h2,
+    h3,
+    h4 {
       margin: 0;
       font-family: var(--pixel);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
-    h1 {
-      font-size: clamp(28px, 4vw, 46px);
-      line-height: 1.08;
-      max-width: 16ch;
+    .page {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 18px;
     }
 
-    .lead {
-      max-width: 64ch;
-      margin-top: 14px;
-      color: var(--muted);
-      line-height: 1.65;
+    .frame {
+      border: 4px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 18px 40px var(--shadow);
+      backdrop-filter: blur(10px);
     }
 
-    .hero-notes {
+    .topbar {
       display: grid;
-      gap: 12px;
-      align-content: start;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 18px;
+      margin-bottom: 16px;
     }
 
-    .hero-topline {
+    .brand {
       display: flex;
-      justify-content: space-between;
-      align-items: start;
-      gap: 16px;
-      margin-bottom: 8px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      height: 44px;
+      padding: 0 10px;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
+      color: var(--accent-2);
+      font: 700 13px/1 var(--pixel);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 4px;
+    }
+
+    .eyebrow,
+    .tiny,
+    .meta-chip,
+    .tab,
+    .status-pill,
+    .tenant-select,
+    .theme-toggle button,
+    button {
+      font-family: var(--pixel);
+      text-transform: uppercase;
+    }
+
+    .eyebrow {
+      color: var(--accent-2);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
+    .brand-title {
+      font: 700 18px/1 var(--pixel);
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .topnav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
+      color: var(--muted);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.14);
+    }
+
+    .tab.active {
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(121, 255, 210, 0.16), rgba(255, 141, 87, 0.10)), var(--panel-strong);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-end;
     }
 
     .theme-toggle {
       display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
-      padding: 8px;
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
+      padding: 6px;
+      gap: 6px;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
     }
 
     .theme-toggle button {
-      min-width: 86px;
-      padding: 9px 10px;
-      box-shadow: none;
+      min-width: 72px;
+      padding: 8px 10px;
+      border: 0;
       background: transparent;
-      color: var(--text);
+      color: var(--muted);
+      cursor: pointer;
+      box-shadow: none;
     }
 
     .theme-toggle button.active {
       background: var(--accent);
-      color: #24191a;
-    }
-
-    .terminal {
-      padding: 14px;
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
-      font: 700 13px/1.65 var(--pixel);
-      color: var(--accent-2);
-    }
-
-    .terminal .label {
-      color: var(--accent);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .stat {
-      padding: 14px;
-      border: 3px solid var(--border);
-      background: var(--panel-raised);
-      min-height: 96px;
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font: 700 11px/1.4 var(--pixel);
-      text-transform: uppercase;
-    }
-
-    .stat-value {
-      margin-top: 8px;
-      font: 700 30px/1 var(--pixel);
-      color: var(--accent);
+      color: var(--bg);
     }
 
     .flash {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       padding: 12px 14px;
-      border: 3px solid var(--border);
+      border: 3px solid var(--line);
       font: 700 13px/1.4 var(--pixel);
-      text-transform: uppercase;
+      background: rgba(121, 255, 210, 0.10);
+      color: var(--text);
     }
 
     .flash.success {
-      background: rgba(123, 228, 149, 0.16);
       color: var(--success);
     }
 
-    .shell {
+    .layout {
       display: grid;
-      grid-template-columns: 290px minmax(0, 1fr) 380px;
-      gap: 18px;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 16px;
       align-items: start;
     }
 
-    .panel {
-      padding: 16px;
-      border: 4px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel);
-      box-shadow: 0 12px 26px var(--shadow);
+    .sidebar,
+    .content {
+      min-height: calc(100vh - 130px);
     }
 
-    .panel-head {
+    .sidebar {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .sidebar-section,
+    .content-section,
+    .hero-card,
+    .doc-panel,
+    .tools-panel,
+    .install-card {
+      border: 3px solid var(--line);
+      background: var(--panel-soft);
+    }
+
+    .sidebar-section,
+    .content-section,
+    .hero-card,
+    .doc-panel,
+    .tools-panel {
+      padding: 14px;
+    }
+
+    .section-head {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       gap: 12px;
-      margin-bottom: 14px;
+      align-items: start;
+      margin-bottom: 12px;
     }
 
-    .panel-kicker {
-      color: var(--muted);
-      font: 700 11px/1.3 var(--pixel);
-      text-transform: uppercase;
-      margin-top: 5px;
-    }
-
-    .stack {
+    .section-title {
       display: grid;
-      gap: 12px;
+      gap: 4px;
+    }
+
+    .section-kicker {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .tenant-select {
+      width: 100%;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 0;
+    }
+
+    .tenant-meta {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .space-list,
+    .nav-list,
+    .install-grid,
+    .revision-list {
+      display: grid;
+      gap: 10px;
     }
 
     .space-card,
-    .namespace-card,
-    .doc-card,
+    .nav-item,
+    .install-card,
     .revision-card {
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
       padding: 12px;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
     }
 
     .space-card {
-      background: linear-gradient(135deg, rgba(88,209,201,0.14), rgba(255,191,71,0.08)), var(--panel-soft);
+      background: linear-gradient(135deg, rgba(121, 255, 210, 0.10), rgba(255, 141, 87, 0.10)), var(--panel-strong);
+    }
+
+    .nav-item {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(243, 239, 226, 0.10), rgba(121, 255, 210, 0.10)), var(--panel-strong);
+      box-shadow: inset 4px 0 0 var(--accent-2);
+    }
+
+    .nav-item:hover,
+    .install-card:hover {
+      transform: translate(-2px, -2px);
+      transition: transform .14s ease;
     }
 
     .name {
-      font: 700 16px/1.3 var(--pixel);
-      text-transform: uppercase;
+      font: 700 16px/1.35 var(--pixel);
     }
 
     .sub,
     .desc,
+    .empty,
     .snippet,
-    .meta-line,
-    .empty {
+    .body-copy,
+    .doc-content,
+    .tenant-meta,
+    .revision-copy {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .meta-row,
+    .doc-meta,
+    .hero-meta,
+    .mini-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .status-pill,
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 4px 8px;
+      border: 2px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .status-pill.active {
+      color: var(--accent-2);
+      background: rgba(121, 255, 210, 0.12);
+    }
+
+    .status-pill.archived {
+      color: #ffc1b1;
+      background: rgba(255, 111, 97, 0.14);
+    }
+
+    .content {
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.8fr);
+      gap: 14px;
+      background:
+        linear-gradient(135deg, rgba(243, 239, 226, 0.08), transparent 56%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.10)),
+        var(--panel-soft);
+    }
+
+    .hero-title {
+      font-size: clamp(26px, 4vw, 40px);
+      line-height: 1.08;
+      max-width: 15ch;
+    }
+
+    .hero-copy {
+      margin-top: 12px;
+      max-width: 64ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .hero-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .hero-stat {
+      padding: 12px;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
+    }
+
+    .hero-stat-label {
+      color: var(--muted);
+      font: 700 11px/1.4 var(--pixel);
+    }
+
+    .hero-stat-value {
+      margin-top: 8px;
+      font: 700 26px/1 var(--pixel);
+    }
+
+    .hero-note {
+      padding: 14px;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .hero-note strong {
+      color: var(--accent);
+      font-family: var(--pixel);
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .hero-note-line {
       color: var(--muted);
       line-height: 1.55;
       font-size: 14px;
     }
 
-    .namespace-card {
+    .content-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .install-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .install-card {
       display: grid;
       gap: 10px;
     }
 
-    .mini-meta {
+    .install-title {
+      font: 700 15px/1.3 var(--pixel);
+    }
+
+    .doc-panel {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06)),
+        var(--panel-soft);
+    }
+
+    .doc-header {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 12px;
     }
 
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 8px;
-      border: 2px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      font: 700 11px/1 var(--pixel);
-      text-transform: uppercase;
+    .doc-content {
+      white-space: pre-wrap;
       color: var(--text);
+      max-width: 86ch;
+      min-height: 180px;
     }
 
-    .tag.active {
-      background: rgba(88,209,201,0.2);
-      color: var(--accent-2);
+    .doc-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .tag.archived {
-      background: rgba(255,107,107,0.2);
-      color: #ffc7c7;
-    }
-
-    .toolbar,
-    .filters,
-    form {
+    .filter-form,
+    .tool-form,
+    .tool-grid,
+    .doc-tools {
       display: grid;
       gap: 10px;
     }
 
-    .split {
-      display: grid;
+    .tool-grid.two {
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
     }
 
     input,
@@ -328,9 +526,9 @@
     select,
     textarea {
       width: 100%;
-      border: 3px solid var(--border);
-      background: #f3e9c8;
-      color: #24191a;
+      border: 3px solid var(--line);
+      background: var(--panel-strong);
+      color: var(--text);
       padding: 11px 12px;
       border-radius: 0;
     }
@@ -338,25 +536,18 @@
     textarea {
       min-height: 140px;
       resize: vertical;
-      line-height: 1.55;
-    }
-
-    :root[data-theme="light"] input,
-    :root[data-theme="light"] select,
-    :root[data-theme="light"] textarea {
-      background: #fffaf0;
-      color: #2b2218;
+      line-height: 1.6;
     }
 
     button {
-      border: 3px solid var(--border);
+      border: 3px solid var(--line);
       background: var(--accent);
-      color: #24191a;
+      color: var(--bg);
       padding: 11px 12px;
-      font: 700 13px/1 var(--pixel);
-      text-transform: uppercase;
       cursor: pointer;
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.24);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18);
+      font-size: 12px;
+      line-height: 1;
     }
 
     button.secondary {
@@ -364,296 +555,152 @@
     }
 
     button.ghost {
-      background: #f3e9c8;
+      background: transparent;
+      color: var(--text);
     }
 
     button.danger {
       background: var(--danger);
-      color: white;
+      color: #fff;
     }
 
-    .doc-list {
-      display: grid;
-      gap: 14px;
-    }
-
-    .doc-card {
-      display: block;
-      position: relative;
-      overflow: hidden;
-      transition: transform .14s ease, box-shadow .14s ease;
-    }
-
-    .doc-card:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 8px 8px 0 rgba(0,0,0,0.22);
-    }
-
-    .doc-card.selected {
-      outline: 3px solid var(--accent);
-      background: linear-gradient(135deg, rgba(255,191,71,0.12), rgba(88,209,201,0.08)), var(--panel-soft);
-    }
-
-    .doc-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .doc-title {
-      font: 700 18px/1.3 var(--pixel);
-      text-transform: uppercase;
-    }
-
-    .doc-snippet {
-      margin-top: 8px;
-      color: #e6dcc5;
-      line-height: 1.6;
-      font-size: 14px;
-      max-width: 68ch;
-    }
-
-    :root[data-theme="light"] .doc-snippet,
-    :root[data-theme="light"] .viewer-content {
-      color: #3c3022;
-    }
-
-    .doc-footer {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .meta-chip {
-      color: var(--muted);
-      font: 700 11px/1 var(--pixel);
-      text-transform: uppercase;
-    }
-
-    .viewer {
-      display: grid;
-      gap: 14px;
-    }
-
-    .viewer-block {
-      padding: 12px;
-      border: 3px solid var(--border);
+    details {
+      border: 3px solid var(--line);
       background: var(--panel-soft);
     }
 
-    .viewer-content {
-      white-space: pre-wrap;
-      line-height: 1.65;
-      color: #f3ebd2;
-      max-height: 280px;
-      overflow: auto;
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      font: 700 13px/1.3 var(--pixel);
+      text-transform: uppercase;
     }
 
-    .revision-list {
-      display: grid;
-      gap: 10px;
-      max-height: 260px;
-      overflow: auto;
+    summary::-webkit-details-marker {
+      display: none;
     }
 
-    .revision-card {
-      background: rgba(255,255,255,0.04);
+    .details-body {
+      padding: 0 14px 14px;
     }
 
-    .revision-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .section-copy {
-      margin-bottom: 12px;
+    .empty-state {
+      padding: 24px;
+      border: 3px dashed var(--line);
       color: var(--muted);
-      line-height: 1.55;
-      font-size: 14px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
     }
 
-    .sidebar-note {
-      padding: 12px;
-      border: 3px dashed rgba(255,255,255,0.2);
-      color: var(--muted);
-      line-height: 1.55;
-      background: rgba(255,255,255,0.03);
-    }
-
-    :root[data-theme="light"] .sidebar-note {
-      border-color: rgba(91, 64, 37, 0.28);
-      background: rgba(255,255,255,0.45);
-    }
-
-    @media (max-width: 1280px) {
-      .shell {
-        grid-template-columns: 270px minmax(0, 1fr);
-      }
-
-      .panel-right {
-        grid-column: 1 / -1;
-      }
-    }
-
-    @media (max-width: 940px) {
-      .hero,
-      .shell,
-      .stats,
-      .split {
+    @media (max-width: 1180px) {
+      .layout {
         grid-template-columns: 1fr;
       }
 
-      h1 {
-        max-width: none;
+      .sidebar {
+        position: static;
+        min-height: auto;
       }
 
-      .hero-topline {
-        flex-direction: column;
+      .content {
+        min-height: auto;
+      }
+
+      .install-grid,
+      .hero-card,
+      .tool-grid.two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        justify-items: start;
+      }
+
+      .topnav,
+      .topbar-actions {
+        justify-content: flex-start;
+      }
+
+      .hero-stat-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <section class="hero frame">
-      <div>
-        <div class="hero-topline">
-          <div class="eyebrow">DocMesh Archive Console</div>
-          <div class="theme-toggle" aria-label="Theme toggle">
-            <button type="button" data-theme-button="dark">Night</button>
-            <button type="button" data-theme-button="light">Day</button>
-          </div>
-        </div>
-        <h1>Retro Wiki For Human + Agent Ops</h1>
-        <div class="lead">
-          Shared tenant knowledge, revisioned documents, and namespace-level organization in a single
-          operator surface. This UI stays intentionally server-rendered, but it should still feel like
-          a real knowledge console instead of a scaffolding page.
-        </div>
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-label">Namespaces</div>
-            <div class="stat-value">{{ .NamespaceCount }}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Documents</div>
-            <div class="stat-value">{{ .DocumentCount }}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Archived</div>
-            <div class="stat-value">{{ .ArchivedCount }}</div>
-          </div>
+    <header class="topbar frame">
+      <div class="brand">
+        <div class="brand-badge">DM</div>
+        <div class="brand-copy">
+          <div class="eyebrow">Pixel Wiki</div>
+          <div class="brand-title">DocMesh</div>
+          <div class="brand-subtitle">Simple tenant wiki for everyday users</div>
         </div>
       </div>
 
-      <div class="hero-notes">
-        <div class="terminal">
-          <div><span class="label">$ tenant</span> {{ .TenantID }}</div>
-          <div><span class="label">$ ui</span> /ui</div>
-          <div><span class="label">$ mode</span> operator wiki shell</div>
-          <div><span class="label">$ theme</span> pixel archive</div>
-        </div>
-        <div class="terminal">
-          <div><span class="label">$ create</span> namespace / document</div>
-          <div><span class="label">$ inspect</span> revisions / content</div>
-          <div><span class="label">$ archive</span> namespace / document</div>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a class="tab active" href="/ui">Wiki</a>
+        <a class="tab" href="#install">Install</a>
+        <a class="tab" href="/install/DocMesh.md" target="_blank" rel="noreferrer">Guide</a>
+        <a class="tab" href="/install/install-cli.sh" target="_blank" rel="noreferrer">CLI</a>
+        <a class="tab" href="/mcp" target="_blank" rel="noreferrer">MCP</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <div class="theme-toggle" aria-label="Theme toggle">
+          <button type="button" data-theme-button="dark">Night</button>
+          <button type="button" data-theme-button="light">Day</button>
         </div>
       </div>
-    </section>
+    </header>
 
     {{ if .Flash }}
     <div class="flash {{ .Flash.Kind }}">{{ .Flash.Message }}</div>
     {{ end }}
 
-    <div class="shell">
-      <aside class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Spaces</h2>
-            <div class="panel-kicker">Tenant containers</div>
+    <div class="layout">
+      <aside class="sidebar frame">
+        <section class="sidebar-section">
+          <div class="section-head">
+            <div class="section-title">
+              <h2>Tenant</h2>
+              <div class="section-kicker">Switch workspace like a normal wiki, not an admin dashboard.</div>
+            </div>
           </div>
-        </div>
-        <div class="stack">
-          {{ range .Spaces }}
-          <div class="space-card">
-            <div class="name">{{ .DisplayName }}</div>
-            <div class="sub">key={{ .Key }} · id={{ .ID }}</div>
-          </div>
-          {{ else }}
-          <div class="empty">No spaces found for this tenant.</div>
-          {{ end }}
-        </div>
 
-        <div class="panel-head" style="margin-top: 18px;">
-          <div>
-            <h2>Namespaces</h2>
-            <div class="panel-kicker">Knowledge lanes</div>
-          </div>
-        </div>
-        <div class="stack">
-          {{ range .Namespaces }}
-          <div class="namespace-card">
-            <div>
+          <select class="tenant-select" aria-label="Tenant selector">
+            <option selected>{{ .TenantID }}</option>
+          </select>
+          <div class="tenant-meta">Current tenant ID: {{ .TenantID }}</div>
+
+          <div class="space-list" style="margin-top: 12px;">
+            {{ range .Spaces }}
+            <div class="space-card">
               <div class="name">{{ .DisplayName }}</div>
-              <div class="sub">{{ .Key }}</div>
+              <div class="sub">{{ .Key }} · #{{ .ID }}</div>
             </div>
-            <div class="mini-meta">
-              <span class="tag">{{ .Visibility }}</span>
-              <span class="tag {{ .Status }}">{{ .Status }}</span>
-              <span class="tag">{{ .DocumentCount }} docs</span>
-            </div>
-            <div class="desc">{{ .Description }}</div>
-            {{ if ne .Status "archived" }}
-            <form method="post" action="/ui/namespaces/{{ .ID }}/archive">
-              <button type="submit" class="danger">Archive Namespace</button>
-            </form>
+            {{ else }}
+            <div class="empty">No spaces found for this tenant.</div>
             {{ end }}
           </div>
-          {{ else }}
-          <div class="empty">No namespaces yet.</div>
-          {{ end }}
-        </div>
+        </section>
 
-        <div class="panel-head" style="margin-top: 18px;">
-          <div>
-            <h2>Create Namespace</h2>
-            <div class="panel-kicker">Open a new lane</div>
+        <section class="sidebar-section">
+          <div class="section-head">
+            <div class="section-title">
+              <h2>Docs</h2>
+              <div class="section-kicker">Left-side navigation stays focused on readable document groups.</div>
+            </div>
           </div>
-        </div>
-        <form method="post" action="/ui/namespaces">
-          <div class="split">
-            <input name="key" placeholder="namespace key" required />
-            <input name="display_name" placeholder="display name" required />
-          </div>
-          <input name="description" placeholder="description" />
-          <select name="visibility">
-            <option value="private">private</option>
-            <option value="tenant">tenant</option>
-            <option value="team">team</option>
-            <option value="restricted">restricted</option>
-          </select>
-          <button type="submit">Create Namespace</button>
-        </form>
-      </aside>
 
-      <main class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Wiki Index</h2>
-            <div class="panel-kicker">Browse the current tenant knowledge</div>
-          </div>
-        </div>
-
-        <form method="get" action="/ui" class="filters">
-          <div class="split">
+          <form method="get" action="/ui" class="filter-form">
             <select name="namespace_id">
-              <option value="">all namespaces</option>
+              <option value="">all collections</option>
               {{ range .Namespaces }}
               <option value="{{ .ID }}" {{ if eq $.SelectedNamespaceID .ID }}selected{{ end }}>{{ .DisplayName }}</option>
               {{ end }}
@@ -663,186 +710,230 @@
               <option value="active" {{ if eq .StatusFilter "active" }}selected{{ end }}>active</option>
               <option value="archived" {{ if eq .StatusFilter "archived" }}selected{{ end }}>archived</option>
             </select>
-          </div>
-          <button type="submit" class="ghost">Apply Filters</button>
-        </form>
+            <button type="submit" class="ghost">Apply Filter</button>
+          </form>
 
-        <div class="section-copy">
-          Each card represents a revisioned document. Pick one to inspect content and history in the right-hand editor.
-        </div>
-
-        <div class="doc-list">
-          {{ range .Documents }}
-          <a href="/ui?document_id={{ .ID }}{{ if $.SelectedNamespaceID }}&namespace_id={{ $.SelectedNamespaceID }}{{ end }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}" class="doc-card {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}selected{{ end }}">
-            <div class="doc-top">
-              <div>
-                <div class="doc-title">{{ .Title }}</div>
-                <div class="sub">{{ .NamespaceLabel }} / {{ .Slug }}</div>
+          <div class="nav-list">
+            {{ range .Documents }}
+            <a
+              class="nav-item {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}active{{ end }}"
+              href="/ui?document_id={{ .ID }}{{ if $.SelectedNamespaceID }}&namespace_id={{ $.SelectedNamespaceID }}{{ end }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}"
+            >
+              <div class="name">{{ .Title }}</div>
+              <div class="sub">{{ .NamespaceLabel }} / {{ .Slug }}</div>
+              <div class="mini-meta">
+                <span class="status-pill {{ .Status }}">{{ .Status }}</span>
+                <span class="meta-chip">rev {{ .CurrentRevisionNo }}</span>
               </div>
-              <span class="tag {{ .Status }}">{{ .Status }}</span>
-            </div>
-            <div class="doc-snippet">{{ snippet .ContentPreview 240 }}</div>
-            <div class="doc-footer">
-              <span class="meta-chip">rev {{ .CurrentRevisionNo }}</span>
-              <span class="meta-chip">updated {{ .UpdatedAt }}</span>
-            </div>
-          </a>
-          {{ else }}
-          <div class="viewer-block">
-            <div class="empty">No documents match the current filters.</div>
-          </div>
-          {{ end }}
-        </div>
-      </main>
-
-      <section class="panel panel-right">
-        <div class="panel-head">
-          <div>
-            <h2>Workbench</h2>
-            <div class="panel-kicker">Create, edit, inspect</div>
-          </div>
-        </div>
-
-        <div class="viewer">
-          <div class="viewer-block">
-            <h3>Install DocMesh</h3>
-            <div class="section-copy">Pick the integration path that matches the agent runtime you are wiring up.</div>
-            <div class="stack">
-              <a class="doc-card" href="/install/DocMesh.md" target="_blank" rel="noreferrer">
-                <div class="doc-top">
-                  <div>
-                    <div class="doc-title">1. Read DocMesh.md</div>
-                    <div class="sub">Skill-style guide over HTTP</div>
-                  </div>
-                  <span class="tag active">markdown</span>
-                </div>
-                <div class="doc-snippet">{{ snippet "/install/DocMesh.md gives agents a direct entry point for setup, CLI usage, HTTP usage, and write discipline." 180 }}</div>
-              </a>
-              <a class="doc-card" href="/install/skills/DocMesh.skill">
-                <div class="doc-top">
-                  <div>
-                    <div class="doc-title">2. Download Skill Package</div>
-                    <div class="sub">Official .skill or .zip archive</div>
-                  </div>
-                  <span class="tag">package</span>
-                </div>
-                <div class="doc-snippet">{{ snippet "Install the official DocMesh skill bundle from /install/skills/DocMesh.skill or the equivalent .zip package." 180 }}</div>
-              </a>
-              <a class="doc-card" href="/install/install-cli.sh" target="_blank" rel="noreferrer">
-                <div class="doc-top">
-                  <div>
-                    <div class="doc-title">3. Install CLI Script</div>
-                    <div class="sub">Cross-platform shell installer</div>
-                  </div>
-                  <span class="tag">shell</span>
-                </div>
-                <div class="doc-snippet">{{ snippet "Use curl against /install/install-cli.sh to detect the current system and download the matching DocMesh CLI build." 180 }}</div>
-              </a>
-            </div>
-          </div>
-
-          <div class="viewer-block">
-            <h3>Create Document</h3>
-            <div class="section-copy">Documents start at revision 1 and can be maintained from the same page.</div>
-            <form method="post" action="/ui/documents">
-              <div class="split">
-                <select name="namespace_id" required>
-                  <option value="">select namespace</option>
-                  {{ range .Namespaces }}
-                  {{ if ne .Status "archived" }}
-                  <option value="{{ .ID }}" {{ if eq $.SelectedNamespaceID .ID }}selected{{ end }}>{{ .DisplayName }}</option>
-                  {{ end }}
-                  {{ end }}
-                </select>
-                <input name="slug" placeholder="document slug" required />
-              </div>
-              <input name="title" placeholder="title" required />
-              <textarea name="content" placeholder="markdown content"></textarea>
-              <div class="split">
-                <input name="author_type" value="user" />
-                <input name="author_id" value="ui" />
-              </div>
-              <input name="change_summary" placeholder="change summary" />
-              <button type="submit">Create Document</button>
-            </form>
-          </div>
-
-          {{ if .SelectedDocument }}
-          <div class="viewer-block">
-            <div class="panel-head">
-              <div>
-                <h3>{{ .SelectedDocument.Title }}</h3>
-                <div class="panel-kicker">{{ .SelectedDocument.Slug }} · namespace {{ .SelectedDocument.NamespaceID }}</div>
-              </div>
-              <span class="tag {{ .SelectedDocument.Status }}">{{ .SelectedDocument.Status }}</span>
-            </div>
-            <div class="mini-meta" style="margin-bottom: 10px;">
-              <span class="tag active">rev {{ .SelectedDocument.CurrentRevisionNo }}</span>
-              <span class="tag">doc {{ .SelectedDocument.ID }}</span>
-            </div>
-            <div class="viewer-content">{{ .SelectedDocument.Content }}</div>
-          </div>
-
-          <div class="viewer-block">
-            <h3>Edit Document</h3>
-            <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/update">
-              <input name="title" value="{{ .SelectedDocument.Title }}" required />
-              <textarea name="content">{{ .SelectedDocument.Content }}</textarea>
-              <div class="split">
-                <input name="author_type" value="user" />
-                <input name="author_id" value="ui" />
-              </div>
-              <input name="change_summary" placeholder="change summary" />
-              <button type="submit" class="secondary">Save New Revision</button>
-            </form>
-          </div>
-
-          <div class="viewer-block">
-            <h3>Archive Document</h3>
-            <div class="section-copy">Archive keeps revision history intact and marks the document as inactive for normal flows.</div>
-            {{ if ne .SelectedDocument.Status "archived" }}
-            <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/archive">
-              <div class="split">
-                <input name="author_type" value="user" />
-                <input name="author_id" value="ui" />
-              </div>
-              <input name="change_summary" placeholder="archive reason" />
-              <button type="submit" class="danger">Archive Document</button>
-            </form>
+            </a>
             {{ else }}
-            <div class="sidebar-note">This document is already archived.</div>
+            <div class="empty">No documents match the current filter.</div>
             {{ end }}
           </div>
+        </section>
+      </aside>
 
-          <div class="viewer-block">
-            <h3>Revision History</h3>
-            <div class="revision-list">
-              {{ range .SelectedDocument.Revisions }}
-              <div class="revision-card">
-                <div class="revision-head">
-                  <div class="name">Revision {{ .RevisionNo }}</div>
-                  <div class="meta-chip">{{ .CreatedAt }}</div>
-                </div>
-                <div class="meta-line">{{ .AuthorType }} / {{ .AuthorID }}</div>
-                <div class="snippet">{{ snippet .ChangeSummary 120 }}</div>
+      <main class="content">
+        <section class="hero-card frame">
+          <div>
+            <div class="eyebrow">Everyday Knowledge</div>
+            <h1 class="hero-title">A wiki home page normal people can read in one glance.</h1>
+            <div class="hero-copy">
+              The left side behaves like a familiar document tree. The center stays focused on the current page.
+              Install and integration entry points live in top tabs and a compact section below instead of crowding the whole UI.
+            </div>
+
+            <div class="hero-stat-grid">
+              <div class="hero-stat">
+                <div class="hero-stat-label">Collections</div>
+                <div class="hero-stat-value">{{ .NamespaceCount }}</div>
               </div>
-              {{ else }}
-              <div class="empty">No revisions found.</div>
-              {{ end }}
+              <div class="hero-stat">
+                <div class="hero-stat-label">Documents</div>
+                <div class="hero-stat-value">{{ .DocumentCount }}</div>
+              </div>
+              <div class="hero-stat">
+                <div class="hero-stat-label">Archived</div>
+                <div class="hero-stat-value">{{ .ArchivedCount }}</div>
+              </div>
             </div>
           </div>
-          {{ else }}
-          <div class="viewer-block">
-            <h3>No Document Selected</h3>
-            <div class="sidebar-note">
-              Pick a document from the wiki index to inspect content, write a new revision, or archive it.
+
+          <div class="hero-note">
+            <div>
+              <strong>Current mode</strong>
+              <div class="hero-note-line">Reader-first wiki surface with pixel styling and a quieter dark palette.</div>
+            </div>
+            <div>
+              <strong>Selected tenant</strong>
+              <div class="hero-note-line">{{ .TenantID }}</div>
+            </div>
+            <div>
+              <strong>Navigation model</strong>
+              <div class="hero-note-line">Tenant switcher on the left, document list below, full article on the right.</div>
             </div>
           </div>
-          {{ end }}
-        </div>
-      </section>
+        </section>
+
+        <section class="content-section frame" id="install">
+          <div class="section-head">
+            <div class="section-title">
+              <h2>Install</h2>
+              <div class="section-kicker">Top-level entry points, similar to a public skills or docs landing page.</div>
+            </div>
+          </div>
+
+          <div class="install-grid">
+            <a class="install-card" href="/install/DocMesh.md" target="_blank" rel="noreferrer">
+              <div class="install-title">Read Guide</div>
+              <div class="body-copy">Open the hosted setup guide for agents, CLI usage, and service conventions.</div>
+              <div class="meta-row">
+                <span class="status-pill active">Markdown</span>
+              </div>
+            </a>
+            <a class="install-card" href="/install/skills/DocMesh.skill">
+              <div class="install-title">Download Skill</div>
+              <div class="body-copy">Pull the official packaged skill archive from the same host.</div>
+              <div class="meta-row">
+                <span class="status-pill">Package</span>
+              </div>
+            </a>
+            <a class="install-card" href="/install/install-cli.sh" target="_blank" rel="noreferrer">
+              <div class="install-title">Install CLI</div>
+              <div class="body-copy">Use the cross-platform install script for local CLI setup.</div>
+              <div class="meta-row">
+                <span class="status-pill">Shell</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        {{ if .SelectedDocument }}
+        <article class="doc-panel frame">
+          <div class="doc-header">
+            <div class="section-title">
+              <div class="eyebrow">Document</div>
+              <h2>{{ .SelectedDocument.Title }}</h2>
+              <div class="section-kicker">{{ .SelectedDocument.Slug }} · namespace {{ .SelectedDocument.NamespaceID }}</div>
+            </div>
+            <span class="status-pill {{ .SelectedDocument.Status }}">{{ .SelectedDocument.Status }}</span>
+          </div>
+
+          <div class="doc-toolbar">
+            <div class="doc-meta">
+              <span class="meta-chip">Doc {{ .SelectedDocument.ID }}</span>
+              <span class="meta-chip">Revision {{ .SelectedDocument.CurrentRevisionNo }}</span>
+            </div>
+            <div class="body-copy">The reading area stays primary. Editing tools are collapsed below.</div>
+          </div>
+
+          <div class="doc-content" style="margin-top: 16px;">{{ .SelectedDocument.Content }}</div>
+        </article>
+
+        <section class="content-section frame">
+          <div class="section-head">
+            <div class="section-title">
+              <h2>Revision History</h2>
+              <div class="section-kicker">Recent edits stay visible without turning the page into an operator console.</div>
+            </div>
+          </div>
+
+          <div class="revision-list">
+            {{ range .SelectedDocument.Revisions }}
+            <div class="revision-card">
+              <div class="meta-row" style="justify-content: space-between; margin-bottom: 8px;">
+                <div class="name">Revision {{ .RevisionNo }}</div>
+                <div class="meta-chip">{{ .CreatedAt }}</div>
+              </div>
+              <div class="revision-copy">{{ .AuthorType }} / {{ .AuthorID }}</div>
+              <div class="snippet">{{ snippet .ChangeSummary 140 }}</div>
+            </div>
+            {{ else }}
+            <div class="empty">No revisions found.</div>
+            {{ end }}
+          </div>
+        </section>
+
+        <section class="content-section frame">
+          <div class="section-head">
+            <div class="section-title">
+              <h2>Editing Tools</h2>
+              <div class="section-kicker">Advanced actions are still here, but they no longer dominate the main layout.</div>
+            </div>
+          </div>
+
+          <div class="doc-tools">
+            <details>
+              <summary>Edit Current Document</summary>
+              <div class="details-body">
+                <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/update" class="tool-form">
+                  <input name="title" value="{{ .SelectedDocument.Title }}" required />
+                  <textarea name="content">{{ .SelectedDocument.Content }}</textarea>
+                  <div class="tool-grid two">
+                    <input name="author_type" value="user" />
+                    <input name="author_id" value="ui" />
+                  </div>
+                  <input name="change_summary" placeholder="change summary" />
+                  <button type="submit" class="secondary">Save New Revision</button>
+                </form>
+              </div>
+            </details>
+
+            <details>
+              <summary>Create Document</summary>
+              <div class="details-body">
+                <form method="post" action="/ui/documents" class="tool-form">
+                  <div class="tool-grid two">
+                    <select name="namespace_id" required>
+                      <option value="">select collection</option>
+                      {{ range .Namespaces }}
+                      {{ if ne .Status "archived" }}
+                      <option value="{{ .ID }}" {{ if eq $.SelectedNamespaceID .ID }}selected{{ end }}>{{ .DisplayName }}</option>
+                      {{ end }}
+                      {{ end }}
+                    </select>
+                    <input name="slug" placeholder="document slug" required />
+                  </div>
+                  <input name="title" placeholder="title" required />
+                  <textarea name="content" placeholder="markdown content"></textarea>
+                  <div class="tool-grid two">
+                    <input name="author_type" value="user" />
+                    <input name="author_id" value="ui" />
+                  </div>
+                  <input name="change_summary" placeholder="change summary" />
+                  <button type="submit">Create Document</button>
+                </form>
+              </div>
+            </details>
+
+            <details>
+              <summary>Archive Current Document</summary>
+              <div class="details-body">
+                {{ if ne .SelectedDocument.Status "archived" }}
+                <form method="post" action="/ui/documents/{{ .SelectedDocument.ID }}/archive" class="tool-form">
+                  <div class="tool-grid two">
+                    <input name="author_type" value="user" />
+                    <input name="author_id" value="ui" />
+                  </div>
+                  <input name="change_summary" placeholder="archive reason" />
+                  <button type="submit" class="danger">Archive Document</button>
+                </form>
+                {{ else }}
+                <div class="body-copy">This document is already archived.</div>
+                {{ end }}
+              </div>
+            </details>
+          </div>
+        </section>
+        {{ else }}
+        <section class="content-section frame">
+          <div class="empty-state">No document is available yet. Create one from the editing tools once a collection exists.</div>
+        </section>
+        {{ end }}
+      </main>
     </div>
   </div>
+
   <script>
     (function() {
       var root = document.documentElement;

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/ifuryst/docmesh/internal/api"
 	"github.com/ifuryst/docmesh/internal/service"
-	"github.com/gin-gonic/gin"
 )
 
 type uiSpaceCard struct {
@@ -119,6 +119,16 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service) {
 				return
 			}
 			selectedDocument = &doc
+		} else if len(documents.Items) > 0 {
+			doc, err := svc.GetDocument(c.Request.Context(), tenantID, documents.Items[0].ID)
+			if err != nil {
+				handleError(c, err)
+				return
+			}
+			selectedDocument = &doc
+			if selectedNamespaceID == 0 {
+				selectedNamespaceID = doc.NamespaceID
+			}
 		}
 
 		spaceCards := make([]uiSpaceCard, 0, len(spaces.Items))
