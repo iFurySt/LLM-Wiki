@@ -21,7 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org
 
       - name: Validate publish inputs
         working-directory: npm/docmesh-mcp
@@ -35,4 +34,6 @@ jobs:
 
       - name: Publish npm package
         working-directory: npm/docmesh-mcp
+        env:
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org
         run: npm publish --access public --provenance
