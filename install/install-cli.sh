@@ -73,6 +73,7 @@ tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"
 
 BIN_SOURCE="$TMP_DIR/docmesh"
 BIN_TARGET="$INSTALL_DIR/docmesh"
+ALIAS_TARGET="$INSTALL_DIR/dm"
 
 if [ ! -f "$BIN_SOURCE" ]; then
   echo "archive did not contain docmesh binary" >&2
@@ -82,5 +83,15 @@ fi
 cp "$BIN_SOURCE" "$BIN_TARGET"
 chmod +x "$BIN_TARGET"
 
+if command -v ln >/dev/null 2>&1; then
+  rm -f "$ALIAS_TARGET"
+  ln -s "$BIN_TARGET" "$ALIAS_TARGET" 2>/dev/null || cp "$BIN_TARGET" "$ALIAS_TARGET"
+else
+  cp "$BIN_TARGET" "$ALIAS_TARGET"
+fi
+chmod +x "$ALIAS_TARGET"
+
 echo "installed docmesh to $BIN_TARGET"
+echo "installed dm alias to $ALIAS_TARGET"
 echo "run: $BIN_TARGET version"
+echo "or:  $ALIAS_TARGET version"

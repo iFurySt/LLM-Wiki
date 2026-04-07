@@ -59,6 +59,7 @@ Install the CLI:
 ```bash
 curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
 docmesh version
+dm version
 docmesh system info --base-url http://127.0.0.1:8234
 ```
 
@@ -175,6 +176,10 @@ Read and follow http://127.0.0.1:8234/install/DocMesh.md
 If an agent is terminal-native, these are the shortest useful starting points:
 
 ```bash
+dm system info --base-url http://127.0.0.1:8234 --tenant default
+dm namespace list --base-url http://127.0.0.1:8234 --tenant default
+dm document list --base-url http://127.0.0.1:8234 --tenant default
+
 docmesh system info --base-url http://127.0.0.1:8234 --tenant default
 docmesh namespace list --base-url http://127.0.0.1:8234 --tenant default
 docmesh document list --base-url http://127.0.0.1:8234 --tenant default

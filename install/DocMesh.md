@@ -78,7 +78,10 @@ GitHub Releases page:
 ```sh
 docmesh version
 docmesh system info --base-url http://127.0.0.1:8234
+dm version
 ```
+
+The installer also creates a lightweight `dm` alias next to the main `docmesh` binary, without editing shell startup files.
 
 ## Option 4: Run The Stdio MCP Package With npx
 
