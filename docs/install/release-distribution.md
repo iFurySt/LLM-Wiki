@@ -1,6 +1,24 @@
 # Release Distribution
 
-This document records what happens on a pushed tag such as `v0.1.0`.
+This document records what happens on two release paths:
+
+- pushes to `main`
+- pushed tags such as `v0.1.0`
+
+## Main Trigger
+
+The beta workflow triggers on:
+
+```text
+refs/heads/main
+```
+
+Published outputs:
+
+- GHCR image: `ghcr.io/ifuryst/docmesh:beta`
+- optional SSH deploy to amoylab when the required secrets are configured
+
+The beta workflow does not publish GitHub Release assets, Docker Hub tags, or npm packages.
 
 ## Tag Trigger
 
@@ -49,6 +67,9 @@ The dedicated npm workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-d
 
 - `DOCKERHUB_USERNAME`
 - `DOCKERHUB_TOKEN`
+- `AMOYLAB_HOST`
+- `AMOYLAB_USER`
+- `AMOYLAB_SSH_KEY`
 
 ## Permission Model
 
@@ -57,11 +78,13 @@ The dedicated npm workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-d
 - Docker Hub publish uses `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
 - npm publish uses GitHub OIDC trusted publishing with `id-token: write`
 - npm package policy can stay on the strictest setting because trusted publishers do not rely on long-lived npm tokens
+- amoylab deploy uses SSH credentials stored as repository secrets
 
 ## Notes
 
 - The Docker image only packages the DocMesh main service.
 - PostgreSQL and Redis remain external dependencies supplied by the operator.
+- main-branch beta images are pushed only to GHCR, under the fixed `beta` tag plus a commit `sha-*` tag.
 - The installer script downloads CLI archives from GitHub Releases instead of from the running DocMesh service.
 - npm trusted publisher configuration must match:
   - repository: `iFurySt/DocMesh`

@@ -1,0 +1,124 @@
+name: beta
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: beta-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Validate npm package
+        working-directory: npm/docmesh-mcp
+        run: npm pack --dry-run
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: verify
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/ifuryst/docmesh
+          tags: |
+            type=raw,value=beta
+            type=sha,prefix=sha-
+
+      - name: Build and push beta image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            DOCMESH_VERSION=beta-${{ github.sha }}
+
+  deploy-amoylab:
+    runs-on: ubuntu-latest
+    needs: docker
+    if: ${{ secrets.AMOYLAB_HOST != '' && secrets.AMOYLAB_USER != '' && secrets.AMOYLAB_SSH_KEY != '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Upload deployment files
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.AMOYLAB_HOST }}
+          port: 53222
+          username: ${{ secrets.AMOYLAB_USER }}
+          key: ${{ secrets.AMOYLAB_SSH_KEY }}
+          source: deploy/prod/docker-compose.yml,deploy/prod/.env.example
+          target: /opt/docmesh
+          strip_components: 2
+
+      - name: Deploy beta to amoylab
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GHCR_USERNAME: ${{ secrets.AMOYLAB_GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.AMOYLAB_GHCR_TOKEN }}
+        with:
+          host: ${{ secrets.AMOYLAB_HOST }}
+          port: 53222
+          username: ${{ secrets.AMOYLAB_USER }}
+          key: ${{ secrets.AMOYLAB_SSH_KEY }}
+          envs: GHCR_USERNAME,GHCR_TOKEN
+          script: |
+            set -eu
+            mkdir -p /opt/docmesh
+            cd /opt/docmesh
+            test -f .env.docker
+            if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
+              echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+            fi
+            docker compose pull
+            docker compose up -d
+            docker image prune -af --filter "label=org.opencontainers.image.source=https://github.com/iFurySt/DocMesh"

@@ -58,5 +58,6 @@ Expected directories as implementation grows:
 - dockerized dev entrypoint: `make dev` with containerized hot reload for the app service
 - install surfaces: hosted markdown guide, shell installer, and skill package download endpoints implemented
 - release packaging: multi-platform CLI archives and packaged skill assets generated into `dist/install/`
-- GitHub release automation: pushed tags now publish CLI and install assets to GitHub Releases, push the main service image to Docker Hub and GHCR, and publish `docmesh-mcp` to npm
+- GitHub release automation: pushed tags publish CLI and install assets to GitHub Releases, push the main service image to Docker Hub and GHCR, and publish `docmesh-mcp` to npm
+- main-branch beta automation: pushes to `main` publish `ghcr.io/ifuryst/docmesh:beta` and can SSH-deploy that image to amoylab
 - npm stdio bridge: `docmesh-mcp` package source added for `npx`-style MCP usage

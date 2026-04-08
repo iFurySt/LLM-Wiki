@@ -72,6 +72,7 @@ docmesh system info --base-url http://127.0.0.1:8234
 
 Release model:
 
+- pushes to `main` publish `ghcr.io/ifuryst/docmesh:beta`
 - CLI binaries are published to GitHub Releases on pushed tags like `v0.1.0`
 - the installer script downloads the matching archive from GitHub Releases
 - the main service image is published to Docker Hub and GHCR

@@ -7,6 +7,7 @@ dist/
 tmp/
 vendor/
 node_modules/
+.air/
 npm/docmesh-mcp/package-lock.json
 !npm/docmesh-mcp/bin/
 !npm/docmesh-mcp/bin/docmesh-mcp.js

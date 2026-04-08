@@ -12,6 +12,7 @@ Use it when you need to answer:
 
 1. `agent-install.md`
 2. `release-distribution.md`
+3. `amoylab-beta-deploy.md`
 
 ## Scope
 
@@ -19,3 +20,5 @@ Use it when you need to answer:
   Canonical install and connection paths for CLI, Docker, MCP, skills, and `npx`.
 - `release-distribution.md`
   What gets published on tags and which credentials and registries are involved.
+- `amoylab-beta-deploy.md`
+  Production-oriented beta deployment flow for the amoylab host using GHCR and Docker Compose.
