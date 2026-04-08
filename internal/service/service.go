@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ifuryst/docmesh/internal/api"
-	"github.com/ifuryst/docmesh/internal/repository"
+	"github.com/ifuryst/llm-wiki/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/repository"
 )
 
 type Service struct {

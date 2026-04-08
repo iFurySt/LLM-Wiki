@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ifuryst/docmesh/internal/db"
-	"github.com/ifuryst/docmesh/internal/httpserver"
-	"github.com/ifuryst/docmesh/internal/logging"
-	"github.com/ifuryst/docmesh/internal/repository"
-	"github.com/ifuryst/docmesh/internal/service"
-	"github.com/ifuryst/docmesh/internal/testutil"
+	"github.com/ifuryst/llm-wiki/internal/db"
+	"github.com/ifuryst/llm-wiki/internal/httpserver"
+	"github.com/ifuryst/llm-wiki/internal/logging"
+	"github.com/ifuryst/llm-wiki/internal/repository"
+	"github.com/ifuryst/llm-wiki/internal/service"
+	"github.com/ifuryst/llm-wiki/internal/testutil"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -37,7 +37,7 @@ func TestMCPStreamableHTTP(t *testing.T) {
 	}
 
 	result, err := session.CallTool(context.Background(), &mcp.CallToolParams{
-		Name: "docmesh_create_namespace",
+		Name: "llm_wiki_create_namespace",
 		Arguments: map[string]any{
 			"key":          "projects",
 			"display_name": "Projects",
@@ -53,7 +53,7 @@ func TestMCPStreamableHTTP(t *testing.T) {
 	}
 
 	listed, err := session.CallTool(context.Background(), &mcp.CallToolParams{
-		Name:      "docmesh_list_namespaces",
+		Name:      "llm_wiki_list_namespaces",
 		Arguments: map[string]any{},
 	})
 	if err != nil {
@@ -63,7 +63,7 @@ func TestMCPStreamableHTTP(t *testing.T) {
 		t.Fatalf("expected namespace tool content")
 	}
 
-	resource, err := session.ReadResource(context.Background(), &mcp.ReadResourceParams{URI: "docmesh://namespaces"})
+	resource, err := session.ReadResource(context.Background(), &mcp.ReadResourceParams{URI: "llm-wiki://namespaces"})
 	if err != nil {
 		t.Fatalf("read resource: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestMCPSSE(t *testing.T) {
 	defer session.Close()
 
 	result, err := session.CallTool(context.Background(), &mcp.CallToolParams{
-		Name:      "docmesh_list_spaces",
+		Name:      "llm_wiki_list_spaces",
 		Arguments: map[string]any{},
 	})
 	if err != nil {
@@ -129,7 +129,7 @@ func connectMCPClient(t *testing.T, transport mcp.Transport) *mcp.ClientSession 
 	t.Cleanup(cancel)
 
 	client := mcp.NewClient(&mcp.Implementation{
-		Name:    "docmesh-e2e-client",
+		Name:    "llm-wiki-e2e-client",
 		Version: "0.0.1",
 	}, nil)
 	session, err := client.Connect(ctx, transport, nil)
@@ -157,7 +157,7 @@ type tenantRoundTripper struct {
 func (r *tenantRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	cloned := req.Clone(req.Context())
 	cloned.Header = cloned.Header.Clone()
-	cloned.Header.Set("X-DocMesh-Tenant-ID", r.tenantID)
+	cloned.Header.Set("X-LLM-Wiki-Tenant-ID", r.tenantID)
 	return r.base.RoundTrip(cloned)
 }
 

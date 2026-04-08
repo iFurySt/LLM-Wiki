@@ -13,9 +13,9 @@ Focus areas:
 ## Final Known-Good State
 
 - npm publish workflow: `.github/workflows/publish-npm.yml`
-- npm package: `docmesh-mcp`
+- npm package: `@ifuryst/llm-wiki-mcp`
 - npm trusted publisher:
-  - repository: `iFurySt/DocMesh`
+  - repository: `iFurySt/LLM-Wiki`
   - workflow: `publish-npm.yml`
   - environment: empty
 - npm publish runtime:
@@ -34,13 +34,13 @@ Focus areas:
 - ensured the trusted publisher pointed to `publish-npm.yml`
 - kept npm publishing on GitHub OIDC instead of `NPM_TOKEN`
 - upgraded the publish workflow to Node 24 and npm 11.5.1+
-- tracked `npm/docmesh-mcp/bin/docmesh-mcp.js` in git so publish artifacts were complete
+- tracked `npm/llm-wiki-mcp/bin/llm-wiki-mcp.js` in git so publish artifacts were complete
 - slimmed the production Dockerfile so release image builds no longer generated full CLI install bundles
 
 ## Final Result
 
 - `publish-npm` workflow for tag `v0.1.8`: success
-- published package version: `docmesh-mcp@0.1.8`
+- published package version: `@ifuryst/llm-wiki-mcp@0.1.8`
 - `npm dist-tag latest`: `0.1.8`
 - Docker release workflow on the optimized path completed in low minutes instead of the original ~28 minute path
 

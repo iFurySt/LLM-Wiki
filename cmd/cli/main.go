@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/ifuryst/docmesh/internal/cli"
+	"github.com/ifuryst/llm-wiki/internal/cli"
 )
 
 func main() {

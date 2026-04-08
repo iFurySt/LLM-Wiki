@@ -34,7 +34,7 @@ jobs:
         run: go test ./...
 
       - name: Validate npm package
-        working-directory: npm/docmesh-mcp
+        working-directory: npm/llm-wiki-mcp
         run: npm pack --dry-run
 
   release-assets:
@@ -55,7 +55,7 @@ jobs:
 
       - name: Package install assets
         env:
-          DOCMESH_VERSION: ${{ github.ref_name }}
+          LLM_WIKI_VERSION: ${{ github.ref_name }}
         run: ./scripts/release/package-install.sh
 
       - name: Upload GitHub release assets
@@ -67,7 +67,7 @@ jobs:
             dist/install/checksums.txt
             dist/install/version.txt
             install/install-cli.sh
-            install/DocMesh.md
+            install/LLM-Wiki.md
 
   docker:
     runs-on: ubuntu-latest
@@ -99,8 +99,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            docker.io/ifuryst/docmesh
-            ghcr.io/ifuryst/docmesh
+            docker.io/ifuryst/llm-wiki
+            ghcr.io/ifuryst/llm-wiki
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -119,4 +119,4 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            DOCMESH_VERSION=${{ github.ref_name }}
+            LLM_WIKI_VERSION=${{ github.ref_name }}

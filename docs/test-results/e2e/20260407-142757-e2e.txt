@@ -2,30 +2,30 @@
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /healthz                  --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
-[GIN-debug] GET    /readyz                   --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/namespaces            --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
-[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
-[GIN-debug] POST   /v1/documents             --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
-[GIN-debug] GET    /v1/documents             --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
-[GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
+[GIN-debug] GET    /healthz                  --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func2 (3 handlers)
+[GIN-debug] GET    /readyz                   --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] POST   /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
+[GIN-debug] GET    /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
+[GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /healthz                  --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/docmesh/internal/httpserver.registerRoutes.func2 (3 handlers)
-[GIN-debug] GET    /readyz                   --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/namespaces            --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
-[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
-[GIN-debug] POST   /v1/documents             --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
-[GIN-debug] GET    /v1/documents             --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
-[GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
+[GIN-debug] GET    /healthz                  --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func2 (3 handlers)
+[GIN-debug] GET    /readyz                   --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
+[GIN-debug] GET    /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] POST   /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
+[GIN-debug] GET    /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
+[GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
+[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
 --- FAIL: TestReadyz (3.21s)
 panic: ':namespaceID' in new path '/v1/namespaces/:namespaceID/documents/:slug' conflicts with existing wildcard ':id' in existing prefix '/v1/namespaces/:id' [recovered, repanicked]
 
@@ -44,15 +44,15 @@ github.com/gin-gonic/gin.(*RouterGroup).handle(0x5d081a2af0c0, {0x10126e427, 0x3
 	/Users/ifuryst/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:89 +0x100
 github.com/gin-gonic/gin.(*RouterGroup).GET(...)
 	/Users/ifuryst/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:117
-github.com/ifuryst/docmesh/internal/httpserver.registerAPIRoutes(0x5d081a142000, 0x5d081a512200)
+github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes(0x5d081a142000, 0x5d081a512200)
 	/Users/ifuryst/projects/github/llm-wiki/internal/httpserver/handlers.go:114 +0x488
-github.com/ifuryst/docmesh/internal/httpserver.NewHandler({{0x10126ee9f, 0x4}, {0x101270189, 0x5}, 0x1, {{0x10127b5ff, 0x9}, 0x0}, {{0x10128572f, 0x12}, ...}, ...}, ...)
+github.com/ifuryst/llm-wiki/internal/httpserver.NewHandler({{0x10126ee9f, 0x4}, {0x101270189, 0x5}, 0x1, {{0x10127b5ff, 0x9}, 0x0}, {{0x10128572f, 0x12}, ...}, ...}, ...)
 	/Users/ifuryst/projects/github/llm-wiki/internal/httpserver/server.go:42 +0x174
-github.com/ifuryst/docmesh/tests/e2e.TestReadyz(0x5d081a0f5b08)
+github.com/ifuryst/llm-wiki/tests/e2e.TestReadyz(0x5d081a0f5b08)
 	/Users/ifuryst/projects/github/llm-wiki/tests/e2e/readyz_test.go:40 +0x340
 testing.tRunner(0x5d081a0f5b08, 0x102092b30)
 	/usr/local/go/src/testing/testing.go:2036 +0xc4
 created by testing.(*T).Run in goroutine 1
 	/usr/local/go/src/testing/testing.go:2101 +0x3a8
-FAIL	github.com/ifuryst/docmesh/tests/e2e	3.833s
+FAIL	github.com/ifuryst/llm-wiki/tests/e2e	3.833s
 FAIL

@@ -1,11 +1,11 @@
 --- FAIL: TestNamespaceAndDocumentCRUD (27.77s)
-    api_test.go:27: open db: failed to connect to `user=docmesh database=docmesh`:
+    api_test.go:27: open db: failed to connect to `user=llm-wiki database=llm-wiki`:
         	[::1]:32770 (localhost): failed to receive message: unexpected EOF
         	127.0.0.1:32770 (localhost): failed to receive message: read tcp 127.0.0.1:55215->127.0.0.1:32770: read: connection reset by peer
 --- FAIL: TestReadyz (27.80s)
-    readyz_test.go:26: open db: failed to connect to `user=docmesh database=docmesh`:
+    readyz_test.go:26: open db: failed to connect to `user=llm-wiki database=llm-wiki`:
         	[::1]:32769 (localhost): dial error: dial tcp [::1]:32769: connect: connection refused
         	127.0.0.1:32769 (localhost): dial error: dial tcp 127.0.0.1:32769: connect: connection refused
 FAIL
-FAIL	github.com/ifuryst/docmesh/tests/e2e	28.387s
+FAIL	github.com/ifuryst/llm-wiki/tests/e2e	28.387s
 FAIL

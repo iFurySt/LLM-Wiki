@@ -1,10 +1,10 @@
 #!/bin/sh
 set -eu
 
-RELEASE_REPO="${DOCMESH_RELEASE_REPO:-iFurySt/DocMesh}"
-VERSION="${DOCMESH_VERSION:-latest}"
-DOWNLOAD_BASE_URL="${DOCMESH_DOWNLOAD_BASE_URL:-}"
-INSTALL_DIR="${DOCMESH_INSTALL_DIR:-$HOME/.local/bin}"
+RELEASE_REPO="${LLM_WIKI_RELEASE_REPO:-iFurySt/LLM-Wiki}"
+VERSION="${LLM_WIKI_VERSION:-latest}"
+DOWNLOAD_BASE_URL="${LLM_WIKI_DOWNLOAD_BASE_URL:-}"
+INSTALL_DIR="${LLM_WIKI_INSTALL_DIR:-$HOME/.local/bin}"
 TMP_DIR="$(mktemp -d)"
 
 cleanup() {
@@ -100,21 +100,21 @@ case "$ARCH" in
     ;;
 esac
 
-ARCHIVE="docmesh_${OS}_${ARCH}.tar.gz"
+ARCHIVE="llm-wiki_${OS}_${ARCH}.tar.gz"
 TARGET_VERSION="$(resolve_target_version)"
 
-BIN_TARGET="$INSTALL_DIR/docmesh"
-ALIAS_TARGET="$INSTALL_DIR/dm"
+BIN_TARGET="$INSTALL_DIR/llm-wiki"
+ALIAS_TARGET="$INSTALL_DIR/lw"
 
 CURRENT_VERSION=""
 if [ -x "$BIN_TARGET" ]; then
   CURRENT_VERSION="$(extract_version "$BIN_TARGET" || true)"
-elif command -v docmesh >/dev/null 2>&1; then
-  CURRENT_VERSION="$(extract_version "$(command -v docmesh)" || true)"
+elif command -v llm-wiki >/dev/null 2>&1; then
+  CURRENT_VERSION="$(extract_version "$(command -v llm-wiki)" || true)"
 fi
 
 if [ -n "$CURRENT_VERSION" ] && [ "$TARGET_VERSION" != "latest" ] && [ "$CURRENT_VERSION" = "$TARGET_VERSION" ]; then
-  echo "docmesh ${CURRENT_VERSION} is already installed"
+  echo "llm-wiki ${CURRENT_VERSION} is already installed"
   echo "no update needed"
   exit 0
 fi
@@ -133,10 +133,10 @@ fetch_to_file "$ARCHIVE_URL" "$TMP_DIR/$ARCHIVE"
 mkdir -p "$INSTALL_DIR"
 tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"
 
-BIN_SOURCE="$TMP_DIR/docmesh"
+BIN_SOURCE="$TMP_DIR/llm-wiki"
 
 if [ ! -f "$BIN_SOURCE" ]; then
-  echo "archive did not contain docmesh binary" >&2
+  echo "archive did not contain llm-wiki binary" >&2
   exit 1
 fi
 
@@ -153,10 +153,10 @@ chmod +x "$ALIAS_TARGET"
 
 INSTALLED_VERSION="$(extract_version "$BIN_TARGET" || true)"
 if [ -n "$CURRENT_VERSION" ]; then
-  echo "updated docmesh from ${CURRENT_VERSION} to ${INSTALLED_VERSION:-unknown}"
+  echo "updated llm-wiki from ${CURRENT_VERSION} to ${INSTALLED_VERSION:-unknown}"
 else
-  echo "installed docmesh ${INSTALLED_VERSION:-unknown} to $BIN_TARGET"
+  echo "installed llm-wiki ${INSTALLED_VERSION:-unknown} to $BIN_TARGET"
 fi
-echo "installed dm alias to $ALIAS_TARGET"
+echo "installed lw alias to $ALIAS_TARGET"
 echo "run: $BIN_TARGET version"
 echo "or:  $ALIAS_TARGET version"

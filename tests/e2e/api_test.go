@@ -5,14 +5,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ifuryst/docmesh/internal/api"
-	"github.com/ifuryst/docmesh/internal/db"
-	"github.com/ifuryst/docmesh/internal/httpclient"
-	"github.com/ifuryst/docmesh/internal/httpserver"
-	"github.com/ifuryst/docmesh/internal/logging"
-	"github.com/ifuryst/docmesh/internal/repository"
-	"github.com/ifuryst/docmesh/internal/service"
-	"github.com/ifuryst/docmesh/internal/testutil"
+	"github.com/ifuryst/llm-wiki/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/db"
+	"github.com/ifuryst/llm-wiki/internal/httpclient"
+	"github.com/ifuryst/llm-wiki/internal/httpserver"
+	"github.com/ifuryst/llm-wiki/internal/logging"
+	"github.com/ifuryst/llm-wiki/internal/repository"
+	"github.com/ifuryst/llm-wiki/internal/service"
+	"github.com/ifuryst/llm-wiki/internal/testutil"
 )
 
 func TestNamespaceAndDocumentCRUD(t *testing.T) {
@@ -59,7 +59,7 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 		NamespaceID:   namespace.ID,
 		Slug:          "product-brief",
 		Title:         "Product Brief",
-		Content:       "# DocMesh",
+		Content:       "# LLM-Wiki",
 		AuthorType:    "agent",
 		AuthorID:      "bootstrap-agent",
 		ChangeSummary: "initial draft",
@@ -73,7 +73,7 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 
 	updated, err := client.UpdateDocument(ctx, document.ID, api.UpdateDocumentRequest{
 		Title:         "Product Brief v2",
-		Content:       "# DocMesh\n\nUpdated.",
+		Content:       "# LLM-Wiki\n\nUpdated.",
 		AuthorType:    "user",
 		AuthorID:      "tester",
 		ChangeSummary: "clarify scope",

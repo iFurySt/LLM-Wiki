@@ -1,6 +1,6 @@
 package version
 
 var (
-	Name    = "docmesh"
+	Name    = "llm-wiki"
 	Version = "0.1.0-dev"
 )

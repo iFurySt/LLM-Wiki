@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This repository builds `DocMesh`, an agent-native knowledge service for multi-tenant document collaboration.
+This repository builds `LLM-Wiki`, an agent-native knowledge service for multi-tenant document collaboration.
 
 `AGENTS.md` is the table of contents, not the encyclopedia.
 

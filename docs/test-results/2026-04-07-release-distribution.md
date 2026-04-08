@@ -20,14 +20,14 @@ Validated the first repo-side implementation of tag-driven release distribution 
 ```sh
 go test ./...
 npm pack --dry-run
-DOCMESH_VERSION=v0.1.0 ./scripts/release/package-install.sh
-docker build -f Dockerfile -t docmesh:test .
+LLM_WIKI_VERSION=v0.1.0 ./scripts/release/package-install.sh
+docker build -f Dockerfile -t llm-wiki:test .
 ```
 
 ## Result
 
 - `go test ./...`: passed
-- `npm pack --dry-run`: passed for `docmesh-mcp@0.1.0-dev`
+- `npm pack --dry-run`: passed for `@ifuryst/llm-wiki-mcp@0.1.0-dev`
 - `package-install.sh`: passed and wrote `dist/install/version.txt` as `v0.1.0`
 - `docker build`: passed for the production `Dockerfile`
 

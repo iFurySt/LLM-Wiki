@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ifuryst/docmesh/internal/api"
-	"github.com/ifuryst/docmesh/internal/repository"
-	"github.com/ifuryst/docmesh/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/ifuryst/llm-wiki/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/repository"
+	"github.com/ifuryst/llm-wiki/internal/service"
 )
 
-const tenantHeader = "X-DocMesh-Tenant-ID"
+const tenantHeader = "X-LLM-Wiki-Tenant-ID"
 
 func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 	engine.GET("/readyz", func(c *gin.Context) {

@@ -36,7 +36,7 @@ jobs:
         run: go test ./...
 
       - name: Validate npm package
-        working-directory: npm/docmesh-mcp
+        working-directory: npm/llm-wiki-mcp
         run: npm pack --dry-run
 
   docker:
@@ -61,7 +61,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/ifuryst/docmesh
+          images: ghcr.io/ifuryst/llm-wiki
           tags: |
             type=raw,value=beta
             type=sha,prefix=sha-
@@ -78,7 +78,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            DOCMESH_VERSION=beta-${{ github.sha }}
+            LLM_WIKI_VERSION=beta-${{ github.sha }}
 
   deploy-amoylab:
     runs-on: ubuntu-latest
@@ -96,7 +96,7 @@ jobs:
           username: ${{ secrets.AMOYLAB_USER }}
           key: ${{ secrets.AMOYLAB_SSH_KEY }}
           source: deploy/prod/docker-compose.yml,deploy/prod/.env.example
-          target: /opt/docmesh
+          target: /opt/llm-wiki
           strip_components: 2
 
       - name: Deploy beta to amoylab
@@ -112,16 +112,21 @@ jobs:
           envs: GHCR_USERNAME,GHCR_TOKEN
           script: |
             set -eu
-            mkdir -p /opt/docmesh
-            cd /opt/docmesh
+            mkdir -p /opt/llm-wiki
+            cd /opt/llm-wiki
             test -f .env.docker
             if command -v systemctl >/dev/null 2>&1; then
+              systemctl stop llm-wiki || true
+              systemctl disable llm-wiki || true
               systemctl stop docmesh || true
               systemctl disable docmesh || true
             fi
+            docker compose down --remove-orphans || true
+            docker rm -f llm-wiki docmesh || true
             if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
               echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
             fi
             docker compose pull
             docker compose up -d
             docker image prune -af --filter "label=org.opencontainers.image.source=https://github.com/iFurySt/DocMesh"
+            docker image prune -af --filter "label=org.opencontainers.image.source=https://github.com/iFurySt/LLM-Wiki"

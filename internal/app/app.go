@@ -3,11 +3,11 @@ package app
 import (
 	"context"
 
-	"github.com/ifuryst/docmesh/internal/config"
-	"github.com/ifuryst/docmesh/internal/db"
-	"github.com/ifuryst/docmesh/internal/httpserver"
-	"github.com/ifuryst/docmesh/internal/repository"
-	"github.com/ifuryst/docmesh/internal/service"
+	"github.com/ifuryst/llm-wiki/internal/config"
+	"github.com/ifuryst/llm-wiki/internal/db"
+	"github.com/ifuryst/llm-wiki/internal/httpserver"
+	"github.com/ifuryst/llm-wiki/internal/repository"
+	"github.com/ifuryst/llm-wiki/internal/service"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )

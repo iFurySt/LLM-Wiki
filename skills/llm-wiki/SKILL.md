@@ -1,9 +1,9 @@
 ---
-name: docmesh
-description: Use this skill to read and update shared knowledge in a DocMesh server over CLI or HTTP. Trigger it when the task involves tenant wiki documents, namespaces, revisions, or durable agent-maintained knowledge.
+name: llm-wiki
+description: Use this skill to read and update shared knowledge in a LLM-Wiki server over CLI or HTTP. Trigger it when the task involves tenant wiki documents, namespaces, revisions, or durable agent-maintained knowledge.
 ---
 
-DocMesh is a shared knowledge backend for AI agents. Use it when the task should read from or write to a durable document system instead of leaving knowledge in a chat transcript or a local scratch file.
+LLM-Wiki is a shared knowledge backend for AI agents. Use it when the task should read from or write to a durable document system instead of leaving knowledge in a chat transcript or a local scratch file.
 
 `SKILL.md` is the entrypoint, not the full manual. Read the references below in order.
 
@@ -16,7 +16,7 @@ DocMesh is a shared knowledge backend for AI agents. Use it when the task should
 3. [references/agent-workflow.md](references/agent-workflow.md)
    The default prompt and operating discipline for accumulating durable knowledge during normal work.
 
-## When To Use DocMesh
+## When To Use LLM-Wiki
 
 - the task may benefit from previously accumulated project knowledge
 - the task produces a durable outcome worth preserving for future sessions
@@ -38,9 +38,9 @@ DocMesh is a shared knowledge backend for AI agents. Use it when the task should
 If the CLI is already available:
 
 ```sh
-docmesh system info --base-url http://127.0.0.1:8234
-docmesh namespace list --base-url http://127.0.0.1:8234 --tenant default
-docmesh document list --base-url http://127.0.0.1:8234 --tenant default
+llm-wiki system info --base-url http://127.0.0.1:8234
+llm-wiki namespace list --base-url http://127.0.0.1:8234 --tenant default
+llm-wiki document list --base-url http://127.0.0.1:8234 --tenant default
 ```
 
 If the CLI is not installed yet, see [references/installation.md](references/installation.md).
@@ -50,11 +50,11 @@ If the CLI is not installed yet, see [references/installation.md](references/ins
 Use this behavioral prompt unless the host system already provides a stronger project-memory policy:
 
 ```text
-Use DocMesh as the shared durable memory for this workspace.
+Use LLM-Wiki as the shared durable memory for this workspace.
 
-At the start of a task, inspect existing DocMesh knowledge before creating new documents or asking for information that may already be captured.
+At the start of a task, inspect existing LLM-Wiki knowledge before creating new documents or asking for information that may already be captured.
 
-During the task, when you discover stable facts, durable decisions, reusable procedures, or progress that will matter in future sessions, update the relevant DocMesh document instead of leaving that knowledge only in chat.
+During the task, when you discover stable facts, durable decisions, reusable procedures, or progress that will matter in future sessions, update the relevant LLM-Wiki document instead of leaving that knowledge only in chat.
 
 At the end of the task, write back the final state: what changed, why it changed, and any follow-up context another agent would need. Prefer updating existing pages over creating duplicates.
 

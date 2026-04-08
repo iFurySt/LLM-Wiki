@@ -6,12 +6,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ifuryst/docmesh/internal/db"
-	"github.com/ifuryst/docmesh/internal/httpserver"
-	"github.com/ifuryst/docmesh/internal/logging"
-	"github.com/ifuryst/docmesh/internal/repository"
-	"github.com/ifuryst/docmesh/internal/service"
-	"github.com/ifuryst/docmesh/internal/testutil"
+	"github.com/ifuryst/llm-wiki/internal/db"
+	"github.com/ifuryst/llm-wiki/internal/httpserver"
+	"github.com/ifuryst/llm-wiki/internal/logging"
+	"github.com/ifuryst/llm-wiki/internal/repository"
+	"github.com/ifuryst/llm-wiki/internal/service"
+	"github.com/ifuryst/llm-wiki/internal/testutil"
 )
 
 func TestReadyz(t *testing.T) {

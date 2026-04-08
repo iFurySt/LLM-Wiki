@@ -66,7 +66,7 @@ func Load() (Config, error) {
 	v.SetConfigName(".env")
 	v.SetConfigType("env")
 	v.AddConfigPath(".")
-	v.SetEnvPrefix("DOCMESH")
+	v.SetEnvPrefix("LLM_WIKI")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
@@ -139,9 +139,9 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("postgres.host", "127.0.0.1")
 	v.SetDefault("postgres.port", 15432)
-	v.SetDefault("postgres.user", "docmesh")
-	v.SetDefault("postgres.password", "docmesh")
-	v.SetDefault("postgres.database", "docmesh")
+	v.SetDefault("postgres.user", "llmwiki")
+	v.SetDefault("postgres.password", "llmwiki")
+	v.SetDefault("postgres.database", "llmwiki")
 	v.SetDefault("postgres.sslmode", "disable")
 
 	v.SetDefault("redis.addr", "127.0.0.1:16379")
@@ -151,7 +151,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("minio.endpoint", "127.0.0.1:19000")
 	v.SetDefault("minio.access_key", "minioadmin")
 	v.SetDefault("minio.secret_key", "minioadmin")
-	v.SetDefault("minio.bucket", "docmesh")
+	v.SetDefault("minio.bucket", "llm-wiki")
 	v.SetDefault("minio.use_ssl", false)
 
 	v.SetDefault("opensearch.url", "http://127.0.0.1:19200")

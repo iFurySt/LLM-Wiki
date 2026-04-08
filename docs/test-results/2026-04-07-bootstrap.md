@@ -8,9 +8,9 @@
 
 ## Result Files
 
-- Unit: [20260407-124905-unit.txt](/Users/ifuryst/projects/github/DocMesh/docs/test-results/unit/20260407-124905-unit.txt)
-- E2E: [20260407-125018-e2e.txt](/Users/ifuryst/projects/github/DocMesh/docs/test-results/e2e/20260407-125018-e2e.txt)
-- Perf: [20260407-125005-perf.txt](/Users/ifuryst/projects/github/DocMesh/docs/test-results/perf/20260407-125005-perf.txt)
+- Unit: [20260407-124905-unit.txt](/Users/ifuryst/projects/github/LLM-Wiki/docs/test-results/unit/20260407-124905-unit.txt)
+- E2E: [20260407-125018-e2e.txt](/Users/ifuryst/projects/github/LLM-Wiki/docs/test-results/e2e/20260407-125018-e2e.txt)
+- Perf: [20260407-125005-perf.txt](/Users/ifuryst/projects/github/LLM-Wiki/docs/test-results/perf/20260407-125005-perf.txt)
 
 ## Summary
 

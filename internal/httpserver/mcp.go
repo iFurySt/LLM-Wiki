@@ -1,8 +1,8 @@
 package httpserver
 
 import (
-	"github.com/ifuryst/docmesh/internal/mcpserver"
 	"github.com/gin-gonic/gin"
+	"github.com/ifuryst/llm-wiki/internal/mcpserver"
 )
 
 func registerMCPRoutes(engine *gin.Engine, manager *mcpserver.Manager) {

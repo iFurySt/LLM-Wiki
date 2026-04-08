@@ -16,7 +16,7 @@ These are distilled repo-practice notes, not a copy of the article.
 - Push more durable knowledge into versioned markdown instead of chat or external docs.
 - Favor boring, inspectable, well-understood technology during early agent-heavy development.
 
-## How This Applies To DocMesh
+## How This Applies To LLM-Wiki
 
 - `AGENTS.md` should stay compact.
 - `docs/` should be structured and discoverable.

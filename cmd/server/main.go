@@ -5,9 +5,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ifuryst/docmesh/internal/app"
-	"github.com/ifuryst/docmesh/internal/config"
-	"github.com/ifuryst/docmesh/internal/logging"
+	"github.com/ifuryst/llm-wiki/internal/app"
+	"github.com/ifuryst/llm-wiki/internal/config"
+	"github.com/ifuryst/llm-wiki/internal/logging"
 )
 
 func main() {

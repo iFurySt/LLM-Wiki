@@ -26,17 +26,17 @@ jobs:
         run: npm install -g npm@^11.5.1
 
       - name: Validate publish inputs
-        working-directory: npm/docmesh-mcp
+        working-directory: npm/llm-wiki-mcp
         run: |
-          test -f bin/docmesh-mcp.js
+          test -f bin/llm-wiki-mcp.js
           npm pack --dry-run
 
       - name: Set package version from tag
-        working-directory: npm/docmesh-mcp
+        working-directory: npm/llm-wiki-mcp
         run: npm pkg set version="${GITHUB_REF_NAME#v}"
 
       - name: Publish npm package
-        working-directory: npm/docmesh-mcp
+        working-directory: npm/llm-wiki-mcp
         env:
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org
         run: npm publish --access public --provenance

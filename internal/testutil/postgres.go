@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ifuryst/docmesh/internal/config"
+	"github.com/ifuryst/llm-wiki/internal/config"
 	"github.com/testcontainers/testcontainers-go"
 	pgcontainer "github.com/testcontainers/testcontainers-go/modules/postgres"
 )
@@ -25,9 +25,9 @@ func StartPostgres(tb testing.TB) *PostgresInstance {
 	container, err := pgcontainer.Run(
 		ctx,
 		"postgres:17",
-		pgcontainer.WithDatabase("docmesh"),
-		pgcontainer.WithUsername("docmesh"),
-		pgcontainer.WithPassword("docmesh"),
+		pgcontainer.WithDatabase("llm-wiki"),
+		pgcontainer.WithUsername("llm-wiki"),
+		pgcontainer.WithPassword("llm-wiki"),
 	)
 	if err != nil {
 		tb.Fatalf("start postgres container: %v", err)
@@ -51,9 +51,9 @@ func StartPostgres(tb testing.TB) *PostgresInstance {
 		Config: config.PostgresConfig{
 			Host:     host,
 			Port:     port.Int(),
-			User:     "docmesh",
-			Password: "docmesh",
-			Database: "docmesh",
+			User:     "llm-wiki",
+			Password: "llm-wiki",
+			Database: "llm-wiki",
 			SSLMode:  "disable",
 		},
 	}
@@ -74,7 +74,7 @@ func MustBaseConfig(pg config.PostgresConfig) config.Config {
 		},
 		Postgres:   pg,
 		Redis:      config.RedisConfig{Addr: "127.0.0.1:6379"},
-		MinIO:      config.MinIOConfig{Endpoint: "127.0.0.1:9000", Bucket: "docmesh"},
+		MinIO:      config.MinIOConfig{Endpoint: "127.0.0.1:9000", Bucket: "llm-wiki"},
 		OpenSearch: config.OpenSearchConfig{URL: "http://127.0.0.1:9200"},
 	}
 }

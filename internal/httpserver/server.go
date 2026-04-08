@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ifuryst/docmesh/internal/config"
-	"github.com/ifuryst/docmesh/internal/mcpserver"
-	"github.com/ifuryst/docmesh/internal/service"
-	"github.com/ifuryst/docmesh/internal/ui"
-	"github.com/ifuryst/docmesh/internal/version"
+	"github.com/ifuryst/llm-wiki/internal/config"
+	"github.com/ifuryst/llm-wiki/internal/mcpserver"
+	"github.com/ifuryst/llm-wiki/internal/service"
+	"github.com/ifuryst/llm-wiki/internal/ui"
+	"github.com/ifuryst/llm-wiki/internal/version"
 	"go.uber.org/zap"
 )
 

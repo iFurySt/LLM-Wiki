@@ -1,0 +1,28 @@
+{
+  "name": "@ifuryst/llm-wiki-mcp",
+  "version": "0.1.0-dev",
+  "description": "LLM-Wiki MCP stdio bridge for npx-based local agent integrations.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iFurySt/LLM-Wiki.git"
+  },
+  "homepage": "https://github.com/iFurySt/LLM-Wiki#readme",
+  "bugs": {
+    "url": "https://github.com/iFurySt/LLM-Wiki/issues"
+  },
+  "bin": {
+    "llm-wiki-mcp": "./bin/llm-wiki-mcp.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  }
+}

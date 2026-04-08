@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ifuryst/docmesh/internal/db"
-	"github.com/ifuryst/docmesh/internal/httpserver"
-	"github.com/ifuryst/docmesh/internal/logging"
-	"github.com/ifuryst/docmesh/internal/repository"
-	"github.com/ifuryst/docmesh/internal/service"
-	"github.com/ifuryst/docmesh/internal/testutil"
+	"github.com/ifuryst/llm-wiki/internal/db"
+	"github.com/ifuryst/llm-wiki/internal/httpserver"
+	"github.com/ifuryst/llm-wiki/internal/logging"
+	"github.com/ifuryst/llm-wiki/internal/repository"
+	"github.com/ifuryst/llm-wiki/internal/service"
+	"github.com/ifuryst/llm-wiki/internal/testutil"
 )
 
 func TestInstallRoutes(t *testing.T) {
@@ -63,7 +63,7 @@ func TestInstallRoutes(t *testing.T) {
 		}
 	}
 
-	assertBodyContains("/install/DocMesh.md", "DocMesh Skill Install")
-	assertBodyContains("/install/install-cli.sh", "DOCMESH_RELEASE_REPO")
-	assertBodyContains("/install/skills/DocMesh.skill", "docmesh/SKILL.md")
+	assertBodyContains("/install/LLM-Wiki.md", "LLM-Wiki Skill Install")
+	assertBodyContains("/install/install-cli.sh", "LLM_WIKI_RELEASE_REPO")
+	assertBodyContains("/install/skills/LLM-Wiki.skill", "llm-wiki/SKILL.md")
 }

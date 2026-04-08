@@ -2,7 +2,7 @@
 
 ## Current Direction
 
-DocMesh starts as a standalone Go service with:
+LLM-Wiki starts as a standalone Go service with:
 
 - HTTP API
 - thin CLI wrapper over HTTP
@@ -78,13 +78,13 @@ The service is intended to integrate with agent platforms like `as-next` as a sh
 
 ## Current Agent Integration Surfaces
 
-DocMesh currently exposes these agent-facing entry points:
+LLM-Wiki currently exposes these agent-facing entry points:
 
 - HTTP API for direct JSON integrations
-- thin `docmesh` CLI for terminal-first workflows
+- thin `llm-wiki` CLI for terminal-first workflows
 - remote MCP endpoint at `/mcp`
 - legacy MCP SSE endpoint at `/sse`
-- official in-repo `docmesh` skill
-- `docmesh-mcp` npm package for stdio MCP via `npx`
+- official in-repo `llm-wiki` skill
+- `@ifuryst/llm-wiki-mcp` npm package for stdio MCP via `npx`
 
 This keeps the same backend reachable from hosted agents, local coding agents, and process-spawned MCP clients.

@@ -1,8 +1,8 @@
 services:
   app:
-    image: ghcr.io/ifuryst/docmesh:beta
-    container_name: docmesh
+    image: ghcr.io/ifuryst/llm-wiki:beta
+    container_name: llm-wiki
     restart: unless-stopped
     network_mode: host
     env_file:
-      - ${DOCMESH_ENV_FILE:-/opt/docmesh/.env.docker}
+      - ${LLM_WIKI_ENV_FILE:-/opt/llm-wiki/.env.docker}

@@ -2,8 +2,8 @@ root = "."
 tmp_dir = ".air"
 
 [build]
-cmd = "chmod +x ./scripts/release/package-install.sh ./install/install-cli.sh && ./scripts/release/package-install.sh && go build -o ./.air/docmesh-server ./cmd/server"
-bin = "./.air/docmesh-server"
+cmd = "chmod +x ./scripts/release/package-install.sh ./install/install-cli.sh && ./scripts/release/package-install.sh && go build -o ./.air/llm-wiki-server ./cmd/server"
+bin = "./.air/llm-wiki-server"
 delay = 500
 exclude_dir = ["dist/install/releases", "dist/install/skills", ".git", ".air", "tmp", "vendor", "node_modules"]
 exclude_regex = ["_test\\.go"]

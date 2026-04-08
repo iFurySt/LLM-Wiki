@@ -15,7 +15,7 @@ refs/heads/main
 
 Published outputs:
 
-- GHCR image: `ghcr.io/ifuryst/docmesh:beta`
+- GHCR image: `ghcr.io/ifuryst/llm-wiki:beta`
 - optional SSH deploy to amoylab when the required secrets are configured
 
 The beta workflow does not publish GitHub Release assets, Docker Hub tags, or npm packages.
@@ -39,14 +39,14 @@ Published by `softprops/action-gh-release`:
 - `dist/install/checksums.txt`
 - `dist/install/version.txt`
 - `install/install-cli.sh`
-- `install/DocMesh.md`
+- `install/LLM-Wiki.md`
 
 ### Docker Registries
 
 Published multi-arch service image:
 
-- `docker.io/ifuryst/docmesh`
-- `ghcr.io/ifuryst/docmesh`
+- `docker.io/ifuryst/llm-wiki`
+- `ghcr.io/ifuryst/llm-wiki`
 
 Tag shapes:
 
@@ -59,9 +59,9 @@ Tag shapes:
 
 Published package:
 
-- `docmesh-mcp`
+- `@ifuryst/llm-wiki-mcp`
 
-The dedicated npm workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-dev` to the pushed git tag version before publish.
+The dedicated npm workflow rewrites `npm/llm-wiki-mcp/package.json` from `0.1.0-dev` to the pushed git tag version before publish.
 
 ## Required GitHub Secrets
 
@@ -82,12 +82,12 @@ The dedicated npm workflow rewrites `npm/docmesh-mcp/package.json` from `0.1.0-d
 
 ## Notes
 
-- The Docker image only packages the DocMesh main service.
+- The Docker image only packages the LLM-Wiki main service.
 - PostgreSQL and Redis remain external dependencies supplied by the operator.
 - main-branch beta images are pushed only to GHCR, under the fixed `beta` tag plus a commit `sha-*` tag.
-- The installer script downloads CLI archives from GitHub Releases instead of from the running DocMesh service.
+- The installer script downloads CLI archives from GitHub Releases instead of from the running LLM-Wiki service.
 - npm trusted publisher configuration must match:
-  - repository: `iFurySt/DocMesh`
+  - repository: `iFurySt/LLM-Wiki`
   - workflow: `publish-npm.yml`
   - environment: empty
 - npm trusted publishing currently requires a modern runtime in CI; keep the publish workflow on Node 24 and npm 11+.

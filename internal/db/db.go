@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ifuryst/docmesh/internal/config"
+	"github.com/ifuryst/llm-wiki/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

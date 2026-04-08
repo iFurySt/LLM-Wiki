@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ifuryst/docmesh/internal/api"
-	"github.com/ifuryst/docmesh/internal/config"
-	"github.com/ifuryst/docmesh/internal/service"
+	"github.com/ifuryst/llm-wiki/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/config"
+	"github.com/ifuryst/llm-wiki/internal/service"
 )
 
 type uiSpaceCard struct {
@@ -314,9 +314,9 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 	return uiIndexData{
 		TenantID:            tenantID,
 		InstallBaseURL:      baseURL,
-		InstallDocURL:       baseURL + "/install/DocMesh.md",
+		InstallDocURL:       baseURL + "/install/LLM-Wiki.md",
 		InstallScriptURL:    baseURL + "/install/install-cli.sh",
-		InstallSkillURL:     baseURL + "/install/skills/DocMesh.skill",
+		InstallSkillURL:     baseURL + "/install/skills/LLM-Wiki.skill",
 		MCPURL:              baseURL + "/mcp",
 		Spaces:              spaceCards,
 		Namespaces:          namespaceCards,

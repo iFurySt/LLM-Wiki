@@ -2,7 +2,7 @@
 
 ## Goal
 
-Turn the current scaffold into a minimal but real DocMesh service with PostgreSQL-backed namespace and document primitives.
+Turn the current scaffold into a minimal but real LLM-Wiki service with PostgreSQL-backed namespace and document primitives.
 
 ## Scope
 

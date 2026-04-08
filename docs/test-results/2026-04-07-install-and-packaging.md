@@ -2,10 +2,10 @@
 
 ## Scope
 
-Validated the new install and distribution flow for DocMesh:
+Validated the new install and distribution flow for LLM-Wiki:
 
 - hosted install routes under `/install/*`
-- official in-repo `docmesh` skill
+- official in-repo `llm-wiki` skill
 - packaged skill downloads
 - multi-platform CLI release archives
 - dev Docker image integration for install assets
@@ -28,11 +28,11 @@ docker compose -f deploy/dev/docker-compose.yml build app
 
 ## Produced Assets
 
-- `dist/install/releases/docmesh_0.1.0-dev_darwin_amd64.tar.gz`
-- `dist/install/releases/docmesh_0.1.0-dev_darwin_arm64.tar.gz`
-- `dist/install/releases/docmesh_0.1.0-dev_linux_amd64.tar.gz`
-- `dist/install/releases/docmesh_0.1.0-dev_linux_arm64.tar.gz`
-- `dist/install/releases/docmesh_0.1.0-dev_windows_amd64.zip`
-- `dist/install/skills/DocMesh.skill`
-- `dist/install/skills/DocMesh.zip`
+- `dist/install/releases/llm-wiki_0.1.0-dev_darwin_amd64.tar.gz`
+- `dist/install/releases/llm-wiki_0.1.0-dev_darwin_arm64.tar.gz`
+- `dist/install/releases/llm-wiki_0.1.0-dev_linux_amd64.tar.gz`
+- `dist/install/releases/llm-wiki_0.1.0-dev_linux_arm64.tar.gz`
+- `dist/install/releases/llm-wiki_0.1.0-dev_windows_amd64.zip`
+- `dist/install/skills/LLM-Wiki.skill`
+- `dist/install/skills/LLM-Wiki.zip`
 - `dist/install/checksums.txt`

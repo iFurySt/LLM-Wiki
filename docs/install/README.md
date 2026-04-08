@@ -1,10 +1,10 @@
 # Install
 
-This directory is the durable install and distribution reference for DocMesh.
+This directory is the durable install and distribution reference for LLM-Wiki.
 
 Use it when you need to answer:
 
-- how humans should install and run DocMesh
+- how humans should install and run LLM-Wiki
 - how AI agents should connect through CLI, MCP, or hosted skill docs
 - how release artifacts are distributed across GitHub Releases, Docker registries, and npm
 

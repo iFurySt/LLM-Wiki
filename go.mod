@@ -1,4 +1,4 @@
-module github.com/ifuryst/docmesh
+module github.com/ifuryst/llm-wiki
 
 go 1.26.1
 

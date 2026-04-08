@@ -2,11 +2,11 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-VERSION="${DOCMESH_VERSION:-$(cd "$ROOT_DIR" && go run ./cmd/cli version | awk '{print $2}')}"
+VERSION="${LLM_WIKI_VERSION:-$(cd "$ROOT_DIR" && go run ./cmd/cli version | awk '{print $2}')}"
 RELEASE_DIR="$ROOT_DIR/dist/install/releases"
 SKILL_DIR="$ROOT_DIR/dist/install/skills"
 TMP_DIR="$(mktemp -d)"
-VERSION_LDFLAGS="-X github.com/ifuryst/docmesh/internal/version.Version=${VERSION}"
+VERSION_LDFLAGS="-X github.com/ifuryst/llm-wiki/internal/version.Version=${VERSION}"
 
 cleanup() {
   rm -rf "$TMP_DIR"
@@ -30,16 +30,16 @@ for target in "${targets[@]}"; do
   stage="$TMP_DIR/${os}_${arch}"
   mkdir -p "$stage"
 
-  binary_name="docmesh"
+  binary_name="llm-wiki"
   if [[ "$os" == "windows" ]]; then
-    binary_name="docmesh.exe"
+    binary_name="llm-wiki.exe"
   fi
 
   GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build \
     -ldflags "$VERSION_LDFLAGS" \
     -o "$stage/$binary_name" "$ROOT_DIR/cmd/cli"
 
-  archive_base="docmesh_${os}_${arch}"
+  archive_base="llm-wiki_${os}_${arch}"
   if [[ "$os" == "windows" ]]; then
     (
       cd "$stage"
@@ -55,12 +55,12 @@ done
 
 skill_stage="$TMP_DIR/skill"
 mkdir -p "$skill_stage"
-cp -R "$ROOT_DIR/skills/docmesh" "$skill_stage/docmesh"
+cp -R "$ROOT_DIR/skills/llm-wiki" "$skill_stage/llm-wiki"
 (
   cd "$skill_stage"
-  zip -qr "$SKILL_DIR/DocMesh.zip" docmesh
+  zip -qr "$SKILL_DIR/LLM-Wiki.zip" llm-wiki
 )
-cp "$SKILL_DIR/DocMesh.zip" "$SKILL_DIR/DocMesh.skill"
+cp "$SKILL_DIR/LLM-Wiki.zip" "$SKILL_DIR/LLM-Wiki.skill"
 
 (
   cd "$ROOT_DIR/dist/install"

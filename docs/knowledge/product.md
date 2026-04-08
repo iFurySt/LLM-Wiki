@@ -2,11 +2,11 @@
 
 ## Name
 
-`DocMesh`
+`LLM-Wiki`
 
 ## What It Is
 
-DocMesh is an agent-native knowledge service for multi-tenant document collaboration.
+LLM-Wiki is an agent-native knowledge service for multi-tenant document collaboration.
 
 It is built for cases where many AI agents need to read, create, update, and organize shared documents while preserving:
 
@@ -18,7 +18,7 @@ It is built for cases where many AI agents need to read, create, update, and org
 
 ## Product Framing
 
-DocMesh is not a classic wiki app and not a generic RAG stack.
+LLM-Wiki is not a classic wiki app and not a generic RAG stack.
 
 It is a shared document system for agents:
 

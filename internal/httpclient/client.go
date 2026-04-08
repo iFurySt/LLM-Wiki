@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ifuryst/docmesh/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/api"
 )
 
 type Client struct {
@@ -186,6 +186,6 @@ func (c *Client) doJSON(ctx context.Context, method string, path string, reqBody
 func (c *Client) applyHeaders(req *http.Request) {
 	req.Header.Set("Accept", "application/json")
 	if strings.TrimSpace(c.tenantID) != "" {
-		req.Header.Set("X-DocMesh-Tenant-ID", c.tenantID)
+		req.Header.Set("X-LLM-Wiki-Tenant-ID", c.tenantID)
 	}
 }

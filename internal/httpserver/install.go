@@ -10,15 +10,15 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ifuryst/docmesh/internal/config"
+	"github.com/ifuryst/llm-wiki/internal/config"
 )
 
 func registerInstallRoutes(engine *gin.Engine, cfg config.Config) {
 	engine.GET("/install", func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/install/DocMesh.md")
+		c.Redirect(http.StatusTemporaryRedirect, "/install/LLM-Wiki.md")
 	})
 
-	engine.GET("/install/DocMesh.md", func(c *gin.Context) {
+	engine.GET("/install/LLM-Wiki.md", func(c *gin.Context) {
 		serveInstallMarkdown(c, cfg)
 	})
 
@@ -26,33 +26,33 @@ func registerInstallRoutes(engine *gin.Engine, cfg config.Config) {
 		serveInstallFile(c, "install/install-cli.sh", "text/x-shellscript; charset=utf-8")
 	})
 
-	engine.GET("/install/skills/DocMesh.zip", func(c *gin.Context) {
-		serveSkillArchive(c, "DocMesh.zip")
+	engine.GET("/install/skills/LLM-Wiki.zip", func(c *gin.Context) {
+		serveSkillArchive(c, "LLM-Wiki.zip")
 	})
 
-	engine.GET("/install/skills/DocMesh.skill", func(c *gin.Context) {
-		serveSkillArchive(c, "DocMesh.skill")
+	engine.GET("/install/skills/LLM-Wiki.skill", func(c *gin.Context) {
+		serveSkillArchive(c, "LLM-Wiki.skill")
 	})
 
 	engine.StaticFS("/install/releases", gin.Dir(resolveInstallPath("dist/install/releases"), false))
 }
 
 func serveInstallMarkdown(c *gin.Context, cfg config.Config) {
-	target := resolveInstallPath("install/DocMesh.md")
+	target := resolveInstallPath("install/LLM-Wiki.md")
 	body, err := os.ReadFile(target)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "install asset not found",
-			"path":  "install/DocMesh.md",
+			"path":  "install/LLM-Wiki.md",
 		})
 		return
 	}
 
 	baseURL := strings.TrimRight(cfg.Install.BaseURL, "/")
 	replacer := strings.NewReplacer(
-		"{{DOCMESH_BASE_URL}}", baseURL,
-		"{{DOCMESH_INSTALL_DOC_URL}}", baseURL+"/install/DocMesh.md",
-		"{{DOCMESH_INSTALL_SCRIPT_URL}}", baseURL+"/install/install-cli.sh",
+		"{{LLM_WIKI_BASE_URL}}", baseURL,
+		"{{LLM_WIKI_INSTALL_DOC_URL}}", baseURL+"/install/LLM-Wiki.md",
+		"{{LLM_WIKI_INSTALL_SCRIPT_URL}}", baseURL+"/install/install-cli.sh",
 	)
 
 	c.Header("Content-Type", "text/markdown; charset=utf-8")
@@ -95,11 +95,11 @@ func resolveInstallPath(relativePath string) string {
 }
 
 func serveSkillArchive(c *gin.Context, fileName string) {
-	root := resolveInstallPath("skills/docmesh")
+	root := resolveInstallPath("skills/llm-wiki")
 	if _, err := os.Stat(root); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "skill directory not found",
-			"path":  "skills/docmesh",
+			"path":  "skills/llm-wiki",
 		})
 		return
 	}
@@ -122,7 +122,7 @@ func serveSkillArchive(c *gin.Context, fileName string) {
 		if err != nil {
 			return err
 		}
-		archivePath := filepath.ToSlash(filepath.Join("docmesh", relative))
+		archivePath := filepath.ToSlash(filepath.Join("llm-wiki", relative))
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
 			return err

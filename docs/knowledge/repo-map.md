@@ -10,11 +10,11 @@ The repository is in bootstrap phase.
 - `cmd/`: entrypoints for the HTTP service and the thin CLI wrapper
 - `internal/`: private Go packages for app wiring, config, logging, HTTP server, CLI, and client code
 - `deploy/dev/`: local development infrastructure definitions
-- `Dockerfile`: production-oriented container build for the main DocMesh service
+- `Dockerfile`: production-oriented container build for the main LLM-Wiki service
 - `.github/workflows/`: CI and release automation
 - `docs/`: durable repository knowledge and execution artifacts
 - `install/`: hosted install docs and scripts served from `:8234/install/*`
-- `skills/`: official DocMesh agent skill source files
+- `skills/`: official LLM-Wiki agent skill source files
 - `npm/`: publishable npm packages maintained in-repo
 - `scripts/`: helper scripts for testing and release packaging
 - `README.md`: quickstart and local setup notes
@@ -44,20 +44,20 @@ Expected directories as implementation grows:
 
 ## Implementation Status
 
-- naming: settled on `DocMesh`
+- naming: settled on `LLM-Wiki`
 - docs system: initialized and structured
 - Go service scaffold: initialized
 - thin HTTP CLI scaffold: initialized
 - test-result tracking structure: initialized
 - database schema: initial v0 migration implemented
 - HTTP API: readiness, structured error responses, space list, namespace CRUD/list/archive, document CRUD/list/filter, slug lookup, and archive
-- MCP: streamable HTTP and legacy SSE endpoints with DocMesh tools and resources
+- MCP: streamable HTTP and legacy SSE endpoints with LLM-Wiki tools and resources
 - CLI: system, space, namespace, and document commands implemented, including list and archive flows
 - UI: retro wiki-style Gin-served HTML page for browsing, creating, editing, archiving, and install flows
 - infra manifests: local development compose initialized
 - dockerized dev entrypoint: `make dev` with containerized hot reload for the app service
 - install surfaces: hosted markdown guide, shell installer, and skill package download endpoints implemented
 - release packaging: multi-platform CLI archives and packaged skill assets generated into `dist/install/`
-- GitHub release automation: pushed tags publish CLI and install assets to GitHub Releases, push the main service image to Docker Hub and GHCR, and publish `docmesh-mcp` to npm
-- main-branch beta automation: pushes to `main` publish `ghcr.io/ifuryst/docmesh:beta` and can SSH-deploy that image to amoylab
-- npm stdio bridge: `docmesh-mcp` package source added for `npx`-style MCP usage
+- GitHub release automation: pushed tags publish CLI and install assets to GitHub Releases, push the main service image to Docker Hub and GHCR, and publish `@ifuryst/llm-wiki-mcp` to npm
+- main-branch beta automation: pushes to `main` publish `ghcr.io/ifuryst/llm-wiki:beta` and can SSH-deploy that image to amoylab
+- npm stdio bridge: `@ifuryst/llm-wiki-mcp` package source added for `npx`-style MCP usage

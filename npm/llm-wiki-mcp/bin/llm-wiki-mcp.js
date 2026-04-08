@@ -11,12 +11,12 @@ if (options.help) {
 }
 
 if (options.version) {
-  process.stdout.write(`docmesh-mcp ${packageInfo.version}\n`);
+  process.stdout.write(`llm-wiki-mcp ${packageInfo.version}\n`);
   process.exit(0);
 }
 
-const baseUrl = options.baseUrl || process.env.DOCMESH_BASE_URL || "http://127.0.0.1:8234";
-const tenantId = options.tenant || process.env.DOCMESH_TENANT_ID || "default";
+const baseUrl = options.baseUrl || process.env.LLM_WIKI_BASE_URL || "http://127.0.0.1:8234";
+const tenantId = options.tenant || process.env.LLM_WIKI_TENANT_ID || "default";
 
 const [{ McpServer, ResourceTemplate }, { StdioServerTransport }, { z }] = await Promise.all([
   import("@modelcontextprotocol/sdk/server/mcp.js"),
@@ -25,32 +25,32 @@ const [{ McpServer, ResourceTemplate }, { StdioServerTransport }, { z }] = await
 ]);
 
 const server = new McpServer({
-  name: "docmesh-mcp",
+  name: "llm-wiki-mcp",
   version: packageInfo.version
 });
 
 server.registerTool(
-  "docmesh_list_spaces",
+  "llm_wiki_list_spaces",
   {
     title: "List Spaces",
-    description: "List spaces for the current DocMesh tenant.",
+    description: "List spaces for the current LLM-Wiki tenant.",
     inputSchema: {}
   },
   async () => toolResult(await requestJSON("GET", "/v1/spaces"))
 );
 
 server.registerTool(
-  "docmesh_list_namespaces",
+  "llm_wiki_list_namespaces",
   {
     title: "List Namespaces",
-    description: "List namespaces for the current DocMesh tenant.",
+    description: "List namespaces for the current LLM-Wiki tenant.",
     inputSchema: {}
   },
   async () => toolResult(await requestJSON("GET", "/v1/namespaces"))
 );
 
 server.registerTool(
-  "docmesh_create_namespace",
+  "llm_wiki_create_namespace",
   {
     title: "Create Namespace",
     description: "Create a namespace in the current tenant.",
@@ -65,7 +65,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "docmesh_archive_namespace",
+  "llm_wiki_archive_namespace",
   {
     title: "Archive Namespace",
     description: "Archive a namespace in the current tenant.",
@@ -77,7 +77,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "docmesh_list_documents",
+  "llm_wiki_list_documents",
   {
     title: "List Documents",
     description: "List documents in the current tenant, optionally filtered by namespace or status.",
@@ -100,7 +100,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "docmesh_get_document",
+  "llm_wiki_get_document",
   {
     title: "Get Document",
     description: "Get a document and its revisions by ID.",
@@ -112,7 +112,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "docmesh_get_document_by_slug",
+  "llm_wiki_get_document_by_slug",
   {
     title: "Get Document By Slug",
     description: "Get a document by namespace ID and slug.",
@@ -125,7 +125,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "docmesh_create_document",
+  "llm_wiki_create_document",
   {
     title: "Create Document",
     description: "Create a new document and its first revision.",
@@ -143,7 +143,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "docmesh_update_document",
+  "llm_wiki_update_document",
   {
     title: "Update Document",
     description: "Update a document and create a new revision.",
@@ -160,7 +160,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "docmesh_archive_document",
+  "llm_wiki_archive_document",
   {
     title: "Archive Document",
     description: "Archive a document while preserving revision history.",
@@ -175,10 +175,10 @@ server.registerTool(
 );
 
 server.registerResource(
-  "docmesh-spaces",
-  "docmesh://spaces",
+  "llm-wiki-spaces",
+  "llm-wiki://spaces",
   {
-    title: "DocMesh Spaces",
+    title: "LLM-Wiki Spaces",
     description: "Spaces for the current tenant.",
     mimeType: "application/json"
   },
@@ -188,10 +188,10 @@ server.registerResource(
 );
 
 server.registerResource(
-  "docmesh-namespaces",
-  "docmesh://namespaces",
+  "llm-wiki-namespaces",
+  "llm-wiki://namespaces",
   {
-    title: "DocMesh Namespaces",
+    title: "LLM-Wiki Namespaces",
     description: "Namespaces for the current tenant.",
     mimeType: "application/json"
   },
@@ -201,10 +201,10 @@ server.registerResource(
 );
 
 server.registerResource(
-  "docmesh-document",
-  new ResourceTemplate("docmesh://documents/{id}", { list: undefined }),
+  "llm-wiki-document",
+  new ResourceTemplate("llm-wiki://documents/{id}", { list: undefined }),
   {
-    title: "DocMesh Document",
+    title: "LLM-Wiki Document",
     description: "Read a document by ID.",
     mimeType: "application/json"
   },
@@ -214,10 +214,10 @@ server.registerResource(
 );
 
 server.registerResource(
-  "docmesh-document-by-slug",
-  new ResourceTemplate("docmesh://documents/by-slug/{namespace_id}/{slug}", { list: undefined }),
+  "llm-wiki-document-by-slug",
+  new ResourceTemplate("llm-wiki://documents/by-slug/{namespace_id}/{slug}", { list: undefined }),
   {
-    title: "DocMesh Document By Slug",
+    title: "LLM-Wiki Document By Slug",
     description: "Read a document by namespace ID and slug.",
     mimeType: "application/json"
   },
@@ -239,14 +239,14 @@ async function requestJSON(method, path, body) {
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
-      "X-DocMesh-Tenant-ID": tenantId
+      "X-LLM-Wiki-Tenant-ID": tenantId
     },
     body: body === undefined ? undefined : JSON.stringify(body)
   });
 
   const text = await response.text();
   if (!response.ok) {
-    throw new Error(`DocMesh API ${response.status}: ${text}`);
+    throw new Error(`LLM-Wiki API ${response.status}: ${text}`);
   }
   return text.length === 0 ? {} : JSON.parse(text);
 }
@@ -298,16 +298,16 @@ function parseArgs(args) {
 }
 
 function printHelp() {
-  process.stdout.write(`DocMesh MCP stdio bridge
+  process.stdout.write(`LLM-Wiki MCP stdio bridge
 
 Usage:
-  docmesh-mcp [--base-url URL] [--tenant TENANT]
-  docmesh-mcp --version
-  docmesh-mcp --help
+  llm-wiki-mcp [--base-url URL] [--tenant TENANT]
+  llm-wiki-mcp --version
+  llm-wiki-mcp --help
 
 Options:
-  --base-url  DocMesh server base URL. Defaults to DOCMESH_BASE_URL or http://127.0.0.1:8234
-  --tenant    DocMesh tenant ID. Defaults to DOCMESH_TENANT_ID or default
+  --base-url  LLM-Wiki server base URL. Defaults to LLM_WIKI_BASE_URL or http://127.0.0.1:8234
+  --tenant    LLM-Wiki tenant ID. Defaults to LLM_WIKI_TENANT_ID or default
   --version   Print package version
   --help      Show this help message
 `);

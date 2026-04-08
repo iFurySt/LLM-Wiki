@@ -1,31 +1,31 @@
 # Agent Workflow
 
-This reference defines how an LLM or coding agent should use DocMesh during normal work, not only for explicit wiki-editing tasks.
+This reference defines how an LLM or coding agent should use LLM-Wiki during normal work, not only for explicit wiki-editing tasks.
 
 ## Default Prompt
 
 Use or adapt this prompt in agent systems that support custom instructions:
 
 ```text
-You have access to DocMesh, a shared durable knowledge system for this workspace.
+You have access to LLM-Wiki, a shared durable knowledge system for this workspace.
 
-Your job is not only to complete the current task, but also to keep important project knowledge up to date in DocMesh.
+Your job is not only to complete the current task, but also to keep important project knowledge up to date in LLM-Wiki.
 
 Behavior:
-- At task start, inspect DocMesh for relevant existing documents, plans, decisions, or procedures.
-- During the task, when you learn something stable and reusable, update the corresponding DocMesh document.
+- At task start, inspect LLM-Wiki for relevant existing documents, plans, decisions, or procedures.
+- During the task, when you learn something stable and reusable, update the corresponding LLM-Wiki document.
 - At task end, write back durable outcomes so the next agent does not need to rediscover them.
 - Prefer editing an existing document over creating a near-duplicate.
 - Use concise factual summaries, stable slugs, and the correct namespace.
 - Always include `author_type`, `author_id`, and `change_summary` on writes.
 - Do not store transient notes, hidden reasoning, or low-value chat residue.
 
-Only information with repeat value should graduate into DocMesh.
+Only information with repeat value should graduate into LLM-Wiki.
 ```
 
 ## When To Read
 
-Read DocMesh early when:
+Read LLM-Wiki early when:
 
 - the task touches an existing project, subsystem, customer, or workflow
 - the user asks about prior decisions, known constraints, or current status
@@ -34,7 +34,7 @@ Read DocMesh early when:
 
 ## When To Write
 
-Write to DocMesh when the task produces durable knowledge such as:
+Write to LLM-Wiki when the task produces durable knowledge such as:
 
 - project plans, execution status, and milestones
 - stable architecture notes or implementation constraints
@@ -93,9 +93,9 @@ Only if they are still relevant after this session ends.
 Typical loop:
 
 ```sh
-docmesh namespace list --base-url http://127.0.0.1:8234 --tenant default
-docmesh document list --base-url http://127.0.0.1:8234 --tenant default --namespace-id 1
-docmesh document get-by-slug --base-url http://127.0.0.1:8234 --tenant default 1 launch-plan
+llm-wiki namespace list --base-url http://127.0.0.1:8234 --tenant default
+llm-wiki document list --base-url http://127.0.0.1:8234 --tenant default --namespace-id 1
+llm-wiki document get-by-slug --base-url http://127.0.0.1:8234 --tenant default 1 launch-plan
 ```
 
 If the page exists, update it by document id. If not, create it with a stable slug.

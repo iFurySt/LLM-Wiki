@@ -7,14 +7,14 @@ Use the HTTP API when the environment cannot run the CLI or when a tool wrapper 
 Every request should send the tenant header:
 
 ```text
-X-DocMesh-Tenant-ID: default
+X-LLM-Wiki-Tenant-ID: default
 ```
 
 ## List Namespaces
 
 ```sh
 curl -s http://127.0.0.1:8234/v1/namespaces \
-  -H 'X-DocMesh-Tenant-ID: default'
+  -H 'X-LLM-Wiki-Tenant-ID: default'
 ```
 
 ## Create Namespace
@@ -22,7 +22,7 @@ curl -s http://127.0.0.1:8234/v1/namespaces \
 ```sh
 curl -s http://127.0.0.1:8234/v1/namespaces \
   -H 'Content-Type: application/json' \
-  -H 'X-DocMesh-Tenant-ID: default' \
+  -H 'X-LLM-Wiki-Tenant-ID: default' \
   -d '{
     "key": "projects",
     "display_name": "Projects",
@@ -36,7 +36,7 @@ curl -s http://127.0.0.1:8234/v1/namespaces \
 ```sh
 curl -s http://127.0.0.1:8234/v1/documents \
   -H 'Content-Type: application/json' \
-  -H 'X-DocMesh-Tenant-ID: default' \
+  -H 'X-LLM-Wiki-Tenant-ID: default' \
   -d '{
     "namespace_id": 1,
     "slug": "launch-plan",
@@ -53,7 +53,7 @@ curl -s http://127.0.0.1:8234/v1/documents \
 ```sh
 curl -s -X PUT http://127.0.0.1:8234/v1/documents/1 \
   -H 'Content-Type: application/json' \
-  -H 'X-DocMesh-Tenant-ID: default' \
+  -H 'X-LLM-Wiki-Tenant-ID: default' \
   -d '{
     "title": "Launch Plan",
     "content": "# Launch Plan\n\nUpdated by agent.",

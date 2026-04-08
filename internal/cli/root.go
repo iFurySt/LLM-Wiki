@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/ifuryst/docmesh/internal/api"
-	"github.com/ifuryst/docmesh/internal/httpclient"
-	"github.com/ifuryst/docmesh/internal/version"
+	"github.com/ifuryst/llm-wiki/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/httpclient"
+	"github.com/ifuryst/llm-wiki/internal/version"
 	"github.com/spf13/cobra"
 )
 
@@ -19,13 +19,13 @@ func NewRootCommand() *cobra.Command {
 	var tenantID string
 
 	root := &cobra.Command{
-		Use:   "docmesh",
-		Short: "DocMesh CLI",
+		Use:   "llm-wiki",
+		Short: "LLM-Wiki CLI",
 	}
 
-	root.PersistentFlags().StringVar(&baseURL, "base-url", defaultString("DOCMESH_CLI_BASE_URL", "https://docmesh.ifuryst.com/"), "DocMesh server base URL")
+	root.PersistentFlags().StringVar(&baseURL, "base-url", defaultString("LLM_WIKI_CLI_BASE_URL", "https://llm-wiki.ifuryst.com/"), "LLM-Wiki server base URL")
 	root.PersistentFlags().DurationVar(&timeout, "timeout", 10*time.Second, "HTTP timeout")
-	root.PersistentFlags().StringVar(&tenantID, "tenant", "default", "DocMesh tenant ID")
+	root.PersistentFlags().StringVar(&tenantID, "tenant", "default", "LLM-Wiki tenant ID")
 
 	root.AddCommand(newVersionCommand())
 	root.AddCommand(newSystemCommand(&baseURL, &timeout, &tenantID))
@@ -77,12 +77,12 @@ func newVersionCommand() *cobra.Command {
 func newSystemCommand(baseURL *string, timeout *time.Duration, tenantID *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "system",
-		Short: "Inspect DocMesh system endpoints",
+		Short: "Inspect LLM-Wiki system endpoints",
 	}
 
 	cmd.AddCommand(&cobra.Command{
 		Use:   "info",
-		Short: "Fetch system info from the DocMesh server",
+		Short: "Fetch system info from the LLM-Wiki server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := httpclient.New(*baseURL, *timeout, *tenantID)
 			info, err := client.GetSystemInfo(context.Background())

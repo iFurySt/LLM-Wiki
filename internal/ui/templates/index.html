@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DocMesh</title>
+  <title>LLM-Wiki</title>
   <style>
     :root,
     :root[data-theme="dark"] {
@@ -684,7 +684,7 @@
         <div class="brand-mark">DM</div>
         <div>
           <div class="eyebrow">Pixel Wiki</div>
-          <div class="brand-title">DocMesh</div>
+          <div class="brand-title">LLM-Wiki</div>
           <div class="brand-subtitle">Wiki and install. Nothing more.</div>
         </div>
       </div>
@@ -884,8 +884,8 @@
           <article class="install-card">
             <div>
               <div class="eyebrow">CLI</div>
-              <h3>Install DocMesh CLI</h3>
-              <div class="install-copy">Use the hosted shell installer to install the local CLI, then run commands against your DocMesh server.</div>
+              <h3>Install LLM-Wiki CLI</h3>
+              <div class="install-copy">Use the hosted shell installer to install the local CLI, then run commands against your LLM-Wiki server.</div>
             </div>
 
             <div class="copy-block">
@@ -893,7 +893,7 @@
                 <div class="install-label">Prompt For AI Agent</div>
                 <button type="button" class="copy-button" data-copy-target="cli-agent">Copy</button>
               </div>
-              <pre id="cli-agent" class="code-block">Install and use the DocMesh CLI for this workspace.
+              <pre id="cli-agent" class="code-block">Install and use the LLM-Wiki CLI for this workspace.
 
 Read:
 {{ .InstallDocURL }}
@@ -902,7 +902,7 @@ Then run:
 curl -fsSL {{ .InstallScriptURL }} | sh
 
 After install, use:
-docmesh system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
+llm-wiki system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
             </div>
 
             <div class="copy-block">
@@ -911,7 +911,7 @@ docmesh system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
                 <button type="button" class="copy-button secondary" data-copy-target="cli-human">Copy</button>
               </div>
               <pre id="cli-human" class="code-block">curl -fsSL {{ .InstallScriptURL }} | sh
-docmesh system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
+llm-wiki system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
             </div>
             <div class="copy-feedback" data-copy-feedback></div>
           </article>
@@ -920,7 +920,7 @@ docmesh system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
             <div>
               <div class="eyebrow">Skill</div>
               <h3>Install Skill Package</h3>
-              <div class="install-copy">Give the agent the hosted guide or the official packaged skill so it can follow your DocMesh conventions directly.</div>
+              <div class="install-copy">Give the agent the hosted guide or the official packaged skill so it can follow your LLM-Wiki conventions directly.</div>
             </div>
 
             <div class="copy-block">
@@ -928,13 +928,13 @@ docmesh system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
                 <div class="install-label">Prompt For AI Agent</div>
                 <button type="button" class="copy-button" data-copy-target="skill-agent">Copy</button>
               </div>
-              <pre id="skill-agent" class="code-block">Read and follow this DocMesh install guide:
+              <pre id="skill-agent" class="code-block">Read and follow this LLM-Wiki install guide:
 {{ .InstallDocURL }}
 
 If your runtime supports skill packages, install:
 {{ .InstallSkillURL }}
 
-Use DocMesh as the shared wiki backend for this task.</pre>
+Use LLM-Wiki as the shared wiki backend for this task.</pre>
             </div>
 
             <div class="copy-block">
@@ -952,7 +952,7 @@ curl -O {{ .InstallSkillURL }}</pre>
             <div>
               <div class="eyebrow">MCP</div>
               <h3>Connect Through MCP</h3>
-              <div class="install-copy">Use the local MCP bridge or the remote HTTP MCP endpoint so Codex or another client can talk to DocMesh directly.</div>
+              <div class="install-copy">Use the local MCP bridge or the remote HTTP MCP endpoint so Codex or another client can talk to LLM-Wiki directly.</div>
             </div>
 
             <div class="copy-block">
@@ -960,16 +960,16 @@ curl -O {{ .InstallSkillURL }}</pre>
                 <div class="install-label">Prompt For AI Agent</div>
                 <button type="button" class="copy-button" data-copy-target="mcp-agent">Copy</button>
               </div>
-              <pre id="mcp-agent" class="code-block">Connect to the local DocMesh MCP server.
+              <pre id="mcp-agent" class="code-block">Connect to the local LLM-Wiki MCP server.
 
 Remote MCP endpoint:
 {{ .MCPURL }}
 
 Tenant header:
-X-DocMesh-Tenant-ID: default
+X-LLM-Wiki-Tenant-ID: default
 
 If local stdio MCP is preferred, run:
-npx --prefix npm/docmesh-mcp docmesh-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
+npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
             </div>
 
             <div class="copy-block">
@@ -977,8 +977,8 @@ npx --prefix npm/docmesh-mcp docmesh-mcp --base-url {{ .InstallBaseURL }} --tena
                 <div class="install-label">Command For Humans</div>
                 <button type="button" class="copy-button secondary" data-copy-target="mcp-human">Copy</button>
               </div>
-              <pre id="mcp-human" class="code-block">npm install --prefix npm/docmesh-mcp --package-lock=false
-npx --prefix npm/docmesh-mcp docmesh-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
+              <pre id="mcp-human" class="code-block">npm install --prefix npm/llm-wiki-mcp --package-lock=false
+npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
             </div>
             <div class="copy-feedback" data-copy-feedback></div>
           </article>
@@ -990,7 +990,7 @@ npx --prefix npm/docmesh-mcp docmesh-mcp --base-url {{ .InstallBaseURL }} --tena
   <script>
     (function() {
       var root = document.documentElement;
-      var storageKey = "docmesh-theme";
+      var storageKey = "llm-wiki-theme";
       var buttons = document.querySelectorAll("[data-theme-button]");
       var copyButtons = document.querySelectorAll("[data-copy-target]");
 

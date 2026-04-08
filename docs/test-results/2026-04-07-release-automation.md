@@ -24,10 +24,10 @@ go test ./...
 
 ## Produced Assets
 
-- `dist/install/releases/docmesh_darwin_amd64.tar.gz`
-- `dist/install/releases/docmesh_darwin_arm64.tar.gz`
-- `dist/install/releases/docmesh_linux_amd64.tar.gz`
-- `dist/install/releases/docmesh_linux_arm64.tar.gz`
-- `dist/install/releases/docmesh_windows_amd64.zip`
+- `dist/install/releases/llm-wiki_darwin_amd64.tar.gz`
+- `dist/install/releases/llm-wiki_darwin_arm64.tar.gz`
+- `dist/install/releases/llm-wiki_linux_amd64.tar.gz`
+- `dist/install/releases/llm-wiki_linux_arm64.tar.gz`
+- `dist/install/releases/llm-wiki_windows_amd64.zip`
 - `dist/install/checksums.txt`
 - `dist/install/version.txt`

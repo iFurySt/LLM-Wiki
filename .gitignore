@@ -8,6 +8,6 @@ tmp/
 vendor/
 node_modules/
 .air/
-npm/docmesh-mcp/package-lock.json
-!npm/docmesh-mcp/bin/
-!npm/docmesh-mcp/bin/docmesh-mcp.js
+npm/llm-wiki-mcp/package-lock.json
+!npm/llm-wiki-mcp/bin/
+!npm/llm-wiki-mcp/bin/llm-wiki-mcp.js
