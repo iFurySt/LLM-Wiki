@@ -44,6 +44,7 @@ type AuthRequest struct {
 	ID                  string
 	FlowType            string
 	TenantID            string
+	OAuthProvider       string
 	DisplayName         string
 	Scopes              []string
 	State               string
@@ -78,6 +79,7 @@ type IssueTokenParams struct {
 type CreateAuthRequestParams struct {
 	FlowType            string
 	TenantID            string
+	OAuthProvider       string
 	DisplayName         string
 	Scopes              []string
 	State               string
@@ -412,13 +414,14 @@ func (r *Repository) CreateAuthRequest(ctx context.Context, params CreateAuthReq
 	var item AuthRequest
 	err = r.pool.QueryRow(ctx, `
 		INSERT INTO auth_requests (
-			id, flow_type, tenant_id, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, device_code, user_code, expires_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-		RETURNING id, flow_type, tenant_id, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
-	`, id, params.FlowType, params.TenantID, params.DisplayName, scopesJSON, params.State, params.RedirectURI, params.CodeChallenge, params.CodeChallengeMethod, params.DeviceCode, params.UserCode, params.ExpiresAt).Scan(
+			id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, device_code, user_code, expires_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		RETURNING id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+	`, id, params.FlowType, params.TenantID, params.OAuthProvider, params.DisplayName, scopesJSON, params.State, params.RedirectURI, params.CodeChallenge, params.CodeChallengeMethod, params.DeviceCode, params.UserCode, params.ExpiresAt).Scan(
 		&item.ID,
 		&item.FlowType,
 		&item.TenantID,
+		&item.OAuthProvider,
 		&item.DisplayName,
 		&scopesJSON,
 		&item.State,
@@ -459,7 +462,7 @@ func (r *Repository) ExchangeAuthorizationCode(ctx context.Context, authCode str
 
 func (r *Repository) getAuthRequestBy(ctx context.Context, column string, value string) (AuthRequest, error) {
 	query := fmt.Sprintf(`
-		SELECT id, flow_type, tenant_id, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+		SELECT id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
 		FROM auth_requests
 		WHERE %s = $1
 	`, column)
@@ -469,6 +472,7 @@ func (r *Repository) getAuthRequestBy(ctx context.Context, column string, value 
 		&item.ID,
 		&item.FlowType,
 		&item.TenantID,
+		&item.OAuthProvider,
 		&item.DisplayName,
 		&scopesJSON,
 		&item.State,
@@ -511,7 +515,7 @@ func (r *Repository) ApproveAuthRequest(ctx context.Context, requestID string, d
 	var request AuthRequest
 	var scopesJSON string
 	err = tx.QueryRow(ctx, `
-		SELECT id, flow_type, tenant_id, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+		SELECT id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
 		FROM auth_requests
 		WHERE id = $1
 		FOR UPDATE
@@ -519,6 +523,7 @@ func (r *Repository) ApproveAuthRequest(ctx context.Context, requestID string, d
 		&request.ID,
 		&request.FlowType,
 		&request.TenantID,
+		&request.OAuthProvider,
 		&request.DisplayName,
 		&scopesJSON,
 		&request.State,
@@ -578,11 +583,12 @@ func (r *Repository) ApproveAuthRequest(ctx context.Context, requestID string, d
 		UPDATE auth_requests
 		SET principal_id = $1, display_name = $2, auth_code = $3, approved_at = NOW()
 		WHERE id = $4
-		RETURNING id, flow_type, tenant_id, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+		RETURNING id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
 	`, principal.ID, displayName, authCode, request.ID).Scan(
 		&request.ID,
 		&request.FlowType,
 		&request.TenantID,
+		&request.OAuthProvider,
 		&request.DisplayName,
 		&scopesJSON,
 		&request.State,
@@ -620,13 +626,38 @@ func (r *Repository) ApproveAuthRequestForPrincipal(ctx context.Context, request
 	}
 	err = r.pool.QueryRow(ctx, `
 		UPDATE auth_requests
-		SET principal_id = $1, auth_code = $2, approved_at = NOW()
-		WHERE id = $3
-		RETURNING id, flow_type, tenant_id, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+		SET principal_id = $1,
+			auth_code = $2,
+			approved_at = NOW(),
+			tenant_id = p.tenant_id,
+			display_name = p.display_name
+		FROM principals p
+		WHERE auth_requests.id = $3
+		  AND p.id = $1
+		RETURNING
+			auth_requests.id,
+			auth_requests.flow_type,
+			auth_requests.tenant_id,
+			auth_requests.oauth_provider,
+			auth_requests.display_name,
+			auth_requests.scopes_json,
+			auth_requests.state,
+			auth_requests.redirect_uri,
+			auth_requests.code_challenge,
+			auth_requests.code_challenge_method,
+			auth_requests.auth_code,
+			auth_requests.device_code,
+			auth_requests.user_code,
+			auth_requests.principal_id,
+			auth_requests.approved_at,
+			auth_requests.denied_at,
+			auth_requests.expires_at,
+			auth_requests.created_at
 	`, principalID, authCode, requestID).Scan(
 		&request.ID,
 		&request.FlowType,
 		&request.TenantID,
+		&request.OAuthProvider,
 		&request.DisplayName,
 		&scopesJSON,
 		&request.State,

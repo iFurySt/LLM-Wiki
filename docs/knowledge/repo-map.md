@@ -16,6 +16,7 @@ The repository is in bootstrap phase.
 - `install/`: hosted install docs and scripts served from `:8234/install/*`
 - `skills/`: official LLM-Wiki agent skill source files
 - `npm/`: publishable npm packages maintained in-repo
+- `apps/`: desktop-client or plugin adapters maintained in-repo
 - `scripts/`: helper scripts for testing and release packaging
 - `README.md`: quickstart and local setup notes
 - `.env.example`: environment variable template
@@ -51,9 +52,11 @@ Expected directories as implementation grows:
 - test-result tracking structure: initialized
 - database schema: initial v0 migration implemented
 - HTTP API: readiness, structured error responses, space list, namespace CRUD/list/archive, document CRUD/list/filter, slug lookup, and archive
-- auth: bearer token middleware, service principals, service-token issuance and revocation, browser/device login flows, first-boot setup, web admin sessions, and bootstrap admin token support
+- auth: bearer token middleware, service principals, service-token issuance and revocation, browser/device login flows, first-boot setup, web admin sessions, bootstrap admin token support, admin-managed OAuth provider config, and OAuth-backed auto-provisioning of first-login users and personal tenants
 - MCP: streamable HTTP and legacy SSE endpoints with bearer-token auth and scoped LLM-Wiki tools and resources
-- CLI: system, auth, space, namespace, and document commands implemented, including browser/device login, token-file support, local profiles, and token admin flows
+- CLI: system, auth, workspace, space, namespace, and document commands implemented, including browser/device login with localhost callback, token-file support, local profiles, provider selection, token admin flows, workspace invites and switching, and an initial Obsidian export command
+- Obsidian adapter: a desktop-only plugin under `apps/obsidian-llm-wiki-live/` reads LLM-Wiki over HTTP, reuses `~/.llm-wiki/config.json`, and continuously mirrors the current tenant into vault files under `LLM-Wiki/<tenant>/...`
+- skill: bundled `llm-wiki` skill exists, but still needs a stronger hosted-service-first and out-of-box workflow shape
 - UI: retro wiki-style Gin-served HTML page for browsing, creating, editing, archiving, install flows, first-run setup, and a pixel-style admin user console
 - infra manifests: local development compose initialized
 - dockerized dev entrypoint: `make dev` with containerized hot reload for the app service

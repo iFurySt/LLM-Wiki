@@ -20,7 +20,8 @@ type WhoAmIResponse struct {
 }
 
 type StartBrowserLoginRequest struct {
-	TenantID            string   `json:"tenant_id" binding:"required"`
+	TenantID            string   `json:"tenant_id"`
+	Provider            string   `json:"provider"`
 	DisplayName         string   `json:"display_name"`
 	Scopes              []string `json:"scopes"`
 	State               string   `json:"state" binding:"required"`
@@ -33,6 +34,39 @@ type StartBrowserLoginResponse struct {
 	RequestID    string `json:"request_id"`
 	AuthorizeURL string `json:"authorize_url"`
 	ExpiresAt    string `json:"expires_at"`
+}
+
+type OAuthProviderResponse struct {
+	Name              string   `json:"name"`
+	DisplayName       string   `json:"display_name"`
+	AuthURL           string   `json:"auth_url,omitempty"`
+	TokenURL          string   `json:"token_url,omitempty"`
+	UserinfoURL       string   `json:"userinfo_url,omitempty"`
+	ClientID          string   `json:"client_id,omitempty"`
+	Scopes            []string `json:"scopes,omitempty"`
+	Enabled           bool     `json:"enabled"`
+	AutoCreateUsers   bool     `json:"auto_create_users"`
+	AutoCreateTenants bool     `json:"auto_create_tenants"`
+	CreatedAt         string   `json:"created_at,omitempty"`
+	UpdatedAt         string   `json:"updated_at,omitempty"`
+}
+
+type ListOAuthProvidersResponse struct {
+	Items []OAuthProviderResponse `json:"items"`
+}
+
+type UpsertOAuthProviderRequest struct {
+	Name              string   `json:"name" binding:"required"`
+	DisplayName       string   `json:"display_name" binding:"required"`
+	AuthURL           string   `json:"auth_url" binding:"required"`
+	TokenURL          string   `json:"token_url" binding:"required"`
+	UserinfoURL       string   `json:"userinfo_url" binding:"required"`
+	ClientID          string   `json:"client_id" binding:"required"`
+	ClientSecret      string   `json:"client_secret" binding:"required"`
+	Scopes            []string `json:"scopes"`
+	Enabled           bool     `json:"enabled"`
+	AutoCreateUsers   bool     `json:"auto_create_users"`
+	AutoCreateTenants bool     `json:"auto_create_tenants"`
 }
 
 type StartDeviceLoginRequest struct {
@@ -118,10 +152,10 @@ type CreateServicePrincipalRequest struct {
 }
 
 type IssueTokenRequest struct {
-	PrincipalID       string   `json:"principal_id" binding:"required"`
-	DisplayName       string   `json:"display_name" binding:"required"`
-	Scopes            []string `json:"scopes"`
-	ExpiresInSeconds  int      `json:"expires_in_seconds"`
+	PrincipalID      string   `json:"principal_id" binding:"required"`
+	DisplayName      string   `json:"display_name" binding:"required"`
+	Scopes           []string `json:"scopes"`
+	ExpiresInSeconds int      `json:"expires_in_seconds"`
 }
 
 type TokenResponse struct {
@@ -142,6 +176,52 @@ type TokenResponse struct {
 
 type ListTokensResponse struct {
 	Items []TokenResponse `json:"items"`
+}
+
+type WorkspaceResponse struct {
+	TenantID    string `json:"tenant_id"`
+	Key         string `json:"key"`
+	DisplayName string `json:"display_name"`
+	Role        string `json:"role,omitempty"`
+	CreatedAt   string `json:"created_at"`
+}
+
+type ListWorkspacesResponse struct {
+	Items []WorkspaceResponse `json:"items"`
+}
+
+type CreateWorkspaceRequest struct {
+	TenantID    string `json:"tenant_id"`
+	DisplayName string `json:"display_name" binding:"required"`
+}
+
+type InviteResponse struct {
+	ID         int64  `json:"id"`
+	TenantID   string `json:"tenant_id"`
+	Email      string `json:"email"`
+	Role       string `json:"role"`
+	Token      string `json:"token,omitempty"`
+	ExpiresAt  string `json:"expires_at"`
+	CreatedAt  string `json:"created_at"`
+	AcceptedAt string `json:"accepted_at,omitempty"`
+}
+
+type ListInvitesResponse struct {
+	Items []InviteResponse `json:"items"`
+}
+
+type CreateInviteRequest struct {
+	Email          string `json:"email" binding:"required"`
+	Role           string `json:"role"`
+	ExpiresInHours int    `json:"expires_in_hours"`
+}
+
+type AcceptInviteRequest struct {
+	InviteToken string `json:"invite_token" binding:"required"`
+}
+
+type SwitchTenantRequest struct {
+	TenantID string `json:"tenant_id" binding:"required"`
 }
 
 type SpaceResponse struct {

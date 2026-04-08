@@ -45,6 +45,7 @@ func NewRootCommand() *cobra.Command {
 
 	root.AddCommand(newVersionCommand())
 	root.AddCommand(newAuthCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
+	root.AddCommand(newWorkspaceCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
 	root.AddCommand(newSystemCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
 	root.AddCommand(newSpaceCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
 	root.AddCommand(newNamespaceCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
@@ -68,6 +69,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 	var noOpen bool
 	var displayName string
 	var accessTokenToStore string
+	var provider string
 
 	cmd := &cobra.Command{
 		Use:   "auth",
@@ -99,15 +101,32 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 			if useDeviceCode {
 				return deviceLogin(cmd, options, displayName, noOpen)
 			}
-			return browserLogin(cmd, options, displayName, noOpen)
+			return browserLogin(cmd, options, displayName, provider, noOpen)
 		},
 	}
 	loginCmd.Flags().BoolVar(&useDeviceCode, "device-code", false, "Use the device authorization flow")
 	loginCmd.Flags().BoolVar(&noOpen, "no-open", false, "Do not automatically open a browser")
 	loginCmd.Flags().StringVar(&displayName, "name", "", "Preferred display name for the browser/device login")
+	loginCmd.Flags().StringVar(&provider, "provider", "", "OAuth provider to use for browser login")
 	loginCmd.Flags().StringVar(&accessTokenToStore, "access-token", "", "Store an existing bearer token into the active profile")
 
 	cmd.AddCommand(loginCmd)
+	cmd.AddCommand(&cobra.Command{
+		Use:   "switch-tenant <tenant-id>",
+		Short: "Switch the active profile to another workspace or tenant you can access",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			resp, err := client.SwitchTenant(context.Background(), args[0])
+			if err != nil {
+				return err
+			}
+			return persistLoginProfile(options, resp, "")
+		},
+	})
 	cmd.AddCommand(&cobra.Command{
 		Use:   "status",
 		Short: "Show the active auth status",
@@ -256,6 +275,144 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 	})
 	cmd.AddCommand(tokenCmd)
 
+	return cmd
+}
+
+func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
+	var workspaceDisplayName string
+	var workspaceTenantID string
+	var inviteEmail string
+	var inviteRole string
+	var inviteTTL time.Duration
+	var exportOutputDir string
+
+	cmd := &cobra.Command{
+		Use:   "workspace",
+		Short: "Manage workspaces and invitations",
+	}
+	cmd.AddCommand(&cobra.Command{
+		Use:   "list",
+		Short: "List workspaces available to the current user",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			resp, err := client.ListWorkspaces(context.Background())
+			if err != nil {
+				return err
+			}
+			return printJSON(cmd, resp)
+		},
+	})
+	createCmd := &cobra.Command{
+		Use:   "create",
+		Short: "Create a new workspace",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			resp, err := client.CreateWorkspace(context.Background(), api.CreateWorkspaceRequest{
+				TenantID:    workspaceTenantID,
+				DisplayName: workspaceDisplayName,
+			})
+			if err != nil {
+				return err
+			}
+			return printJSON(cmd, resp)
+		},
+	}
+	createCmd.Flags().StringVar(&workspaceDisplayName, "display-name", "", "Workspace display name")
+	createCmd.Flags().StringVar(&workspaceTenantID, "tenant-id", "", "Optional tenant/workspace key")
+	_ = createCmd.MarkFlagRequired("display-name")
+	cmd.AddCommand(createCmd)
+
+	cmd.AddCommand(&cobra.Command{
+		Use:   "invite-list",
+		Short: "List invitations for the current workspace",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			resp, err := client.ListInvites(context.Background())
+			if err != nil {
+				return err
+			}
+			return printJSON(cmd, resp)
+		},
+	})
+	inviteCmd := &cobra.Command{
+		Use:   "invite",
+		Short: "Invite a user to the current workspace",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			resp, err := client.CreateInvite(context.Background(), api.CreateInviteRequest{
+				Email:          inviteEmail,
+				Role:           inviteRole,
+				ExpiresInHours: int(inviteTTL.Hours()),
+			})
+			if err != nil {
+				return err
+			}
+			return printJSON(cmd, resp)
+		},
+	}
+	inviteCmd.Flags().StringVar(&inviteEmail, "email", "", "Invitee email")
+	inviteCmd.Flags().StringVar(&inviteRole, "role", "member", "Invite role")
+	inviteCmd.Flags().DurationVar(&inviteTTL, "expires-in", 72*time.Hour, "Invite lifetime")
+	_ = inviteCmd.MarkFlagRequired("email")
+	cmd.AddCommand(inviteCmd)
+
+	cmd.AddCommand(&cobra.Command{
+		Use:   "accept-invite <token>",
+		Short: "Accept an invite into another workspace",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			resp, err := client.AcceptInvite(context.Background(), args[0])
+			if err != nil {
+				return err
+			}
+			return printJSON(cmd, resp)
+		},
+	})
+	exportCmd := &cobra.Command{
+		Use:   "export-obsidian",
+		Short: "Export the current workspace into an Obsidian-compatible vault folder",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			namespacesResp, err := client.ListNamespaces(context.Background())
+			if err != nil {
+				return err
+			}
+			documentsResp, err := client.ListDocuments(context.Background(), nil, nil)
+			if err != nil {
+				return err
+			}
+			outputDir := strings.TrimSpace(exportOutputDir)
+			if outputDir == "" {
+				outputDir = fmt.Sprintf("llm-wiki-%s-obsidian", options.TenantID)
+			}
+			if err := exportWorkspaceToObsidian(outputDir, options.TenantID, namespacesResp.Items, documentsResp.Items); err != nil {
+				return err
+			}
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "exported %d documents to %s\n", len(documentsResp.Items), outputDir)
+			return nil
+		},
+	}
+	exportCmd.Flags().StringVar(&exportOutputDir, "output", "", "Output directory for the Obsidian vault export")
+	cmd.AddCommand(exportCmd)
 	return cmd
 }
 
@@ -644,7 +801,7 @@ func authorizedClient(baseURL string, timeout time.Duration, accessToken string,
 	return client, options, nil
 }
 
-func browserLogin(cmd *cobra.Command, options runtimeOptions, displayName string, noOpen bool) error {
+func browserLogin(cmd *cobra.Command, options runtimeOptions, displayName string, provider string, noOpen bool) error {
 	verifier, challenge, state, err := pkceValues()
 	if err != nil {
 		return err
@@ -687,6 +844,7 @@ func browserLogin(cmd *cobra.Command, options runtimeOptions, displayName string
 	client := httpclient.New(options.BaseURL, options.Timeout, "")
 	startResp, err := client.StartBrowserLogin(context.Background(), api.StartBrowserLoginRequest{
 		TenantID:            options.TenantID,
+		Provider:            provider,
 		DisplayName:         displayName,
 		State:               state,
 		RedirectURI:         redirectURI,

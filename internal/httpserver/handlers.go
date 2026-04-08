@@ -42,6 +42,14 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		}
 		c.JSON(http.StatusOK, resp)
 	})
+	authGroup.GET("/providers", func(c *gin.Context) {
+		resp, err := svc.ListOAuthProviders(c.Request.Context(), true)
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, resp)
+	})
 	authGroup.POST("/device/start", func(c *gin.Context) {
 		var req api.StartDeviceLoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -68,9 +76,22 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		}
 		c.JSON(http.StatusOK, resp)
 	})
-
 	protected := v1.Group("")
 	protected.Use(authenticateRequest(svc))
+
+	protected.POST("/auth/switch-tenant", func(c *gin.Context) {
+		var req api.SwitchTenantRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			badRequest(c, err)
+			return
+		}
+		resp, err := svc.SwitchTenant(c.Request.Context(), strings.TrimSpace(req.TenantID))
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, resp)
+	})
 
 	protected.GET("/auth/whoami", func(c *gin.Context) {
 		resp, err := svc.WhoAmI(c.Request.Context())
@@ -83,6 +104,27 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 
 	authAdmin := protected.Group("/auth")
 	authAdmin.Use(requireScopes(auth.ScopeTokensIssue))
+	authAdmin.GET("/providers/admin", func(c *gin.Context) {
+		resp, err := svc.ListAdminOAuthProviders(c.Request.Context())
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, resp)
+	})
+	authAdmin.POST("/providers", func(c *gin.Context) {
+		var req api.UpsertOAuthProviderRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			badRequest(c, err)
+			return
+		}
+		resp, err := svc.UpsertOAuthProvider(c.Request.Context(), req)
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusCreated, resp)
+	})
 	authAdmin.GET("/service-principals", func(c *gin.Context) {
 		resp, err := svc.ListServicePrincipals(c.Request.Context(), principalFromRequest(c).TenantID)
 		if err != nil {
@@ -146,6 +188,61 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 	spaces.Use(requireScopes(auth.ScopeSpacesRead))
 	spaces.GET("/spaces", func(c *gin.Context) {
 		resp, err := svc.ListSpaces(c.Request.Context(), principalFromRequest(c).TenantID)
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, resp)
+	})
+	spaces.GET("/workspaces", func(c *gin.Context) {
+		resp, err := svc.ListWorkspaces(c.Request.Context())
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, resp)
+	})
+	spaces.POST("/workspaces", func(c *gin.Context) {
+		var req api.CreateWorkspaceRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			badRequest(c, err)
+			return
+		}
+		resp, err := svc.CreateWorkspace(c.Request.Context(), req)
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusCreated, resp)
+	})
+	spaces.GET("/workspaces/invites", func(c *gin.Context) {
+		resp, err := svc.ListInvites(c.Request.Context())
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, resp)
+	})
+	spaces.POST("/workspaces/invites", func(c *gin.Context) {
+		var req api.CreateInviteRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			badRequest(c, err)
+			return
+		}
+		resp, err := svc.CreateInvite(c.Request.Context(), req)
+		if err != nil {
+			handleError(c, err)
+			return
+		}
+		c.JSON(http.StatusCreated, resp)
+	})
+	spaces.POST("/workspaces/invites/accept", func(c *gin.Context) {
+		var req api.AcceptInviteRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			badRequest(c, err)
+			return
+		}
+		resp, err := svc.AcceptInvite(c.Request.Context(), req)
 		if err != nil {
 			handleError(c, err)
 			return

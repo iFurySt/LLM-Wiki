@@ -104,6 +104,7 @@ func (s *Service) StartBrowserLogin(ctx context.Context, baseURL string, req api
 	request, err := s.repo.CreateAuthRequest(ctx, repository.CreateAuthRequestParams{
 		FlowType:            "browser",
 		TenantID:            strings.TrimSpace(req.TenantID),
+		OAuthProvider:       normalizeKey(req.Provider),
 		DisplayName:         strings.TrimSpace(req.DisplayName),
 		Scopes:              filterInteractiveScopes(req.Scopes),
 		State:               req.State,
@@ -268,7 +269,7 @@ func (s *Service) exchangeAuthorizationCode(ctx context.Context, code string, ve
 	if err != nil {
 		return api.TokenExchangeResponse{}, err
 	}
-	if request.ApprovedAt == nil {
+	if request.PrincipalID == nil {
 		return api.TokenExchangeResponse{}, repository.ErrPending
 	}
 	if request.ExpiresAt.Before(time.Now()) {
@@ -288,7 +289,7 @@ func (s *Service) exchangeDeviceCode(ctx context.Context, deviceCode string) (ap
 	if request.ExpiresAt.Before(time.Now()) {
 		return api.TokenExchangeResponse{}, repository.ErrExpired
 	}
-	if request.ApprovedAt == nil {
+	if request.PrincipalID == nil {
 		return api.TokenExchangeResponse{}, repository.ErrPending
 	}
 	return s.issueInteractiveTokens(ctx, request)
@@ -310,6 +311,9 @@ func (s *Service) exchangeRefreshToken(ctx context.Context, rawToken string) (ap
 func (s *Service) issueInteractiveTokens(ctx context.Context, request repository.AuthRequest) (api.TokenExchangeResponse, error) {
 	if request.PrincipalID == nil {
 		return api.TokenExchangeResponse{}, repository.ErrUnauthorized
+	}
+	if user, err := s.repo.GetUserByPrincipalID(ctx, *request.PrincipalID); err == nil && user.IsAdmin {
+		request.Scopes = uniqueScopes(append(request.Scopes, auth.ScopeTokensIssue, auth.ScopeTokensRevoke, auth.ScopeAdminTenants))
 	}
 	accessExpiry := time.Now().Add(1 * time.Hour)
 	refreshExpiry := time.Now().Add(30 * 24 * time.Hour)

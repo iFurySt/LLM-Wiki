@@ -23,6 +23,7 @@ type Space struct {
 	Key         string
 	DisplayName string
 	CreatedAt   time.Time
+	Role        string
 }
 
 type Namespace struct {
@@ -110,13 +111,22 @@ func (r *Repository) Ping(ctx context.Context) error {
 }
 
 func (r *Repository) EnsureTenantSpace(ctx context.Context, tenantID string) (Space, error) {
+	return r.EnsureTenantSpaceWithDisplayName(ctx, tenantID, "Default Space")
+}
+
+func (r *Repository) EnsureTenantSpaceWithDisplayName(ctx context.Context, tenantID string, displayName string) (Space, error) {
 	var space Space
 	err := r.pool.QueryRow(ctx, `
 		INSERT INTO spaces (tenant_id, key, display_name)
-		VALUES ($1, 'default', 'Default Space')
-		ON CONFLICT (tenant_id) DO UPDATE SET tenant_id = EXCLUDED.tenant_id
+		VALUES ($1, 'default', $2)
+		ON CONFLICT (tenant_id) DO UPDATE SET
+			tenant_id = EXCLUDED.tenant_id,
+			display_name = CASE
+				WHEN spaces.display_name = '' OR spaces.display_name = 'Default Space' THEN EXCLUDED.display_name
+				ELSE spaces.display_name
+			END
 		RETURNING id, tenant_id, key, display_name, created_at
-	`, tenantID).Scan(
+	`, tenantID, displayName).Scan(
 		&space.ID,
 		&space.TenantID,
 		&space.Key,

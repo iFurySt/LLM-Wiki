@@ -9,6 +9,7 @@ Add a real identity and authorization model for LLM-Wiki that works across:
 - browser-based OAuth sign-in
 - remote and headless environments such as CI, cloud VMs, and Kubernetes
 - service-to-service integrations that need tenant-scoped fine-grained tokens
+- multi-tenant workspaces where normal users can self-serve into a personal tenant and then create more
 
 ## Why Now
 
@@ -18,6 +19,8 @@ The current model is still bootstrap-grade:
 - HTTP and MCP integrations still rely on `X-LLM-Wiki-Tenant-ID`
 - there is no first-class user, session, or service principal identity
 - there is no central token issuance or revocation model
+- tenant creation still reads too much like an admin-only provisioning concern
+- CLI login is not yet optimized around the browser loopback callback path
 
 That is enough for local development, but not enough for hosted multi-tenant use.
 
@@ -25,8 +28,10 @@ That is enough for local development, but not enough for hosted multi-tenant use
 
 - Keep `cmd/cli` thin. Credential discovery and login UX can live in the CLI, but authorization decisions must stay server-side.
 - Treat tenant selection as a consequence of authenticated identity and granted access, not as a free-form client header.
+- Treat a personal default tenant as part of user onboarding, not as a separate manual provisioning step.
 - Separate human sessions from service tokens.
 - Support interactive and headless login flows from the start.
+- Prefer browser login with localhost callback for interactive CLI sessions; only fall back to device flow when needed.
 - Make all access paths converge on the same server-side auth context model.
 - Prefer short-lived access tokens plus refresh or re-issuance paths over long-lived bearer secrets.
 - Every token must be attributable to a principal and auditable.
@@ -102,6 +107,14 @@ Recommended credential precedence:
 
 This keeps local and cloud usage predictable.
 
+CLI login should update this profile automatically after successful auth, including:
+
+- `base_url`
+- selected or default `tenant_id`
+- access token metadata
+- refresh token metadata when present
+- optional user display information for profile introspection
+
 ### 3. Browser OAuth 2.0 login
 
 Add `lw login` with an experience similar to Codex:
@@ -119,9 +132,17 @@ Recommended browser flow:
 CLI behavior:
 
 - open browser automatically when possible
+- bind a localhost listener for the callback instead of asking the user to paste codes in the common path
 - persist tokens in `~/.llm-wiki/`
 - store server metadata and the chosen tenant profile
 - refresh access tokens automatically when refresh token is present
+
+Provider rollout for the first hosted flow:
+
+- admin configures required Google and GitHub OAuth client credentials
+- login screen shows enabled providers automatically
+- first successful OAuth login can create the internal user if policy allows
+- first successful OAuth login can also create the user's personal default tenant if it does not exist yet
 
 ### 4. Service tokens for cloud and K8s
 
@@ -229,6 +250,7 @@ Use when tenants already have:
 - Okta
 - Keycloak
 - Google Workspace backed identity
+- GitHub-backed developer identity
 
 LLM-Wiki responsibilities:
 
@@ -236,6 +258,8 @@ LLM-Wiki responsibilities:
 - exchange code for tokens
 - map upstream identity to an internal principal
 - evaluate tenant memberships locally
+- auto-create the user on first login when policy allows
+- auto-create the personal default tenant on first login when policy allows
 
 ### Path B: LLM-Wiki as its own authorization server for first-party CLI
 
@@ -255,6 +279,22 @@ Recommended rollout:
 - v2: add fully first-party OAuth authorization server only if product needs it
 
 This avoids overbuilding the identity stack too early.
+
+## Workspace And Tenant Onboarding
+
+The target hosted behavior should be closer to a workspace product:
+
+- a user can sign in without an admin pre-creating a tenant for them
+- first login creates a personal default tenant named from username or email
+- the creator becomes owner or admin of that tenant
+- the same user can later create additional tenants or workspaces
+- membership grants, not free-form tenant ids, control access thereafter
+
+Naming guidance for the first tenant:
+
+- prefer a normalized username slug when present
+- otherwise derive from email local-part plus collision handling
+- preserve a user-facing display name separately from the immutable id
 
 ## CLI Command Additions
 
@@ -361,18 +401,25 @@ Only store token hashes server-side for static bearer tokens.
 - add issue, list, and revoke APIs
 - wire scopes into HTTP and MCP authorization
 
-### Phase 3: CLI credential discovery
+### Phase 3: OAuth-backed user onboarding
+
+- add OAuth provider config and account linkage
+- add first-login user provisioning
+- add first-login personal-tenant creation
+- make membership bootstrap deterministic
+
+### Phase 4: CLI credential discovery and browser login
 
 - add `--token`, `--token-file`, env support, and `~/.llm-wiki/` profiles
+- add browser PKCE login with localhost callback
 - remove the need to always pass `--tenant` manually when token already binds tenant
 
-### Phase 4: human login UX
+### Phase 5: headless human fallback
 
-- add browser PKCE login
 - add device code flow
 - add refresh token handling
 
-### Phase 5: resource-aware policy
+### Phase 6: resource-aware policy
 
 - move from tenant-wide scopes to namespace and document ACL integration
 - reduce trust in user-supplied `author_*` fields
@@ -397,8 +444,10 @@ Only store token hashes server-side for static bearer tokens.
 The highest-leverage next slice is:
 
 1. Add bearer-token auth context to the server.
-2. Add service principals and tenant-scoped service tokens.
-3. Add CLI `--token`, env, `token_file`, and `~/.llm-wiki/` profile support.
-4. Keep browser OAuth as the next phase after that plumbing is working.
+2. Add OAuth account linkage and first-login user provisioning.
+3. Add personal default-tenant auto provisioning and membership bootstrap.
+4. Move CLI to browser-first login with localhost callback and `~/.llm-wiki/` profile persistence.
+5. Keep device code as explicit fallback for constrained environments.
+6. Add service principals and tenant-scoped service tokens after the human hosted flow is solid.
 
-That gets secure cloud and K8s usage first, while leaving the Codex-style human login flow as a thin layer over the same auth substrate.
+That gets the real hosted user journey working first, while still leaving service-token plumbing on the same auth substrate.

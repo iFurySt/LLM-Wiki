@@ -79,6 +79,12 @@ func (c *Client) StartBrowserLogin(ctx context.Context, req api.StartBrowserLogi
 	return resp, err
 }
 
+func (c *Client) ListOAuthProviders(ctx context.Context) (api.ListOAuthProvidersResponse, error) {
+	var resp api.ListOAuthProvidersResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/auth/providers", nil, &resp)
+	return resp, err
+}
+
 func (c *Client) StartDeviceLogin(ctx context.Context, req api.StartDeviceLoginRequest) (api.StartDeviceLoginResponse, error) {
 	var resp api.StartDeviceLoginResponse
 	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/device/start", req, &resp)
@@ -88,6 +94,12 @@ func (c *Client) StartDeviceLogin(ctx context.Context, req api.StartDeviceLoginR
 func (c *Client) ExchangeToken(ctx context.Context, req api.TokenExchangeRequest) (api.TokenExchangeResponse, error) {
 	var resp api.TokenExchangeResponse
 	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/token", req, &resp)
+	return resp, err
+}
+
+func (c *Client) SwitchTenant(ctx context.Context, tenantID string) (api.TokenExchangeResponse, error) {
+	var resp api.TokenExchangeResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/switch-tenant", api.SwitchTenantRequest{TenantID: tenantID}, &resp)
 	return resp, err
 }
 
@@ -124,6 +136,36 @@ func (c *Client) RevokeToken(ctx context.Context, tokenID int64) (api.TokenRespo
 func (c *Client) ListSpaces(ctx context.Context) (api.ListSpacesResponse, error) {
 	var resp api.ListSpacesResponse
 	err := c.doJSON(ctx, http.MethodGet, "/v1/spaces", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) ListWorkspaces(ctx context.Context) (api.ListWorkspacesResponse, error) {
+	var resp api.ListWorkspacesResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/workspaces", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) CreateWorkspace(ctx context.Context, req api.CreateWorkspaceRequest) (api.WorkspaceResponse, error) {
+	var resp api.WorkspaceResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/workspaces", req, &resp)
+	return resp, err
+}
+
+func (c *Client) ListInvites(ctx context.Context) (api.ListInvitesResponse, error) {
+	var resp api.ListInvitesResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/workspaces/invites", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) CreateInvite(ctx context.Context, req api.CreateInviteRequest) (api.InviteResponse, error) {
+	var resp api.InviteResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/workspaces/invites", req, &resp)
+	return resp, err
+}
+
+func (c *Client) AcceptInvite(ctx context.Context, token string) (api.WorkspaceResponse, error) {
+	var resp api.WorkspaceResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/workspaces/invites/accept", api.AcceptInviteRequest{InviteToken: token}, &resp)
 	return resp, err
 }
 

@@ -112,6 +112,42 @@ func (r *Repository) GetUserByUsername(ctx context.Context, tenantID string, use
 	return item, err
 }
 
+func (r *Repository) GetUserByPrincipalID(ctx context.Context, principalID string) (UserRecord, error) {
+	var item UserRecord
+	err := r.pool.QueryRow(ctx, `
+		SELECT id, principal_id, tenant_id, username, display_name, password_hash, is_admin, created_at
+		FROM users
+		WHERE principal_id = $1
+	`, principalID).Scan(
+		&item.ID,
+		&item.PrincipalID,
+		&item.TenantID,
+		&item.Username,
+		&item.DisplayName,
+		&item.PasswordHash,
+		&item.IsAdmin,
+		&item.CreatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return UserRecord{}, ErrNotFound
+	}
+	return item, err
+}
+
+func (r *Repository) TenantExists(ctx context.Context, tenantID string) (bool, error) {
+	var exists bool
+	err := r.pool.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM users WHERE tenant_id = $1
+			UNION
+			SELECT 1 FROM principals WHERE tenant_id = $1
+			UNION
+			SELECT 1 FROM spaces WHERE tenant_id = $1
+		)
+	`, tenantID).Scan(&exists)
+	return exists, err
+}
+
 func (r *Repository) CreateWebSession(ctx context.Context, principalID string, tenantID string, ttl time.Duration) (WebSessionRecord, error) {
 	sessionID, err := auth.RandomID("ws", 16)
 	if err != nil {

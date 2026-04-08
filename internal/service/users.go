@@ -120,7 +120,7 @@ func (s *Service) ApproveAuthRequestWithPassword(ctx context.Context, requestID 
 	if err != nil {
 		return repository.AuthRequest{}, err
 	}
-	return s.repo.ApproveAuthRequestForPrincipal(ctx, request.ID, user.PrincipalID)
+	return s.ApproveAuthRequest(ctx, request.ID, user.DisplayName)
 }
 
 func (s *Service) ApproveDeviceCodeWithPassword(ctx context.Context, userCode string, username string, password string) (repository.AuthRequest, error) {
@@ -163,7 +163,30 @@ func userResponse(item repository.UserRecord) api.UserResponse {
 }
 
 func normalizeUsername(value string) string {
-	return strings.TrimSpace(strings.ToLower(value))
+	value = strings.TrimSpace(strings.ToLower(value))
+	value = strings.ReplaceAll(value, " ", "-")
+	value = strings.ReplaceAll(value, "_", "-")
+	if value == "" {
+		return value
+	}
+	var b strings.Builder
+	lastDash := false
+	for _, r := range value {
+		switch {
+		case r >= 'a' && r <= 'z':
+			b.WriteRune(r)
+			lastDash = false
+		case r >= '0' && r <= '9':
+			b.WriteRune(r)
+			lastDash = false
+		default:
+			if !lastDash {
+				b.WriteByte('-')
+				lastDash = true
+			}
+		}
+	}
+	return strings.Trim(b.String(), "-")
 }
 
 func adminScopes(isAdmin bool) []string {
