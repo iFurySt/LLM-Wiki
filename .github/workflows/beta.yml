@@ -83,7 +83,6 @@ jobs:
   deploy-amoylab:
     runs-on: ubuntu-latest
     needs: docker
-    if: ${{ secrets.AMOYLAB_HOST != '' && secrets.AMOYLAB_USER != '' && secrets.AMOYLAB_SSH_KEY != '' }}
 
     steps:
       - name: Checkout
