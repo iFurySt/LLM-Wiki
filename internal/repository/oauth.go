@@ -29,7 +29,7 @@ type OAuthAccountRecord struct {
 	ProviderName    string
 	ExternalSubject string
 	PrincipalID     string
-	TenantID        string
+	NS              string
 	Email           string
 	Username        string
 	DisplayName     string
@@ -38,7 +38,7 @@ type OAuthAccountRecord struct {
 
 type TenantInviteRecord struct {
 	ID                    int64
-	TenantID              string
+	NS                    string
 	Email                 string
 	Role                  string
 	InviteToken           string
@@ -175,7 +175,7 @@ func (r *Repository) UpsertOAuthProvider(ctx context.Context, item OAuthProvider
 func (r *Repository) GetOAuthAccount(ctx context.Context, providerName string, externalSubject string) (OAuthAccountRecord, error) {
 	var item OAuthAccountRecord
 	err := r.pool.QueryRow(ctx, `
-		SELECT id, provider_name, external_subject, principal_id, tenant_id, email, username, display_name, created_at
+		SELECT id, provider_name, external_subject, principal_id, ns, email, username, display_name, created_at
 		FROM oauth_accounts
 		WHERE provider_name = $1 AND external_subject = $2
 		ORDER BY created_at ASC
@@ -185,7 +185,7 @@ func (r *Repository) GetOAuthAccount(ctx context.Context, providerName string, e
 		&item.ProviderName,
 		&item.ExternalSubject,
 		&item.PrincipalID,
-		&item.TenantID,
+		&item.NS,
 		&item.Email,
 		&item.Username,
 		&item.DisplayName,
@@ -200,15 +200,15 @@ func (r *Repository) GetOAuthAccount(ctx context.Context, providerName string, e
 func (r *Repository) CreateOAuthAccount(ctx context.Context, item OAuthAccountRecord) (OAuthAccountRecord, error) {
 	var saved OAuthAccountRecord
 	err := r.pool.QueryRow(ctx, `
-		INSERT INTO oauth_accounts (provider_name, external_subject, principal_id, tenant_id, email, username, display_name)
+		INSERT INTO oauth_accounts (provider_name, external_subject, principal_id, ns, email, username, display_name)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, provider_name, external_subject, principal_id, tenant_id, email, username, display_name, created_at
-	`, item.ProviderName, item.ExternalSubject, item.PrincipalID, item.TenantID, item.Email, item.Username, item.DisplayName).Scan(
+		RETURNING id, provider_name, external_subject, principal_id, ns, email, username, display_name, created_at
+	`, item.ProviderName, item.ExternalSubject, item.PrincipalID, item.NS, item.Email, item.Username, item.DisplayName).Scan(
 		&saved.ID,
 		&saved.ProviderName,
 		&saved.ExternalSubject,
 		&saved.PrincipalID,
-		&saved.TenantID,
+		&saved.NS,
 		&saved.Email,
 		&saved.Username,
 		&saved.DisplayName,
@@ -220,7 +220,7 @@ func (r *Repository) CreateOAuthAccount(ctx context.Context, item OAuthAccountRe
 func (r *Repository) GetOAuthAccountByPrincipalID(ctx context.Context, principalID string) (OAuthAccountRecord, error) {
 	var item OAuthAccountRecord
 	err := r.pool.QueryRow(ctx, `
-		SELECT id, provider_name, external_subject, principal_id, tenant_id, email, username, display_name, created_at
+		SELECT id, provider_name, external_subject, principal_id, ns, email, username, display_name, created_at
 		FROM oauth_accounts
 		WHERE principal_id = $1
 	`, principalID).Scan(
@@ -228,7 +228,7 @@ func (r *Repository) GetOAuthAccountByPrincipalID(ctx context.Context, principal
 		&item.ProviderName,
 		&item.ExternalSubject,
 		&item.PrincipalID,
-		&item.TenantID,
+		&item.NS,
 		&item.Email,
 		&item.Username,
 		&item.DisplayName,
@@ -242,10 +242,10 @@ func (r *Repository) GetOAuthAccountByPrincipalID(ctx context.Context, principal
 
 func (r *Repository) ListOAuthAccountsByIdentity(ctx context.Context, providerName string, externalSubject string) ([]OAuthAccountRecord, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, provider_name, external_subject, principal_id, tenant_id, email, username, display_name, created_at
+		SELECT id, provider_name, external_subject, principal_id, ns, email, username, display_name, created_at
 		FROM oauth_accounts
 		WHERE provider_name = $1 AND external_subject = $2
-		ORDER BY tenant_id ASC
+		ORDER BY ns ASC
 	`, providerName, externalSubject)
 	if err != nil {
 		return nil, err
@@ -260,7 +260,7 @@ func (r *Repository) ListOAuthAccountsByIdentity(ctx context.Context, providerNa
 			&item.ProviderName,
 			&item.ExternalSubject,
 			&item.PrincipalID,
-			&item.TenantID,
+			&item.NS,
 			&item.Email,
 			&item.Username,
 			&item.DisplayName,
@@ -276,12 +276,12 @@ func (r *Repository) ListOAuthAccountsByIdentity(ctx context.Context, providerNa
 func (r *Repository) CreateTenantInvite(ctx context.Context, item TenantInviteRecord) (TenantInviteRecord, error) {
 	var saved TenantInviteRecord
 	err := r.pool.QueryRow(ctx, `
-		INSERT INTO tenant_invites (tenant_id, email, role, invite_token, invited_by_principal_id, expires_at)
+		INSERT INTO ns_invites (ns, email, role, invite_token, invited_by_principal_id, expires_at)
 		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, tenant_id, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
-	`, item.TenantID, item.Email, item.Role, item.InviteToken, item.InvitedByPrincipalID, item.ExpiresAt).Scan(
+		RETURNING id, ns, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
+	`, item.NS, item.Email, item.Role, item.InviteToken, item.InvitedByPrincipalID, item.ExpiresAt).Scan(
 		&saved.ID,
-		&saved.TenantID,
+		&saved.NS,
 		&saved.Email,
 		&saved.Role,
 		&saved.InviteToken,
@@ -296,9 +296,9 @@ func (r *Repository) CreateTenantInvite(ctx context.Context, item TenantInviteRe
 
 func (r *Repository) ListTenantInvites(ctx context.Context, tenantID string) ([]TenantInviteRecord, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, tenant_id, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
-		FROM tenant_invites
-		WHERE tenant_id = $1
+		SELECT id, ns, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
+		FROM ns_invites
+		WHERE ns = $1
 		ORDER BY created_at DESC
 	`, tenantID)
 	if err != nil {
@@ -310,7 +310,7 @@ func (r *Repository) ListTenantInvites(ctx context.Context, tenantID string) ([]
 		var item TenantInviteRecord
 		if err := rows.Scan(
 			&item.ID,
-			&item.TenantID,
+			&item.NS,
 			&item.Email,
 			&item.Role,
 			&item.InviteToken,
@@ -330,12 +330,12 @@ func (r *Repository) ListTenantInvites(ctx context.Context, tenantID string) ([]
 func (r *Repository) GetTenantInviteByToken(ctx context.Context, token string) (TenantInviteRecord, error) {
 	var item TenantInviteRecord
 	err := r.pool.QueryRow(ctx, `
-		SELECT id, tenant_id, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
-		FROM tenant_invites
+		SELECT id, ns, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
+		FROM ns_invites
 		WHERE invite_token = $1
 	`, token).Scan(
 		&item.ID,
-		&item.TenantID,
+		&item.NS,
 		&item.Email,
 		&item.Role,
 		&item.InviteToken,
@@ -354,13 +354,13 @@ func (r *Repository) GetTenantInviteByToken(ctx context.Context, token string) (
 func (r *Repository) AcceptTenantInvite(ctx context.Context, inviteID int64, principalID string) (TenantInviteRecord, error) {
 	var item TenantInviteRecord
 	err := r.pool.QueryRow(ctx, `
-		UPDATE tenant_invites
+		UPDATE ns_invites
 		SET accepted_by_principal_id = $1, accepted_at = NOW()
 		WHERE id = $2 AND accepted_at IS NULL
-		RETURNING id, tenant_id, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
+		RETURNING id, ns, email, role, invite_token, invited_by_principal_id, accepted_by_principal_id, accepted_at, expires_at, created_at
 	`, principalID, inviteID).Scan(
 		&item.ID,
-		&item.TenantID,
+		&item.NS,
 		&item.Email,
 		&item.Role,
 		&item.InviteToken,

@@ -52,7 +52,7 @@ lw version
 - web UI: `/ui`
 - HTTP API: `/v1/*`
 - MCP: `/mcp`
-- legacy SSE: `/sse`
+- SSE: `/sse`
 - hosted install guide: `/install/LLM-Wiki.md`
 
 ## Repo Map

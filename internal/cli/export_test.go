@@ -12,7 +12,7 @@ import (
 func TestRenderObsidianMarkdownIncludesFrontmatterAndBody(t *testing.T) {
 	doc := api.DocumentResponse{
 		ID:                42,
-		NamespaceID:       9,
+		FolderID:          9,
 		Slug:              "hello-world",
 		Title:             "Hello World",
 		Content:           "Body text",
@@ -41,16 +41,16 @@ func TestRenderObsidianMarkdownIncludesFrontmatterAndBody(t *testing.T) {
 
 func TestExportNSToObsidianWritesFolderTreeAndManifest(t *testing.T) {
 	dir := t.TempDir()
-	namespaces := []api.NamespaceResponse{
+	folders := []api.FolderResponse{
 		{ID: 1, Key: "Product Docs", DisplayName: "Product Docs"},
 		{ID: 2, Key: "Engineering/Spec", DisplayName: "Engineering Spec"},
 	}
 	documents := []api.DocumentResponse{
-		{ID: 10, NamespaceID: 1, Slug: "Vision Doc", Title: "Vision", Content: "North star", Status: "active", CurrentRevisionNo: 1, UpdatedAt: "2026-04-08T10:00:00Z"},
-		{ID: 11, NamespaceID: 2, Slug: "API:v1", Title: "API", Content: "Protocol", Status: "active", CurrentRevisionNo: 2, UpdatedAt: "2026-04-08T11:00:00Z"},
+		{ID: 10, FolderID: 1, Slug: "Vision Doc", Title: "Vision", Content: "North star", Status: "active", CurrentRevisionNo: 1, UpdatedAt: "2026-04-08T10:00:00Z"},
+		{ID: 11, FolderID: 2, Slug: "API:v1", Title: "API", Content: "Protocol", Status: "active", CurrentRevisionNo: 2, UpdatedAt: "2026-04-08T11:00:00Z"},
 	}
 
-	if err := exportNSToObsidian(dir, "team-alpha", namespaces, documents); err != nil {
+	if err := exportNSToObsidian(dir, "team-alpha", folders, documents); err != nil {
 		t.Fatalf("exportNSToObsidian returned error: %v", err)
 	}
 

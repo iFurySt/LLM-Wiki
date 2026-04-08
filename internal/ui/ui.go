@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"embed"
 	"html/template"
+	"io/fs"
+	"net/http"
 	"strings"
 
 	"github.com/yuin/goldmark"
@@ -11,8 +13,8 @@ import (
 	rendererhtml "github.com/yuin/goldmark/renderer/html"
 )
 
-//go:embed templates/*.html
-var templateFS embed.FS
+//go:embed templates/*.html assets/*
+var embeddedFS embed.FS
 
 func ParseTemplates() (*template.Template, error) {
 	markdown := goldmark.New(
@@ -44,5 +46,13 @@ func ParseTemplates() (*template.Template, error) {
 			}
 			return template.HTML(buf.String())
 		},
-	}).ParseFS(templateFS, "templates/*.html")
+	}).ParseFS(embeddedFS, "templates/*.html")
+}
+
+func AssetFS() (http.FileSystem, error) {
+	sub, err := fs.Sub(embeddedFS, "assets")
+	if err != nil {
+		return nil, err
+	}
+	return http.FS(sub), nil
 }

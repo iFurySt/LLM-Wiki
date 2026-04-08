@@ -45,18 +45,18 @@ func BenchmarkCreateAndGetDocument(b *testing.B) {
 	defer server.Close()
 
 	client := httpclient.New(server.URL, 10*time.Second, token)
-	namespace, err := client.CreateNamespace(ctx, api.CreateNamespaceRequest{
+	folder, err := client.CreateFolder(ctx, api.CreateFolderRequest{
 		Key:         "perf",
 		DisplayName: "Perf",
 	})
 	if err != nil {
-		b.Fatalf("create namespace: %v", err)
+		b.Fatalf("create folder: %v", err)
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		doc, err := client.CreateDocument(ctx, api.CreateDocumentRequest{
-			NamespaceID:   namespace.ID,
+			FolderID:      folder.ID,
 			Slug:          testutil.UniqueTenant("doc", i),
 			Title:         "Benchmark",
 			Content:       "payload",

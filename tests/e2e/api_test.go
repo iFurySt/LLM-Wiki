@@ -49,18 +49,18 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 
 	client := httpclient.New(server.URL, 10_000_000_000, token)
 
-	namespace, err := client.CreateNamespace(ctx, api.CreateNamespaceRequest{
+	folder, err := client.CreateFolder(ctx, api.CreateFolderRequest{
 		Key:         "org",
 		DisplayName: "Org",
-		Description: "tenant-wide knowledge",
-		Visibility:  "tenant",
+		Description: "ns-wide knowledge",
+		Visibility:  "ns",
 	})
 	if err != nil {
-		t.Fatalf("create namespace: %v", err)
+		t.Fatalf("create folder: %v", err)
 	}
 
 	document, err := client.CreateDocument(ctx, api.CreateDocumentRequest{
-		NamespaceID:   namespace.ID,
+		FolderID:      folder.ID,
 		Slug:          "product-brief",
 		Title:         "Product Brief",
 		Content:       "# LLM-Wiki",
@@ -100,7 +100,7 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 		t.Fatalf("unexpected title: %q", fetched.Title)
 	}
 
-	bySlug, err := client.GetDocumentBySlug(ctx, namespace.ID, "product-brief")
+	bySlug, err := client.GetDocumentBySlug(ctx, folder.ID, "product-brief")
 	if err != nil {
 		t.Fatalf("get document by slug: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 		t.Fatalf("slug lookup returned wrong document: %d", bySlug.ID)
 	}
 
-	listed, err := client.ListDocuments(ctx, &namespace.ID, nil)
+	listed, err := client.ListDocuments(ctx, &folder.ID, nil)
 	if err != nil {
 		t.Fatalf("list documents: %v", err)
 	}

@@ -8,7 +8,7 @@ import (
 type Principal struct {
 	PrincipalID   string
 	PrincipalType string
-	TenantID      string
+	NS            string
 	DisplayName   string
 	Scopes        []string
 	TokenID       int64
@@ -20,9 +20,9 @@ type contextKey string
 const principalContextKey contextKey = "llm_wiki_principal"
 
 const (
-	ScopeSpacesRead       = "spaces.read"
-	ScopeNamespacesRead   = "namespaces.read"
-	ScopeNamespacesWrite  = "namespaces.write"
+	ScopeNSRead           = "ns.read"
+	ScopeFoldersRead      = "namens.read"
+	ScopeFoldersWrite     = "folders.write"
 	ScopeDocumentsRead    = "documents.read"
 	ScopeDocumentsWrite   = "documents.write"
 	ScopeDocumentsArchive = "documents.archive"
@@ -30,7 +30,7 @@ const (
 	ScopeMCPInvoke        = "mcp.invoke"
 	ScopeTokensIssue      = "tokens.issue"
 	ScopeTokensRevoke     = "tokens.revoke"
-	ScopeAdminTenants     = "admin.tenants"
+	ScopeAdminNS          = "admin.ns"
 )
 
 func WithPrincipal(ctx context.Context, principal Principal) context.Context {

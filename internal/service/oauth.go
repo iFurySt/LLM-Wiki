@@ -61,7 +61,7 @@ func (s *Service) UpsertOAuthProvider(ctx context.Context, req api.UpsertOAuthPr
 		Scopes:            uniqueScopes(req.Scopes),
 		Enabled:           req.Enabled,
 		AutoCreateUsers:   req.AutoCreateUsers,
-		AutoCreateTenants: req.AutoCreateTenants,
+		AutoCreateTenants: req.AutoCreateNS,
 	})
 	if err != nil {
 		return api.OAuthProviderResponse{}, err
@@ -122,7 +122,7 @@ func (s *Service) CompleteOAuthBrowserLogin(ctx context.Context, requestID strin
 	if err != nil {
 		return repository.AuthRequest{}, err
 	}
-	request.TenantID = tenantID
+	request.NS = tenantID
 	request.DisplayName = displayName
 	return s.repo.ApproveAuthRequestForPrincipal(ctx, request.ID, principalID)
 }
@@ -134,7 +134,7 @@ func (s *Service) resolveOrProvisionOAuthPrincipal(ctx context.Context, provider
 		if err != nil {
 			return "", "", "", err
 		}
-		return principal.ID, principal.TenantID, principal.DisplayName, nil
+		return principal.ID, principal.NS, principal.DisplayName, nil
 	}
 	if err != repository.ErrNotFound {
 		return "", "", "", err
@@ -168,7 +168,7 @@ func (s *Service) resolveOrProvisionOAuthPrincipal(ctx context.Context, provider
 		ProviderName:    provider.Name,
 		ExternalSubject: identity.Subject,
 		PrincipalID:     user.PrincipalID,
-		TenantID:        user.TenantID,
+		NS:              user.NS,
 		Email:           identity.Email,
 		Username:        user.Username,
 		DisplayName:     user.DisplayName,
@@ -176,13 +176,13 @@ func (s *Service) resolveOrProvisionOAuthPrincipal(ctx context.Context, provider
 	if err != nil {
 		return "", "", "", err
 	}
-	return user.PrincipalID, user.TenantID, user.DisplayName, nil
+	return user.PrincipalID, user.NS, user.DisplayName, nil
 }
 
 func (s *Service) allocatePersonalTenantID(ctx context.Context, identity oauthIdentity) (string, error) {
-	base := normalizeKey(firstNonEmpty(identity.Username, emailLocalPart(identity.Email), identity.DisplayName, "workspace"))
+	base := normalizeKey(firstNonEmpty(identity.Username, emailLocalPart(identity.Email), identity.DisplayName, "ns"))
 	if base == "" {
-		base = "workspace"
+		base = "ns"
 	}
 	for i := 0; i < 100; i++ {
 		candidate := base
@@ -197,7 +197,7 @@ func (s *Service) allocatePersonalTenantID(ctx context.Context, identity oauthId
 			return candidate, nil
 		}
 	}
-	return "", fmt.Errorf("unable to allocate tenant id")
+	return "", fmt.Errorf("unable to allocate ns")
 }
 
 func fetchOAuthIdentity(ctx context.Context, provider repository.OAuthProviderRecord, code string, redirectURI string) (oauthIdentity, error) {
@@ -265,14 +265,14 @@ func fetchOAuthIdentity(ctx context.Context, provider repository.OAuthProviderRe
 
 func oauthProviderResponse(item repository.OAuthProviderRecord, includeSecrets bool) api.OAuthProviderResponse {
 	resp := api.OAuthProviderResponse{
-		Name:              item.Name,
-		DisplayName:       item.DisplayName,
-		Scopes:            item.Scopes,
-		Enabled:           item.Enabled,
-		AutoCreateUsers:   item.AutoCreateUsers,
-		AutoCreateTenants: item.AutoCreateTenants,
-		CreatedAt:         item.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:         item.UpdatedAt.Format(time.RFC3339),
+		Name:            item.Name,
+		DisplayName:     item.DisplayName,
+		Scopes:          item.Scopes,
+		Enabled:         item.Enabled,
+		AutoCreateUsers: item.AutoCreateUsers,
+		AutoCreateNS:    item.AutoCreateTenants,
+		CreatedAt:       item.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       item.UpdatedAt.Format(time.RFC3339),
 	}
 	if includeSecrets {
 		resp.AuthURL = item.AuthURL

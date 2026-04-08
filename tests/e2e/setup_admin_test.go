@@ -53,7 +53,7 @@ func TestSetupAndAdminUserManagement(t *testing.T) {
 	}
 
 	form := url.Values{
-		"tenant_id":    {"default"},
+		"ns":           {"default"},
 		"username":     {"admin"},
 		"display_name": {"Workspace Admin"},
 		"password":     {"secret123"},

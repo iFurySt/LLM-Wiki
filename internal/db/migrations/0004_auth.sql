@@ -1,17 +1,17 @@
 CREATE TABLE IF NOT EXISTS principals (
     id TEXT PRIMARY KEY,
-    tenant_id TEXT NOT NULL,
+    ns TEXT NOT NULL,
     principal_type TEXT NOT NULL,
     display_name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (tenant_id, principal_type, display_name)
+    UNIQUE (ns, principal_type, display_name)
 );
 
 CREATE TABLE IF NOT EXISTS api_tokens (
     id BIGSERIAL PRIMARY KEY,
     token_type TEXT NOT NULL,
     principal_id TEXT NOT NULL REFERENCES principals(id) ON DELETE CASCADE,
-    tenant_id TEXT NOT NULL,
+    ns TEXT NOT NULL,
     display_name TEXT NOT NULL,
     token_hash TEXT NOT NULL UNIQUE,
     token_prefix TEXT NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS api_tokens (
 CREATE TABLE IF NOT EXISTS auth_requests (
     id TEXT PRIMARY KEY,
     flow_type TEXT NOT NULL,
-    tenant_id TEXT NOT NULL,
+    ns TEXT NOT NULL,
     display_name TEXT NOT NULL DEFAULT '',
     scopes_json TEXT NOT NULL DEFAULT '[]',
     state TEXT NOT NULL DEFAULT '',

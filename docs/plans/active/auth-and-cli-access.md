@@ -16,7 +16,7 @@ Add a real identity and authorization model for LLM-Wiki that works across:
 The current model is still bootstrap-grade:
 
 - CLI is only a thin HTTP wrapper with `base-url` and `ns`
-- HTTP and MCP integrations still rely on `X-LLM-Wiki-Tenant-ID`
+- HTTP and MCP integrations still rely on `X-LLM-Wiki-NS`
 - there is no first-class user, session, or service principal identity
 - there is no central token issuance or revocation model
 - `ns` creation still reads too much like an admin-only provisioning concern
@@ -44,7 +44,7 @@ Core fields:
 
 - `principal_type`: `user`, `service`, `agent_session`, or `admin`
 - `principal_id`
-- `tenant_id`
+- `ns`
 - `space_ids`
 - `team_ids`
 - `scopes`
@@ -89,13 +89,13 @@ profiles:
       access_token: ""
       refresh_token: ""
       expires_at: ""
-    tenant_id: tenant_a
+    ns: tenant_a
   ci:
     base_url: https://llm-wiki.example.com
     auth:
       mode: token
       token_file: /var/run/secrets/llm-wiki/token
-    tenant_id: tenant_a
+    ns: tenant_a
 ```
 
 Recommended credential precedence:
@@ -110,7 +110,7 @@ This keeps local and cloud usage predictable.
 CLI login should update this profile automatically after successful auth, including:
 
 - `base_url`
-- selected or default `tenant_id`
+- selected or default `ns`
 - access token metadata
 - refresh token metadata when present
 - optional user display information for profile introspection
@@ -191,9 +191,9 @@ Start with coarse scopes, then add resource constraints.
 
 Base scopes:
 
-- `spaces.read`
-- `namespaces.read`
-- `namespaces.write`
+- `ns.read`
+- `namens.read`
+- `folders.write`
 - `documents.read`
 - `documents.write`
 - `documents.archive`
@@ -201,13 +201,13 @@ Base scopes:
 - `mcp.invoke`
 - `tokens.issue`
 - `tokens.revoke`
-- `admin.tenants`
+- `admin.ns`
 
 Resource restrictions:
 
 - `ns`-bound
 - optionally restricted to selected folders
-- optionally restricted to selected API namespace resources
+- optionally restricted to selected API folder resources
 - optional read-only or write-only mode
 
 Token examples:
@@ -235,7 +235,7 @@ Suggested internal packages:
 Suggested HTTP changes:
 
 - `Authorization: Bearer <token>` becomes the primary auth input
-- `X-LLM-Wiki-Tenant-ID` becomes optional legacy compatibility only
+- `X-LLM-Wiki-NS` becomes optional legacy compatibility only
 - if both are present, the authenticated token grant wins and mismatches are rejected
 
 ## OAuth Deployment Model
@@ -372,7 +372,7 @@ Likely new persistence entities:
 Fields each token record should keep:
 
 - `id`
-- `tenant_id`
+- `ns`
 - `principal_type`
 - `principal_id`
 - `display_name`

@@ -2,11 +2,11 @@ ALTER TABLE oauth_accounts
 DROP CONSTRAINT IF EXISTS oauth_accounts_provider_name_external_subject_key;
 
 ALTER TABLE oauth_accounts
-ADD CONSTRAINT oauth_accounts_provider_subject_tenant_key UNIQUE (provider_name, external_subject, tenant_id);
+ADD CONSTRAINT oauth_accounts_provider_subject_tenant_key UNIQUE (provider_name, external_subject, ns);
 
-CREATE TABLE IF NOT EXISTS tenant_invites (
+CREATE TABLE IF NOT EXISTS ns_invites (
     id BIGSERIAL PRIMARY KEY,
-    tenant_id TEXT NOT NULL,
+    ns TEXT NOT NULL,
     email TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'member',
     invite_token TEXT NOT NULL UNIQUE,
@@ -17,4 +17,4 @@ CREATE TABLE IF NOT EXISTS tenant_invites (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_tenant_invites_tenant_email ON tenant_invites (tenant_id, email);
+CREATE INDEX IF NOT EXISTS idx_tenant_invites_tenant_email ON ns_invites (ns, email);

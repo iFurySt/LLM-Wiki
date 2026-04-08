@@ -74,7 +74,7 @@ func Load() (Config, error) {
 		},
 		Auth: AuthConfig{
 			BootstrapToken:         v.GetString("auth.bootstrap_token"),
-			BootstrapTenantID:      v.GetString("auth.bootstrap_tenant_id"),
+			BootstrapTenantID:      v.GetString("auth.bootstrap_ns"),
 			BootstrapPrincipalName: v.GetString("auth.bootstrap_principal_name"),
 		},
 		Install: InstallConfig{
@@ -112,7 +112,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("cli.base_url", "http://127.0.0.1:8234")
 	v.SetDefault("cli.timeout", "10s")
 	v.SetDefault("auth.bootstrap_token", "dev-bootstrap-token")
-	v.SetDefault("auth.bootstrap_tenant_id", "default")
+	v.SetDefault("auth.bootstrap_ns", "default")
 	v.SetDefault("auth.bootstrap_principal_name", "bootstrap-admin")
 	v.SetDefault("install.base_url", "")
 

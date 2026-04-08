@@ -9,7 +9,7 @@ Use it when you want one durable backend for documents, revisions, and shared ag
 Remote MCP:
 
 - `https://llm-wiki.ifuryst.com/mcp`
-- legacy SSE: `https://llm-wiki.ifuryst.com/sse`
+- SSE: `https://llm-wiki.ifuryst.com/sse`
 
 Example:
 
@@ -69,8 +69,8 @@ docker run --rm -p 8234:8234 \
 
 ## Main Endpoints
 
-- `GET /v1/namespaces`
-- `POST /v1/namespaces`
+- `GET /v1/folders`
+- `POST /v1/folders`
 - `GET /v1/documents`
 - `POST /v1/documents`
 - `GET /v1/documents/:id`

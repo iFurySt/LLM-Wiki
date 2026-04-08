@@ -17,7 +17,7 @@ type obsidianManifest struct {
 	DocCount   int    `json:"doc_count"`
 }
 
-func exportNSToObsidian(outputDir string, ns string, namespaces []api.NamespaceResponse, documents []api.DocumentResponse) error {
+func exportNSToObsidian(outputDir string, ns string, folders []api.FolderResponse, documents []api.DocumentResponse) error {
 	root := strings.TrimSpace(outputDir)
 	if root == "" {
 		return fmt.Errorf("output directory is required")
@@ -26,15 +26,15 @@ func exportNSToObsidian(outputDir string, ns string, namespaces []api.NamespaceR
 		return err
 	}
 
-	namespaceKeys := make(map[int64]string, len(namespaces))
-	namespaceNames := make(map[int64]string, len(namespaces))
-	for _, item := range namespaces {
+	namespaceKeys := make(map[int64]string, len(folders))
+	namespaceNames := make(map[int64]string, len(folders))
+	for _, item := range folders {
 		namespaceKeys[item.ID] = sanitizePathSegment(item.Key)
 		namespaceNames[item.ID] = item.DisplayName
 	}
 
 	for _, item := range documents {
-		nsKey := namespaceKeys[item.NamespaceID]
+		nsKey := namespaceKeys[item.FolderID]
 		if nsKey == "" {
 			nsKey = "unknown"
 		}
@@ -46,7 +46,7 @@ func exportNSToObsidian(outputDir string, ns string, namespaces []api.NamespaceR
 		if filename == "" {
 			filename = fmt.Sprintf("document-%d", item.ID)
 		}
-		body := renderObsidianMarkdown(item, ns, nsKey, namespaceNames[item.NamespaceID])
+		body := renderObsidianMarkdown(item, ns, nsKey, namespaceNames[item.FolderID])
 		if err := os.WriteFile(filepath.Join(dir, filename+".md"), []byte(body), 0o644); err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func renderObsidianMarkdown(item api.DocumentResponse, ns string, folderKey stri
 		b.WriteString("folder_name: " + yamlScalar(folderName) + "\n")
 	}
 	b.WriteString(fmt.Sprintf("document_id: %d\n", item.ID))
-	b.WriteString(fmt.Sprintf("folder_id: %d\n", item.NamespaceID))
+	b.WriteString(fmt.Sprintf("folder_id: %d\n", item.FolderID))
 	b.WriteString("slug: " + yamlScalar(item.Slug) + "\n")
 	b.WriteString("title: " + yamlScalar(item.Title) + "\n")
 	b.WriteString("status: " + yamlScalar(item.Status) + "\n")

@@ -54,11 +54,11 @@
   background: var(--background-secondary);
 }
 
-.llm-wiki-live-namespace + .llm-wiki-live-namespace {
+.llm-wiki-live-folder + .llm-wiki-live-folder {
   margin-top: 12px;
 }
 
-.llm-wiki-live-namespace-title {
+.llm-wiki-live-folder-title {
   font-weight: 700;
   margin-bottom: 6px;
 }

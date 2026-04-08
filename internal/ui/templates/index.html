@@ -8,66 +8,53 @@
     :root,
     :root[data-theme="dark"] {
       color-scheme: dark;
-      --bg: #121212;
-      --bg-grid: rgba(255, 255, 255, 0.04);
-      --panel: #1a1a1a;
-      --panel-raised: #242424;
-      --panel-soft: #161616;
-      --panel-muted: #1f1f1f;
-      --text: #f5f1e8;
-      --muted: #b8b0a2;
-      --accent: #f2c94c;
-      --accent-2: #fff1bf;
-      --accent-3: #7ee0d6;
-      --danger: #ff7676;
-      --success: #88e48f;
-      --border: #080808;
-      --shadow: rgba(0, 0, 0, 0.46);
-      --pixel: "Courier New", "SFMono-Regular", Consolas, monospace;
-      --body: "Trebuchet MS", "Verdana", sans-serif;
+      --bg: #0b0d12;
+      --bg-soft: #11141c;
+      --panel: rgba(18, 22, 30, 0.82);
+      --panel-2: rgba(24, 30, 40, 0.86);
+      --panel-3: rgba(31, 39, 53, 0.92);
+      --text: #f3f6fb;
+      --muted: #8d99ab;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.14);
+      --accent: #8bb8ff;
+      --accent-soft: rgba(139, 184, 255, 0.16);
+      --success: #78d998;
+      --warning: #ffb86b;
+      --danger: #ff8f8f;
+      --shadow: rgba(0, 0, 0, 0.34);
     }
 
     :root[data-theme="light"] {
       color-scheme: light;
-      --bg: #eee8d8;
-      --bg-grid: rgba(70, 56, 36, 0.10);
-      --panel: #fff8ea;
-      --panel-raised: #ffe9ad;
-      --panel-soft: #fffdf7;
-      --panel-muted: #f5ecd7;
-      --text: #2a241a;
-      --muted: #6d5d49;
-      --accent: #d59a12;
-      --accent-2: #8b6200;
-      --accent-3: #12756b;
-      --danger: #c94d4d;
-      --success: #237f4d;
-      --border: #5a4022;
-      --shadow: rgba(58, 32, 8, 0.18);
+      --bg: #f4f7fb;
+      --bg-soft: #ecf1f8;
+      --panel: #ffffff;
+      --panel-2: #f8fbff;
+      --panel-3: #edf3fb;
+      --text: #1a2230;
+      --muted: #5d6b80;
+      --line: #d7e0ec;
+      --line-strong: #c1cede;
+      --accent: #1f6feb;
+      --accent-soft: rgba(31, 111, 235, 0.10);
+      --success: #1c8c53;
+      --warning: #a56500;
+      --danger: #c44646;
+      --shadow: rgba(44, 63, 88, 0.10);
     }
 
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
-      min-height: 100vh;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top center, rgba(139, 184, 255, 0.12), transparent 28%),
+        radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.05), transparent 22%),
+        linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 100%);
       color: var(--text);
-      font-family: var(--body);
-      background:
-        linear-gradient(var(--bg-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
-        radial-gradient(circle at top, rgba(242, 201, 76, 0.12), transparent 34%),
-        linear-gradient(180deg, #1c1c1c 0%, var(--bg) 48%, #0f0f0f 100%);
-      background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%;
-    }
-
-    :root[data-theme="light"] body {
-      background:
-        linear-gradient(var(--bg-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
-        radial-gradient(circle at top, rgba(213, 154, 18, 0.15), transparent 30%),
-        linear-gradient(180deg, #f4eddc 0%, var(--bg) 50%, #eadfca 100%);
-      background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     a {
@@ -75,31 +62,34 @@
       text-decoration: none;
     }
 
-    h1, h2, h3 {
-      margin: 0;
-      font-family: var(--pixel);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
     }
 
     .page {
-      max-width: 1520px;
+      max-width: 1540px;
       margin: 0 auto;
-      padding: 22px 18px 32px;
+      padding: 20px;
     }
 
-    .frame {
-      border: 4px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.08)), var(--panel);
-      box-shadow: 0 0 0 3px rgba(242, 201, 76, 0.12), 0 20px 40px var(--shadow);
+    .surface {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 16px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 18px 48px var(--shadow);
     }
 
     .topbar {
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 16px;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 18px;
       align-items: center;
-      padding: 14px 16px;
+      padding: 14px 18px;
       margin-bottom: 16px;
     }
 
@@ -107,507 +97,498 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      min-width: 0;
     }
 
     .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(135deg, rgba(139, 184, 255, 0.24), rgba(255,255,255,0.06));
+      color: var(--text);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 44px;
-      height: 44px;
-      border: 3px solid var(--border);
-      background: var(--accent);
-      color: #191511;
-      font: 700 14px/1 var(--pixel);
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      flex: 0 0 auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
-    .eyebrow,
-    .tab,
-    .pill,
-    .tree-meta,
-    .copy-button,
-    button,
-    .theme-toggle button {
-      font-family: var(--pixel);
-      text-transform: uppercase;
+    .brand-copy {
+      min-width: 0;
     }
 
     .eyebrow {
-      color: var(--accent);
-      font-size: 11px;
-      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.02em;
     }
 
     .brand-title {
-      font: 700 18px/1 var(--pixel);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
     }
 
     .brand-subtitle {
-      margin-top: 4px;
+      margin-top: 2px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .tabs {
+    .tabs,
+    .theme-toggle,
+    .filter-row,
+    .meta-row,
+    .doc-meta-row,
+    .reader-actions,
+    .install-links {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
+      gap: 8px;
+      align-items: center;
     }
 
-    .tab {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 42px;
-      padding: 0 14px;
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
+    .tab,
+    .theme-toggle button,
+    .filter-pill,
+    .pill,
+    .copy-button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel-2);
       color: var(--muted);
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
-    }
-
-    .tab.active {
-      background: var(--accent);
-      color: #1a1610;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
-      padding: 6px;
-    }
-
-    .theme-toggle button {
-      min-width: 72px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      padding: 8px 10px;
-      box-shadow: none;
+      padding: 8px 13px;
+      transition: 120ms ease;
       cursor: pointer;
     }
 
-    .theme-toggle button.active {
-      background: var(--accent);
-      color: #1a1610;
+    .tab.active,
+    .theme-toggle button.active,
+    .filter-pill.active,
+    .copy-button {
+      color: var(--text);
+      border-color: rgba(108, 178, 255, 0.38);
+      background: var(--accent-soft);
+    }
+
+    .tab:hover,
+    .theme-toggle button:hover,
+    .filter-pill:hover,
+    .copy-button:hover {
+      color: var(--text);
+      border-color: var(--line-strong);
     }
 
     .flash {
       margin-bottom: 16px;
       padding: 12px 14px;
-      border: 3px solid var(--border);
-      background: rgba(242, 201, 76, 0.14);
-      font: 700 13px/1.4 var(--pixel);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
     }
 
-    .flash.success {
-      color: var(--success);
-    }
+    .flash.success { color: var(--success); }
 
     .shell {
       display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
+      grid-template-columns: 286px minmax(0, 1fr);
       gap: 16px;
       align-items: start;
     }
 
     .sidebar {
-      padding: 0;
       position: sticky;
-      top: 18px;
+      top: 16px;
+      overflow: hidden;
     }
 
-    .explorer {
-      display: grid;
-      min-height: 72vh;
-      grid-template-rows: auto 1fr;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel-soft);
+    .sidebar-head,
+    .reader-head,
+    .section-head,
+    .install-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
     }
 
-    .explorer-head {
-      padding: 16px;
-      border-bottom: 3px solid var(--border);
-      background: linear-gradient(135deg, rgba(242, 201, 76, 0.12), rgba(255,255,255,0.02)), var(--panel-raised);
+    .sidebar-head h2,
+    .reader-title,
+    .section-title,
+    .install-title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
     }
 
-    .explorer-body {
-      padding: 12px 10px 14px;
-      overflow: auto;
-    }
-
-    .panel {
-      padding: 14px;
-      border: 3px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel-soft);
-    }
-
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: start;
-      margin-bottom: 12px;
-    }
-
-    .panel-kicker,
-    .sub,
-    .desc,
-    .empty,
-    .tree-meta,
-    .doc-meta,
-    .install-copy,
-    .install-label,
+    .sidebar-head p,
+    .reader-subtitle,
+    .section-subtitle,
+    .install-subtitle,
+    .doc-subtitle,
     .revision-note,
-    .code-block,
-    .copy-feedback {
+    .copy-feedback,
+    .install-copy,
+    .empty {
+      margin: 6px 0 0;
       color: var(--muted);
+      font-size: 13px;
       line-height: 1.6;
-      font-size: 14px;
     }
 
-    .name {
-      font: 700 15px/1.35 var(--pixel);
+    .sidebar-body,
+    .reader-body,
+    .install-body {
+      padding: 16px;
+    }
+
+    .sidebar-head p {
+      margin-bottom: 0;
+    }
+
+    .tree-search {
+      margin-top: 12px;
+      position: relative;
+    }
+
+    .tree-search input {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 0 12px 0 36px;
+      outline: none;
+    }
+
+    .tree-search input::placeholder {
+      color: var(--muted);
+    }
+
+    .tree-search::before {
+      content: "⌕";
+      position: absolute;
+      left: 12px;
+      top: 9px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .mui-tree-shell {
+      margin-top: 8px;
+      min-height: 120px;
+    }
+
+    .mui-tree-empty {
+      padding: 8px 8px 8px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .mui-tree-item-title {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stats {
+      display: none;
+    }
+
+    .stat {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-2);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat-value {
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
     }
 
     .tree {
+      margin-top: 8px;
       display: grid;
-      gap: 4px;
+      gap: 0;
     }
 
-    .tree-group {
-      position: relative;
-      margin-left: 16px;
-    }
-
-    .tree-group::before {
-      content: "";
-      position: absolute;
-      left: -10px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: rgba(255,255,255,0.08);
-    }
-
-    .tree-group summary {
-      list-style: none;
-      cursor: pointer;
-      padding: 0;
+    .tree-root {
       display: flex;
-      align-items: stretch;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      background: rgba(108, 178, 255, 0.16);
+      color: var(--text);
     }
 
-    .tree-group summary::-webkit-details-marker {
+    .tree-root::before {
+      content: "▾";
+      color: var(--accent);
+      font-size: 13px;
+      width: 14px;
+      text-align: center;
+      flex: 0 0 auto;
+    }
+
+    .tree-root::after {
+      content: "";
+      width: 13px;
+      height: 10px;
+      border: 1px solid rgba(108, 178, 255, 0.6);
+      border-top-width: 4px;
+      border-radius: 2px;
+      flex: 0 0 auto;
+    }
+
+    .tree-root-title {
+      min-width: 0;
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    details.tree-group {
+      border-radius: 8px;
+      border: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    details.tree-group summary {
+      list-style: none;
+    }
+
+    details.tree-group summary::-webkit-details-marker {
       display: none;
     }
 
     .tree-row {
-      position: relative;
-      min-width: 0;
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
       align-items: center;
-      width: 100%;
-      min-height: 42px;
-      padding: 8px 10px 8px 14px;
-      border: 2px solid transparent;
-      background: transparent;
+      min-height: 30px;
+      padding: 5px 8px;
+      cursor: pointer;
+      border-radius: 6px;
     }
 
-    .tree-row::before {
-      content: "";
-      position: absolute;
-      left: -10px;
-      top: 20px;
-      width: 10px;
-      height: 2px;
-      background: rgba(255,255,255,0.08);
+    .tree-row:hover,
+    details.tree-group[open] .tree-row {
+      background: rgba(255, 255, 255, 0.035);
     }
 
     .tree-folder {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
       min-width: 0;
     }
 
     .tree-folder::before {
-      content: "▾";
-      color: var(--accent);
+      content: "▸";
+      color: var(--muted);
+      font-size: 13px;
       flex: 0 0 auto;
-      width: 10px;
+      width: 14px;
       text-align: center;
     }
 
-    .tree-group:not([open]) .tree-folder::before {
-      content: "▸";
+    .tree-folder::after {
+      content: "";
+      width: 12px;
+      height: 9px;
+      border: 1px solid var(--line-strong);
+      border-top-width: 4px;
+      border-radius: 2px;
+      background: transparent;
+      flex: 0 0 auto;
+    }
+
+    details.tree-group[open] .tree-folder::before {
+      content: "▾";
+      color: var(--accent);
+    }
+
+    .tree-folder-title,
+    .tree-file-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 500;
     }
 
     .tree-docs {
-      position: relative;
-      margin-left: 16px;
-      padding: 2px 0 4px;
       display: grid;
-      gap: 2px;
-    }
-
-    .tree-docs::before {
-      content: "";
-      position: absolute;
-      left: -10px;
-      top: 0;
-      bottom: 8px;
-      width: 2px;
-      background: rgba(255,255,255,0.08);
+      gap: 0;
+      padding: 0 0 2px 0;
     }
 
     .tree-link {
+      display: flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 8px 4px 42px;
+      border-radius: 6px;
+      color: var(--muted);
       position: relative;
-      display: grid;
-      gap: 2px;
-      padding: 8px 10px 8px 26px;
-      border: 2px solid transparent;
-      background: transparent;
-      min-height: 38px;
+      gap: 8px;
     }
 
     .tree-link::before {
       content: "";
       position: absolute;
-      left: -10px;
-      top: 18px;
-      width: 10px;
-      height: 2px;
-      background: rgba(255,255,255,0.08);
-    }
-
-    .tree-link::after {
-      content: "·";
-      position: absolute;
-      left: 14px;
-      top: 8px;
-      color: var(--accent-2);
-      font: 700 18px/1 var(--pixel);
+      left: 25px;
+      top: 7px;
+      width: 12px;
+      height: 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: 2px;
+      background:
+        linear-gradient(var(--line-strong), var(--line-strong)) top left / 100% 3px no-repeat,
+        transparent;
     }
 
     .tree-link:hover {
-      background: rgba(255,255,255,0.04);
-      border-color: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
     }
 
     .tree-link.selected {
-      background: linear-gradient(135deg, rgba(242, 201, 76, 0.18), rgba(255,255,255,0.03)), var(--panel-soft);
-      border-color: var(--accent);
-      box-shadow: inset 4px 0 0 var(--accent);
-    }
-
-    .tree-row:hover {
-      background: rgba(255,255,255,0.03);
-      border-color: rgba(255,255,255,0.06);
-    }
-
-    .tree-root {
-      display: grid;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .tree-root-row {
-      position: relative;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      min-height: 46px;
-      padding: 10px 12px;
-      border: 2px solid rgba(255,255,255,0.08);
-      background: linear-gradient(135deg, rgba(242, 201, 76, 0.12), rgba(255,255,255,0.02)), var(--panel-raised);
-    }
-
-    .tree-root-row::before {
-      content: "⌘";
-      color: var(--accent);
-      font: 700 14px/1 var(--pixel);
-      margin-right: 10px;
-    }
-
-    .tree-root-meta,
-    .tree-node-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      min-width: 0;
-    }
-
-    .tree-node-title {
-      min-width: 0;
-    }
-
-    .tree-count {
-      color: var(--muted);
-      font: 700 11px/1.4 var(--pixel);
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .tree-status {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 2px rgba(242, 201, 76, 0.15);
-    }
-
-    .tree-status.archived {
-      background: #ff7676;
-      box-shadow: 0 0 0 2px rgba(255, 118, 118, 0.15);
-    }
-
-    .tree-file-title {
+      background: rgba(108, 178, 255, 0.16);
       color: var(--text);
-      font: 700 12px/1.4 var(--pixel);
-      text-transform: uppercase;
-      word-break: break-word;
+    }
+
+    .tree-link.selected::before {
+      border-color: var(--accent);
+      background:
+        linear-gradient(var(--accent), var(--accent)) top left / 100% 3px no-repeat,
+        transparent;
+    }
+
+    .tree-meta-right,
+    .doc-meta-row {
+      justify-content: flex-end;
     }
 
     .pill {
-      display: inline-flex;
-      align-items: center;
-      min-height: 24px;
-      padding: 4px 8px;
-      border: 2px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
       font-size: 11px;
-      line-height: 1;
-    }
-
-    .pill.archived {
-      background: rgba(255, 118, 118, 0.16);
-      color: #ffd2d2;
+      padding: 4px 8px;
+      cursor: default;
     }
 
     .pill.active {
-      background: rgba(242, 201, 76, 0.16);
-      color: var(--accent-2);
+      color: var(--accent);
+      border-color: rgba(108, 178, 255, 0.28);
+      background: var(--accent-soft);
+    }
+
+    .pill.archived {
+      color: var(--danger);
+      background: rgba(255, 143, 143, 0.10);
+      border-color: rgba(255, 143, 143, 0.24);
     }
 
     .main {
       display: grid;
-      gap: 16px;
+      gap: 14px;
     }
 
-    .hero,
-    .section {
-      padding: 16px;
-      border: 4px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel);
-      box-shadow: 0 12px 26px var(--shadow);
+    .ns-bar,
+    .reader,
+    .section,
+    .install-grid > article {
+      overflow: hidden;
     }
 
-    .hero {
+    .ns-bar {
       display: grid;
-      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
-      gap: 16px;
-    }
-
-    .hero-title {
-      margin-top: 8px;
-      font-size: clamp(24px, 3.4vw, 38px);
-      line-height: 1.1;
-      max-width: 18ch;
-    }
-
-    .hero-copy {
-      margin-top: 12px;
-      max-width: 64ch;
-      color: var(--muted);
-      line-height: 1.65;
-    }
-
-    .stat-grid {
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .stat {
-      padding: 12px;
-      border: 3px solid var(--border);
-      background: var(--panel-raised);
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font: 700 11px/1.4 var(--pixel);
-      text-transform: uppercase;
-    }
-
-    .stat-value {
-      margin-top: 8px;
-      font: 700 28px/1 var(--pixel);
-      color: var(--accent);
-    }
-
-    .hero-note {
-      padding: 14px;
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
-      display: grid;
-      gap: 10px;
-      align-content: start;
-    }
-
-    .hero-note strong {
-      color: var(--accent);
-      font-family: var(--pixel);
-      text-transform: uppercase;
-      font-size: 12px;
-    }
-
-    .doc-header {
-      display: flex;
-      justify-content: space-between;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
-      align-items: start;
-      margin-bottom: 14px;
-    }
-
-    .doc-meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      padding: 16px 18px;
       align-items: center;
     }
 
+    .ns-copy {
+      min-width: 0;
+    }
+
+    .ns-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .ns-note {
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.16;
+      max-width: 16ch;
+    }
+
+    .reader-header-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .doc-title {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 42px);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+    }
+
+    .doc-subtitle {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
     .markdown-wrap {
-      margin-top: 14px;
-      padding: 14px;
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
       overflow: auto;
     }
 
     .markdown-body {
+      max-width: 84ch;
+      font-size: 16px;
+      line-height: 1.8;
       color: var(--text);
-      max-width: 82ch;
-      line-height: 1.7;
     }
 
     .markdown-body > :first-child {
@@ -621,25 +602,52 @@
     .markdown-body h1,
     .markdown-body h2,
     .markdown-body h3 {
-      margin: 1.2em 0 0.6em;
-      color: var(--accent);
-      font-size: 1.1em;
+      margin: 1.2em 0 0.55em;
+      line-height: 1.25;
     }
 
     .markdown-body code {
-      padding: 1px 5px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(0,0,0,0.24);
-      color: var(--accent-2);
-      font-family: var(--pixel);
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--line-strong);
+      background: rgba(0, 0, 0, 0.16);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
       font-size: 0.92em;
     }
 
     .markdown-body pre {
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--line-strong);
+      background: #0d1117;
       overflow: auto;
-      padding: 12px;
-      border: 3px solid var(--border);
-      background: #0d0d0d;
+    }
+
+    .revision-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .revision-card {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+
+    .revision-title {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .empty-state {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      border-radius: 12px;
+      border: 1px dashed var(--line-strong);
+      background: var(--panel-2);
     }
 
     .install-grid {
@@ -648,17 +656,16 @@
       gap: 14px;
     }
 
-    .install-card,
-    .revision-card {
-      padding: 14px;
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
+    .install-grid > article {
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 16px 40px var(--shadow);
     }
 
-    .install-card {
+    .install-body {
       display: grid;
-      gap: 12px;
-      align-content: start;
+      gap: 14px;
     }
 
     .copy-block {
@@ -669,127 +676,44 @@
     .copy-head {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
-    .copy-button,
-    button {
-      border: 3px solid var(--border);
-      background: var(--accent);
-      color: #24191a;
-      padding: 11px 12px;
-      font: 700 13px/1 var(--pixel);
-      cursor: pointer;
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.24);
-    }
-
-    .copy-button {
-      padding: 8px 10px;
-      min-width: 82px;
-    }
-
-    .copy-button.secondary {
-      background: var(--panel-raised);
-      color: var(--text);
-    }
-
-    .copy-feedback {
-      min-height: 1.4em;
+    .install-label {
+      color: var(--muted);
       font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .code-block {
       margin: 0;
-      padding: 12px;
-      border: 3px solid var(--border);
-      background: #0d0d0d;
-      color: var(--accent-2);
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #0d1117;
+      color: #d2e5ff;
+      font-size: 12px;
+      line-height: 1.65;
       white-space: pre-wrap;
       word-break: break-word;
-      font-family: var(--pixel);
-      font-size: 12px;
-      line-height: 1.6;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
     }
 
-    .revision-list,
-    .tool-stack {
-      display: grid;
-      gap: 10px;
-      margin-top: 16px;
+    #ui-content {
+      transition: opacity 120ms ease;
     }
 
-    details.tool-box {
-      border: 3px solid var(--border);
-      background: var(--panel-soft);
-    }
-
-    details.tool-box summary {
-      list-style: none;
-      cursor: pointer;
-      padding: 12px 14px;
-      font: 700 13px/1.3 var(--pixel);
-      text-transform: uppercase;
-    }
-
-    details.tool-box summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .tool-body {
-      padding: 0 14px 14px;
-    }
-
-    input,
-    select,
-    textarea,
-    button {
-      font: inherit;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      border: 3px solid var(--border);
-      background: #f3e9c8;
-      color: #24191a;
-      padding: 11px 12px;
-      border-radius: 0;
-    }
-
-    :root[data-theme="light"] input,
-    :root[data-theme="light"] select,
-    :root[data-theme="light"] textarea {
-      background: #fffaf0;
-      color: #2b2218;
-    }
-
-    textarea {
-      min-height: 140px;
-      resize: vertical;
-      line-height: 1.55;
-    }
-
-    .split {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .empty-state {
-      padding: 24px;
-      border: 3px dashed rgba(255,255,255,0.16);
-      background: rgba(255,255,255,0.03);
-      color: var(--muted);
-      text-align: center;
+    #ui-content.is-loading {
+      opacity: 0.82;
     }
 
     @media (max-width: 1180px) {
       .shell,
-      .hero,
       .install-grid,
-      .split {
+      .reader-header-grid,
+      .ns-bar {
         grid-template-columns: 1fr;
       }
 
@@ -798,17 +722,12 @@
       }
     }
 
-    @media (max-width: 940px) {
+    @media (max-width: 900px) {
       .topbar {
         grid-template-columns: 1fr;
       }
 
-      .tabs,
-      .top-actions {
-        justify-content: flex-start;
-      }
-
-      .stat-grid {
+      .stats {
         grid-template-columns: 1fr;
       }
     }
@@ -816,26 +735,23 @@
 </head>
 <body>
   <div class="page">
-    <header class="topbar frame">
+    <header class="topbar surface">
       <div class="brand">
-        <div class="brand-mark">DM</div>
-        <div>
-          <div class="eyebrow">Pixel Wiki</div>
+        <div class="brand-mark">LW</div>
+        <div class="brand-copy">
           <div class="brand-title">LLM-Wiki</div>
-          <div class="brand-subtitle">Wiki and install. Nothing more.</div>
+          <div class="brand-subtitle">Service-first knowledge ns for documents, revisions, and agents.</div>
         </div>
       </div>
 
       <nav class="tabs" aria-label="Top tabs">
-        <a class="tab {{ if eq .CurrentPage "wiki" }}active{{ end }}" href="/ui">Wiki</a>
-        <a class="tab {{ if eq .CurrentPage "install" }}active{{ end }}" href="/ui/install">Install</a>
+        <a class="tab {{ if eq .CurrentPage "wiki" }}active{{ end }}" href="/ui" data-ui-nav data-ui-tab="wiki">Workspace</a>
+        <a class="tab {{ if eq .CurrentPage "install" }}active{{ end }}" href="/ui/install" data-ui-nav data-ui-tab="install">Install</a>
       </nav>
 
-      <div class="top-actions">
-        <div class="theme-toggle" aria-label="Theme toggle">
-          <button type="button" data-theme-button="dark">Night</button>
-          <button type="button" data-theme-button="light">Day</button>
-        </div>
+      <div class="theme-toggle" aria-label="Theme toggle">
+        <button type="button" data-theme-button="dark">Dark</button>
+        <button type="button" data-theme-button="light">Light</button>
       </div>
     </header>
 
@@ -843,299 +759,22 @@
     <div class="flash {{ .Flash.Kind }}">{{ .Flash.Message }}</div>
     {{ end }}
 
-    {{ if eq .CurrentPage "wiki" }}
-    <div class="shell">
-      <aside class="sidebar frame">
-        <div class="explorer">
-          <div class="explorer-head">
-            <h2>Explorer</h2>
-            <div class="panel-kicker">Workspace tree like an IDE sidebar. Collections are folders, documents are files.</div>
-          </div>
-          <div class="explorer-body">
-            <div class="tree-root">
-              <div class="tree-root-row">
-                <div>
-                  <div class="name">{{ .TenantID }}</div>
-                  <div class="sub">workspace root</div>
-                </div>
-                <div class="tree-root-meta">
-                  <span class="tree-count">{{ .NamespaceCount }} dirs</span>
-                  <span class="tree-count">{{ .DocumentCount }} files</span>
-                </div>
-              </div>
-            </div>
-
-          <div class="tree">
-            {{ range .NamespaceTree }}
-            <details class="tree-group" {{ if or (eq $.SelectedNamespaceID .ID) (and $.SelectedDocument (eq $.SelectedDocument.NamespaceID .ID)) }}open{{ end }}>
-              <summary>
-                <div class="tree-row">
-                  <div class="tree-folder">
-                    <div class="tree-node-title">
-                      <div class="name">{{ .DisplayName }}</div>
-                      <div class="tree-meta">{{ .Key }}</div>
-                    </div>
-                  </div>
-                  <div class="tree-node-meta">
-                    <span class="tree-count">{{ .DocumentCount }} files</span>
-                    <span class="tree-status {{ .Status }}"></span>
-                  </div>
-                </div>
-              </summary>
-
-              <div class="tree-docs">
-                {{ range .Documents }}
-                <a class="tree-link {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}selected{{ end }}" href="/ui?document_id={{ .ID }}&namespace_id={{ .NamespaceID }}">
-                  <div class="tree-file-title">{{ .Title }}</div>
-                  <div class="tree-meta">{{ .Slug }}</div>
-                </a>
-                {{ else }}
-                <div class="empty">No documents in this collection.</div>
-                {{ end }}
-              </div>
-            </details>
-            {{ else }}
-            <div class="empty-state">No collections yet.</div>
-            {{ end }}
-          </div>
-        </div>
-        <!-- explorer -->
-      </aside>
-
-      <main class="main">
-        <section class="hero">
-          <div>
-            <div class="eyebrow">Wiki</div>
-            <h1 class="hero-title">Left side for navigation. Right side for reading.</h1>
-            <div class="hero-copy">
-              This page is only for browsing and reading wiki content. Document bodies render as markdown.
-            </div>
-            <div class="stat-grid">
-              <div class="stat">
-                <div class="stat-label">Collections</div>
-                <div class="stat-value">{{ .NamespaceCount }}</div>
-              </div>
-              <div class="stat">
-                <div class="stat-label">Documents</div>
-                <div class="stat-value">{{ .DocumentCount }}</div>
-              </div>
-              <div class="stat">
-                <div class="stat-label">Archived</div>
-                <div class="stat-value">{{ .ArchivedCount }}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="hero-note">
-            <div>
-              <strong>Selected tenant</strong>
-              <div class="desc">{{ .TenantID }}</div>
-            </div>
-            <div>
-              <strong>Rendering mode</strong>
-              <div class="desc">Markdown first.</div>
-            </div>
-            <div>
-              <strong>Install page</strong>
-              <div class="desc">Go to the separate install page for CLI, skill, and MCP setup.</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section">
-          {{ if .SelectedDocument }}
-          <div class="doc-header">
-            <div>
-              <div class="eyebrow">Document</div>
-              <h2>{{ .SelectedDocument.Title }}</h2>
-              <div class="doc-meta">{{ .SelectedDocument.Slug }} · namespace {{ .SelectedDocument.NamespaceID }}</div>
-            </div>
-            <span class="pill {{ .SelectedDocument.Status }}">{{ .SelectedDocument.Status }}</span>
-          </div>
-
-          <div class="doc-meta-row">
-            <span class="pill active">Doc {{ .SelectedDocument.ID }}</span>
-            <span class="pill">Revision {{ .SelectedDocument.CurrentRevisionNo }}</span>
-          </div>
-
-          <div class="markdown-wrap">
-            <div class="markdown-body">{{ markdown .SelectedDocument.Content }}</div>
-          </div>
-
-          <div class="tool-stack">
-            <details class="tool-box">
-              <summary>Revision History</summary>
-              <div class="tool-body">
-                <div class="revision-list">
-                  {{ range .SelectedDocument.Revisions }}
-                  <div class="revision-card">
-                    <div class="name">Revision {{ .RevisionNo }}</div>
-                    <div class="revision-note">{{ .CreatedAt }} · {{ .AuthorType }} / {{ .AuthorID }}</div>
-                    <div class="desc">{{ snippet .ChangeSummary 140 }}</div>
-                  </div>
-                  {{ else }}
-                  <div class="empty">No revisions found.</div>
-                  {{ end }}
-                </div>
-              </div>
-            </details>
-          </div>
-          {{ else }}
-          <div class="empty-state">Pick a document from the tree on the left.</div>
-          {{ end }}
-        </section>
-      </main>
+    <div id="ui-content">
+      {{ if eq .CurrentPage "wiki" }}
+      {{ template "ui_wiki_content.html" . }}
+      {{ else }}
+      {{ template "ui_install_content.html" . }}
+      {{ end }}
     </div>
-    {{ else }}
-    <main class="main">
-      <section class="hero">
-        <div>
-          <div class="eyebrow">Install</div>
-          <h1 class="hero-title">Three install paths. One page. Human and agent both covered.</h1>
-          <div class="hero-copy">
-            Each card gives you a ready-to-copy prompt for an AI agent, a canonical URL, and a direct shell command for humans.
-          </div>
-        </div>
-
-        <div class="hero-note">
-          <div>
-            <strong>Agent use</strong>
-            <div class="desc">Copy the prompt block and paste it into Codex or another agent.</div>
-          </div>
-          <div>
-            <strong>Human use</strong>
-            <div class="desc">Copy the bash block and run it directly.</div>
-          </div>
-          <div>
-            <strong>Current host</strong>
-            <div class="desc">{{ .InstallBaseURL }}</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="panel-head">
-          <div>
-            <h2>Install Paths</h2>
-            <div class="panel-kicker">CLI, skill, and MCP. Nothing else on this page.</div>
-          </div>
-        </div>
-
-        <div class="install-grid">
-          <article class="install-card">
-            <div>
-              <div class="eyebrow">CLI</div>
-              <h3>Install LLM-Wiki CLI</h3>
-              <div class="install-copy">Use the hosted shell installer to install the local CLI, then run commands against your LLM-Wiki server.</div>
-            </div>
-
-            <div class="copy-block">
-              <div class="copy-head">
-                <div class="install-label">Prompt For AI Agent</div>
-                <button type="button" class="copy-button" data-copy-target="cli-agent">Copy</button>
-              </div>
-              <pre id="cli-agent" class="code-block">Install and use the LLM-Wiki CLI for this workspace.
-
-Read:
-{{ .InstallDocURL }}
-
-Then run:
-curl -fsSL {{ .InstallScriptURL }} | sh
-
-After install, use:
-llm-wiki system info --base-url {{ .InstallBaseURL }}
-llm-wiki auth login --base-url {{ .InstallBaseURL }}</pre>
-            </div>
-
-            <div class="copy-block">
-              <div class="copy-head">
-                <div class="install-label">Command For Humans</div>
-                <button type="button" class="copy-button secondary" data-copy-target="cli-human">Copy</button>
-              </div>
-              <pre id="cli-human" class="code-block">curl -fsSL {{ .InstallScriptURL }} | sh
-llm-wiki system info --base-url {{ .InstallBaseURL }}
-llm-wiki auth login --base-url {{ .InstallBaseURL }}</pre>
-            </div>
-            <div class="copy-feedback" data-copy-feedback></div>
-          </article>
-
-          <article class="install-card">
-            <div>
-              <div class="eyebrow">Skill</div>
-              <h3>Install Skill Package</h3>
-              <div class="install-copy">Give the agent the hosted guide or the official packaged skill so it can follow your LLM-Wiki conventions directly.</div>
-            </div>
-
-            <div class="copy-block">
-              <div class="copy-head">
-                <div class="install-label">Prompt For AI Agent</div>
-                <button type="button" class="copy-button" data-copy-target="skill-agent">Copy</button>
-              </div>
-              <pre id="skill-agent" class="code-block">Read and follow this LLM-Wiki install guide:
-{{ .InstallDocURL }}
-
-If your runtime supports skill packages, install:
-{{ .InstallSkillURL }}
-
-Use LLM-Wiki as the shared wiki backend for this task.</pre>
-            </div>
-
-            <div class="copy-block">
-              <div class="copy-head">
-                <div class="install-label">Command For Humans</div>
-                <button type="button" class="copy-button secondary" data-copy-target="skill-human">Copy</button>
-              </div>
-              <pre id="skill-human" class="code-block">open {{ .InstallDocURL }}
-curl -O {{ .InstallSkillURL }}</pre>
-            </div>
-            <div class="copy-feedback" data-copy-feedback></div>
-          </article>
-
-          <article class="install-card">
-            <div>
-              <div class="eyebrow">MCP</div>
-              <h3>Connect Through MCP</h3>
-              <div class="install-copy">Use the local MCP bridge or the remote HTTP MCP endpoint so Codex or another client can talk to LLM-Wiki directly.</div>
-            </div>
-
-            <div class="copy-block">
-              <div class="copy-head">
-                <div class="install-label">Prompt For AI Agent</div>
-                <button type="button" class="copy-button" data-copy-target="mcp-agent">Copy</button>
-              </div>
-              <pre id="mcp-agent" class="code-block">Connect to the local LLM-Wiki MCP server.
-
-Remote MCP endpoint:
-{{ .MCPURL }}
-
-Auth header:
-Authorization: Bearer &lt;llm-wiki-token&gt;
-
-If local stdio MCP is preferred, run:
-LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }}</pre>
-            </div>
-
-            <div class="copy-block">
-              <div class="copy-head">
-                <div class="install-label">Command For Humans</div>
-                <button type="button" class="copy-button secondary" data-copy-target="mcp-human">Copy</button>
-              </div>
-              <pre id="mcp-human" class="code-block">npm install --prefix npm/llm-wiki-mcp --package-lock=false
-LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }}</pre>
-            </div>
-            <div class="copy-feedback" data-copy-feedback></div>
-          </article>
-        </div>
-      </section>
-    </main>
-    {{ end }}
   </div>
+
+  <script src="/ui/assets/llm-wiki-tree.js" defer></script>
   <script>
     (function() {
       var root = document.documentElement;
       var storageKey = "llm-wiki-theme";
       var buttons = document.querySelectorAll("[data-theme-button]");
-      var copyButtons = document.querySelectorAll("[data-copy-target]");
+      var contentRoot = document.getElementById("ui-content");
 
       function applyTheme(theme) {
         root.setAttribute("data-theme", theme);
@@ -1144,9 +783,86 @@ LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp
         });
       }
 
+      function pageForLocation(location) {
+        return location.pathname === "/ui/install" ? "install" : "wiki";
+      }
+
+      function fragmentURL(targetURL) {
+        var url = new URL(targetURL, window.location.origin);
+        if (url.pathname === "/ui") {
+          return "/ui/fragment/wiki" + url.search;
+        }
+        if (url.pathname === "/ui/install") {
+          return "/ui/fragment/install" + url.search;
+        }
+        return "";
+      }
+
+      function updateActiveTabs(page) {
+        document.querySelectorAll("[data-ui-tab]").forEach(function(tab) {
+          tab.classList.toggle("active", tab.getAttribute("data-ui-tab") === page);
+        });
+      }
+
+      function mountTreeFromDOM() {
+        if (window.LLMWikiTree && typeof window.LLMWikiTree.mountFromDOM === "function") {
+          window.LLMWikiTree.mountFromDOM();
+        }
+      }
+
+      function setLoading(loading) {
+        if (!contentRoot) {
+          return;
+        }
+        contentRoot.classList.toggle("is-loading", loading);
+        contentRoot.setAttribute("aria-busy", loading ? "true" : "false");
+      }
+
+      function replaceContent(html, targetURL, pushHistory) {
+        if (!contentRoot) {
+          window.location.assign(targetURL);
+          return;
+        }
+        contentRoot.innerHTML = html;
+        updateActiveTabs(pageForLocation(new URL(targetURL, window.location.origin)));
+        mountTreeFromDOM();
+        if (pushHistory) {
+          window.history.pushState({ url: targetURL }, "", targetURL);
+        }
+      }
+
+      function navigate(targetURL, options) {
+        var settings = options || {};
+        var fragment = fragmentURL(targetURL);
+        if (!fragment || !contentRoot) {
+          window.location.assign(targetURL);
+          return Promise.resolve();
+        }
+        setLoading(true);
+        return fetch(fragment, {
+          headers: {
+            "X-Requested-With": "fetch"
+          }
+        }).then(function(response) {
+          if (!response.ok) {
+            throw new Error("fragment request failed");
+          }
+          return response.text();
+        }).then(function(html) {
+          replaceContent(html, targetURL, settings.pushHistory !== false);
+        }).catch(function() {
+          window.location.assign(targetURL);
+        }).finally(function() {
+          setLoading(false);
+        });
+      }
+
+      window.LLMWikiUI = {
+        navigate: navigate
+      };
+
       var saved = localStorage.getItem(storageKey);
-      var initialTheme = saved === "light" || saved === "dark" ? saved : "dark";
-      applyTheme(initialTheme);
+      applyTheme(saved === "light" || saved === "dark" ? saved : "dark");
 
       buttons.forEach(function(button) {
         button.addEventListener("click", function() {
@@ -1156,28 +872,46 @@ LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp
         });
       });
 
-      copyButtons.forEach(function(button) {
-        button.addEventListener("click", function() {
-          var targetId = button.getAttribute("data-copy-target");
-          var target = document.getElementById(targetId);
-          if (!target) {
-            return;
+      document.addEventListener("click", function(event) {
+        if (!(event.target instanceof Element)) {
+          return;
+        }
+        var navLink = event.target.closest("[data-ui-nav]");
+        if (navLink && navLink.getAttribute("href")) {
+          event.preventDefault();
+          navigate(navLink.getAttribute("href"));
+          return;
+        }
+
+        var button = event.target.closest("[data-copy-target]");
+        if (!button) {
+          return;
+        }
+        var targetId = button.getAttribute("data-copy-target");
+        var target = document.getElementById(targetId);
+        if (!target) {
+          return;
+        }
+        navigator.clipboard.writeText(target.textContent).then(function() {
+          var card = button.closest("article");
+          var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
+          if (feedback) {
+            feedback.textContent = "Copied.";
           }
-          navigator.clipboard.writeText(target.textContent).then(function() {
-            var card = button.closest(".install-card");
-            var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
-            if (feedback) {
-              feedback.textContent = "Copied.";
-            }
-          }).catch(function() {
-            var card = button.closest(".install-card");
-            var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
-            if (feedback) {
-              feedback.textContent = "Copy failed.";
-            }
-          });
+        }).catch(function() {
+          var card = button.closest("article");
+          var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
+          if (feedback) {
+            feedback.textContent = "Copy failed.";
+          }
         });
       });
+
+      window.addEventListener("popstate", function() {
+        navigate(window.location.pathname + window.location.search, { pushHistory: false });
+      });
+
+      mountTreeFromDOM();
     })();
   </script>
 </body>

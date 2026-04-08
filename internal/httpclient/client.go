@@ -97,9 +97,9 @@ func (c *Client) ExchangeToken(ctx context.Context, req api.TokenExchangeRequest
 	return resp, err
 }
 
-func (c *Client) SwitchTenant(ctx context.Context, tenantID string) (api.TokenExchangeResponse, error) {
+func (c *Client) SwitchNS(ctx context.Context, ns string) (api.TokenExchangeResponse, error) {
 	var resp api.TokenExchangeResponse
-	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/switch-tenant", api.SwitchTenantRequest{TenantID: tenantID}, &resp)
+	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/switch-ns", api.SwitchNSRequest{NS: ns}, &resp)
 	return resp, err
 }
 
@@ -133,57 +133,57 @@ func (c *Client) RevokeToken(ctx context.Context, tokenID int64) (api.TokenRespo
 	return resp, err
 }
 
-func (c *Client) ListSpaces(ctx context.Context) (api.ListSpacesResponse, error) {
-	var resp api.ListSpacesResponse
-	err := c.doJSON(ctx, http.MethodGet, "/v1/spaces", nil, &resp)
+func (c *Client) ListNS(ctx context.Context) (api.ListNSResponse, error) {
+	var resp api.ListNSResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/ns", nil, &resp)
 	return resp, err
 }
 
-func (c *Client) ListWorkspaces(ctx context.Context) (api.ListWorkspacesResponse, error) {
-	var resp api.ListWorkspacesResponse
-	err := c.doJSON(ctx, http.MethodGet, "/v1/workspaces", nil, &resp)
-	return resp, err
-}
-
-func (c *Client) CreateWorkspace(ctx context.Context, req api.CreateWorkspaceRequest) (api.WorkspaceResponse, error) {
-	var resp api.WorkspaceResponse
-	err := c.doJSON(ctx, http.MethodPost, "/v1/workspaces", req, &resp)
+func (c *Client) CreateNS(ctx context.Context, req api.CreateNSRequest) (api.NSResponse, error) {
+	var resp api.NSResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/ns", req, &resp)
 	return resp, err
 }
 
 func (c *Client) ListInvites(ctx context.Context) (api.ListInvitesResponse, error) {
 	var resp api.ListInvitesResponse
-	err := c.doJSON(ctx, http.MethodGet, "/v1/workspaces/invites", nil, &resp)
+	err := c.doJSON(ctx, http.MethodGet, "/v1/ns/invites", nil, &resp)
 	return resp, err
 }
 
 func (c *Client) CreateInvite(ctx context.Context, req api.CreateInviteRequest) (api.InviteResponse, error) {
 	var resp api.InviteResponse
-	err := c.doJSON(ctx, http.MethodPost, "/v1/workspaces/invites", req, &resp)
+	err := c.doJSON(ctx, http.MethodPost, "/v1/ns/invites", req, &resp)
 	return resp, err
 }
 
-func (c *Client) AcceptInvite(ctx context.Context, token string) (api.WorkspaceResponse, error) {
-	var resp api.WorkspaceResponse
-	err := c.doJSON(ctx, http.MethodPost, "/v1/workspaces/invites/accept", api.AcceptInviteRequest{InviteToken: token}, &resp)
+func (c *Client) AcceptInvite(ctx context.Context, token string) (api.NSResponse, error) {
+	var resp api.NSResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/ns/invites/accept", api.AcceptInviteRequest{InviteToken: token}, &resp)
 	return resp, err
 }
 
-func (c *Client) CreateNamespace(ctx context.Context, req api.CreateNamespaceRequest) (api.NamespaceResponse, error) {
-	var resp api.NamespaceResponse
-	err := c.doJSON(ctx, http.MethodPost, "/v1/namespaces", req, &resp)
+func (c *Client) CreateFolder(ctx context.Context, req api.CreateFolderRequest) (api.FolderResponse, error) {
+	var resp api.FolderResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/folders", req, &resp)
 	return resp, err
 }
 
-func (c *Client) GetNamespace(ctx context.Context, namespaceID int64) (api.NamespaceResponse, error) {
-	var resp api.NamespaceResponse
-	err := c.doJSON(ctx, http.MethodGet, fmt.Sprintf("/v1/namespaces/%d", namespaceID), nil, &resp)
+func (c *Client) GetFolder(ctx context.Context, folderID int64) (api.FolderResponse, error) {
+	var resp api.FolderResponse
+	err := c.doJSON(ctx, http.MethodGet, fmt.Sprintf("/v1/folders/%d", folderID), nil, &resp)
 	return resp, err
 }
 
-func (c *Client) ListNamespaces(ctx context.Context) (api.ListNamespacesResponse, error) {
-	var resp api.ListNamespacesResponse
-	err := c.doJSON(ctx, http.MethodGet, "/v1/namespaces", nil, &resp)
+func (c *Client) ListFolders(ctx context.Context) (api.ListFoldersResponse, error) {
+	var resp api.ListFoldersResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/folders", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) ArchiveFolder(ctx context.Context, folderID int64) (api.FolderResponse, error) {
+	var resp api.FolderResponse
+	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/v1/folders/%d/archive", folderID), map[string]any{}, &resp)
 	return resp, err
 }
 
@@ -199,23 +199,23 @@ func (c *Client) GetDocument(ctx context.Context, documentID int64) (api.Documen
 	return resp, err
 }
 
-func (c *Client) GetDocumentBySlug(ctx context.Context, namespaceID int64, slug string) (api.DocumentResponse, error) {
+func (c *Client) GetDocumentBySlug(ctx context.Context, folderID int64, slug string) (api.DocumentResponse, error) {
 	var resp api.DocumentResponse
-	err := c.doJSON(ctx, http.MethodGet, fmt.Sprintf("/v1/document-by-slug?namespace_id=%d&slug=%s", namespaceID, slug), nil, &resp)
+	err := c.doJSON(ctx, http.MethodGet, fmt.Sprintf("/v1/document-by-slug?folder_id=%d&slug=%s", folderID, slug), nil, &resp)
 	return resp, err
 }
 
-func (c *Client) ListDocuments(ctx context.Context, namespaceID *int64, status *string) (api.ListDocumentsResponse, error) {
+func (c *Client) ListDocuments(ctx context.Context, folderID *int64, status *string) (api.ListDocumentsResponse, error) {
 	path := "/v1/documents"
 	query := make([]string, 0, 2)
-	if namespaceID != nil {
-		query = append(query, fmt.Sprintf("namespace_id=%d", *namespaceID))
+	if folderID != nil {
+		query = append(query, fmt.Sprintf("folder_id=%d", *folderID))
 	}
 	if status != nil && *status != "" {
 		query = append(query, fmt.Sprintf("status=%s", *status))
 	}
 	if len(query) > 0 {
-		path = path + "?" + strings.Join(query, "&")
+		path += "?" + strings.Join(query, "&")
 	}
 	var resp api.ListDocumentsResponse
 	err := c.doJSON(ctx, http.MethodGet, path, nil, &resp)
@@ -231,12 +231,6 @@ func (c *Client) UpdateDocument(ctx context.Context, documentID int64, req api.U
 func (c *Client) ArchiveDocument(ctx context.Context, documentID int64, req api.ArchiveDocumentRequest) (api.DocumentResponse, error) {
 	var resp api.DocumentResponse
 	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/v1/documents/%d/archive", documentID), req, &resp)
-	return resp, err
-}
-
-func (c *Client) ArchiveNamespace(ctx context.Context, namespaceID int64) (api.NamespaceResponse, error) {
-	var resp api.NamespaceResponse
-	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/v1/namespaces/%d/archive", namespaceID), map[string]any{}, &resp)
 	return resp, err
 }
 
@@ -269,10 +263,8 @@ func (c *Client) doJSON(ctx context.Context, method string, path string, reqBody
 
 	if resp.StatusCode >= 400 {
 		var payload api.ErrorResponse
-		if err := json.NewDecoder(resp.Body).Decode(&payload); err == nil {
-			if payload.Error.Message != "" {
-				return fmt.Errorf("%s: %s", payload.Error.Code, payload.Error.Message)
-			}
+		if err := json.NewDecoder(resp.Body).Decode(&payload); err == nil && payload.Error.Message != "" {
+			return fmt.Errorf("%s: %s", payload.Error.Code, payload.Error.Message)
 		}
 		return fmt.Errorf("unexpected status: %s", resp.Status)
 	}
@@ -284,8 +276,8 @@ func (c *Client) doJSON(ctx context.Context, method string, path string, reqBody
 }
 
 func (c *Client) applyHeaders(req *http.Request) {
-	req.Header.Set("Accept", "application/json")
 	if c.accessToken != "" {
 		req.Header.Set("Authorization", "Bearer "+c.accessToken)
 	}
+	req.Header.Set("Accept", "application/json")
 }

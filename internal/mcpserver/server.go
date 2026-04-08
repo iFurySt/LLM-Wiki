@@ -32,7 +32,7 @@ func NewManager(svc *service.Service) *Manager {
 }
 
 func (m *Manager) ServerForPrincipal(principal auth.Principal) *mcp.Server {
-	key := principal.TenantID + "|" + principal.PrincipalID + "|" + strings.Join(principal.Scopes, ",")
+	key := principal.NS + "|" + principal.PrincipalID + "|" + strings.Join(principal.Scopes, ",")
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -75,30 +75,30 @@ func (m *Manager) newServer(principal auth.Principal) *mcp.Server {
 type emptyInput struct{}
 
 type listSpacesOutput struct {
-	TenantID string              `json:"tenant_id"`
-	Items    []api.SpaceResponse `json:"items"`
+	NS    string           `json:"ns"`
+	Items []api.NSResponse `json:"items"`
 }
 
-type listNamespacesOutput struct {
-	TenantID string                  `json:"tenant_id"`
-	Items    []api.NamespaceResponse `json:"items"`
+type listFoldersOutput struct {
+	NS    string               `json:"ns"`
+	Items []api.FolderResponse `json:"items"`
 }
 
-type createNamespaceInput struct {
-	Key         string `json:"key" jsonschema:"stable namespace key"`
-	DisplayName string `json:"display_name" jsonschema:"human-readable namespace name"`
-	Description string `json:"description,omitempty" jsonschema:"namespace description"`
-	Visibility  string `json:"visibility,omitempty" jsonschema:"private, tenant, team, or restricted"`
+type createFolderInput struct {
+	Key         string `json:"key" jsonschema:"stable folder key"`
+	DisplayName string `json:"display_name" jsonschema:"human-readable folder name"`
+	Description string `json:"description,omitempty" jsonschema:"folder description"`
+	Visibility  string `json:"visibility,omitempty" jsonschema:"private, ns, team, or restricted"`
 }
 
 type listDocumentsInput struct {
-	NamespaceID *int64  `json:"namespace_id,omitempty" jsonschema:"optional namespace filter"`
-	Status      *string `json:"status,omitempty" jsonschema:"optional status filter such as active or archived"`
+	FolderID *int64  `json:"folder_id,omitempty" jsonschema:"optional folder filter"`
+	Status   *string `json:"status,omitempty" jsonschema:"optional status filter such as active or archived"`
 }
 
 type listDocumentsOutput struct {
-	TenantID string                 `json:"tenant_id"`
-	Items    []api.DocumentResponse `json:"items"`
+	NS    string                 `json:"ns"`
+	Items []api.DocumentResponse `json:"items"`
 }
 
 type getDocumentInput struct {
@@ -106,12 +106,12 @@ type getDocumentInput struct {
 }
 
 type getDocumentBySlugInput struct {
-	NamespaceID int64  `json:"namespace_id" jsonschema:"namespace ID"`
-	Slug        string `json:"slug" jsonschema:"document slug"`
+	FolderID int64  `json:"folder_id" jsonschema:"folder ID"`
+	Slug     string `json:"slug" jsonschema:"document slug"`
 }
 
 type createDocumentInput struct {
-	NamespaceID   int64  `json:"namespace_id" jsonschema:"namespace ID"`
+	FolderID      int64  `json:"folder_id" jsonschema:"folder ID"`
 	Slug          string `json:"slug" jsonschema:"document slug"`
 	Title         string `json:"title" jsonschema:"document title"`
 	Content       string `json:"content,omitempty" jsonschema:"markdown content"`
@@ -136,51 +136,51 @@ type archiveDocumentInput struct {
 	ChangeSummary string `json:"change_summary,omitempty" jsonschema:"archive reason"`
 }
 
-type archiveNamespaceInput struct {
-	ID int64 `json:"id" jsonschema:"namespace ID"`
+type archiveFolderInput struct {
+	ID int64 `json:"id" jsonschema:"folder ID"`
 }
 
 func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
-	tenantID := principal.TenantID
+	ns := principal.NS
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "llm_wiki_list_spaces",
-		Title:       "List Spaces",
-		Description: "List spaces for the current LLM-Wiki tenant.",
+		Name:        "llm_wiki_list_ns",
+		Title:       "List NS",
+		Description: "List ns visible to the current principal.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyInput) (*mcp.CallToolResult, listSpacesOutput, error) {
-		if !auth.HasScopes(principal, auth.ScopeSpacesRead) {
-			return nil, listSpacesOutput{}, fmt.Errorf("missing %s scope", auth.ScopeSpacesRead)
+		if !auth.HasScopes(principal, auth.ScopeNSRead) {
+			return nil, listSpacesOutput{}, fmt.Errorf("missing %s scope", auth.ScopeNSRead)
 		}
-		resp, err := m.svc.ListSpaces(ctx, tenantID)
+		resp, err := m.svc.ListNS(ctx, ns)
 		if err != nil {
 			return nil, listSpacesOutput{}, err
 		}
-		return nil, listSpacesOutput{TenantID: tenantID, Items: resp.Items}, nil
+		return nil, listSpacesOutput{NS: ns, Items: resp.Items}, nil
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "llm_wiki_list_namespaces",
-		Title:       "List Namespaces",
-		Description: "List namespaces for the current LLM-Wiki tenant.",
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyInput) (*mcp.CallToolResult, listNamespacesOutput, error) {
-		if !auth.HasScopes(principal, auth.ScopeNamespacesRead) {
-			return nil, listNamespacesOutput{}, fmt.Errorf("missing %s scope", auth.ScopeNamespacesRead)
+		Name:        "llm_wiki_list_folders",
+		Title:       "List Folders",
+		Description: "List folders in the current ns.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyInput) (*mcp.CallToolResult, listFoldersOutput, error) {
+		if !auth.HasScopes(principal, auth.ScopeFoldersRead) {
+			return nil, listFoldersOutput{}, fmt.Errorf("missing %s scope", auth.ScopeFoldersRead)
 		}
-		resp, err := m.svc.ListNamespaces(ctx, tenantID)
+		resp, err := m.svc.ListFolders(ctx, ns)
 		if err != nil {
-			return nil, listNamespacesOutput{}, err
+			return nil, listFoldersOutput{}, err
 		}
-		return nil, listNamespacesOutput{TenantID: tenantID, Items: resp.Items}, nil
+		return nil, listFoldersOutput{NS: ns, Items: resp.Items}, nil
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "llm_wiki_create_namespace",
-		Title:       "Create Namespace",
-		Description: "Create a namespace inside the current tenant's default space.",
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, in createNamespaceInput) (*mcp.CallToolResult, api.NamespaceResponse, error) {
-		if !auth.HasScopes(principal, auth.ScopeNamespacesWrite) {
-			return nil, api.NamespaceResponse{}, fmt.Errorf("missing %s scope", auth.ScopeNamespacesWrite)
+		Name:        "llm_wiki_create_folder",
+		Title:       "Create Folder",
+		Description: "Create a folder in the current ns.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in createFolderInput) (*mcp.CallToolResult, api.FolderResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeFoldersWrite) {
+			return nil, api.FolderResponse{}, fmt.Errorf("missing %s scope", auth.ScopeFoldersWrite)
 		}
-		resp, err := m.svc.CreateNamespace(ctx, tenantID, api.CreateNamespaceRequest{
+		resp, err := m.svc.CreateFolder(ctx, ns, api.CreateFolderRequest{
 			Key:         in.Key,
 			DisplayName: in.DisplayName,
 			Description: in.Description,
@@ -190,30 +190,30 @@ func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "llm_wiki_archive_namespace",
-		Title:       "Archive Namespace",
-		Description: "Archive a namespace in the current tenant.",
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, in archiveNamespaceInput) (*mcp.CallToolResult, api.NamespaceResponse, error) {
-		if !auth.HasScopes(principal, auth.ScopeNamespacesWrite) {
-			return nil, api.NamespaceResponse{}, fmt.Errorf("missing %s scope", auth.ScopeNamespacesWrite)
+		Name:        "llm_wiki_archive_folder",
+		Title:       "Archive Folder",
+		Description: "Archive a folder in the current ns.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in archiveFolderInput) (*mcp.CallToolResult, api.FolderResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeFoldersWrite) {
+			return nil, api.FolderResponse{}, fmt.Errorf("missing %s scope", auth.ScopeFoldersWrite)
 		}
-		resp, err := m.svc.ArchiveNamespace(ctx, tenantID, in.ID)
+		resp, err := m.svc.ArchiveFolder(ctx, ns, in.ID)
 		return nil, resp, err
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "llm_wiki_list_documents",
 		Title:       "List Documents",
-		Description: "List documents in the current tenant, optionally filtered by namespace or status.",
+		Description: "List documents in the current ns, optionally filtered by folder or status.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in listDocumentsInput) (*mcp.CallToolResult, listDocumentsOutput, error) {
 		if !auth.HasScopes(principal, auth.ScopeDocumentsRead) {
 			return nil, listDocumentsOutput{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsRead)
 		}
-		resp, err := m.svc.ListDocuments(ctx, tenantID, in.NamespaceID, in.Status)
+		resp, err := m.svc.ListDocuments(ctx, ns, in.FolderID, in.Status)
 		if err != nil {
 			return nil, listDocumentsOutput{}, err
 		}
-		return nil, listDocumentsOutput{TenantID: tenantID, Items: resp.Items}, nil
+		return nil, listDocumentsOutput{NS: ns, Items: resp.Items}, nil
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -224,19 +224,19 @@ func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
 		if !auth.HasScopes(principal, auth.ScopeDocumentsRead) {
 			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsRead)
 		}
-		resp, err := m.svc.GetDocument(ctx, tenantID, in.ID)
+		resp, err := m.svc.GetDocument(ctx, ns, in.ID)
 		return nil, resp, err
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "llm_wiki_get_document_by_slug",
 		Title:       "Get Document By Slug",
-		Description: "Fetch a document and its revisions by namespace ID and slug.",
+		Description: "Fetch a document and its revisions by folder ID and slug.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in getDocumentBySlugInput) (*mcp.CallToolResult, api.DocumentResponse, error) {
 		if !auth.HasScopes(principal, auth.ScopeDocumentsRead) {
 			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsRead)
 		}
-		resp, err := m.svc.GetDocumentBySlug(ctx, tenantID, in.NamespaceID, in.Slug)
+		resp, err := m.svc.GetDocumentBySlug(ctx, ns, in.FolderID, in.Slug)
 		return nil, resp, err
 	})
 
@@ -248,8 +248,8 @@ func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
 		if !auth.HasScopes(principal, auth.ScopeDocumentsWrite) {
 			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsWrite)
 		}
-		resp, err := m.svc.CreateDocument(ctx, tenantID, api.CreateDocumentRequest{
-			NamespaceID:   in.NamespaceID,
+		resp, err := m.svc.CreateDocument(ctx, ns, api.CreateDocumentRequest{
+			FolderID:      in.FolderID,
 			Slug:          in.Slug,
 			Title:         in.Title,
 			Content:       in.Content,
@@ -268,7 +268,7 @@ func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
 		if !auth.HasScopes(principal, auth.ScopeDocumentsWrite) {
 			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsWrite)
 		}
-		resp, err := m.svc.UpdateDocument(ctx, tenantID, in.ID, api.UpdateDocumentRequest{
+		resp, err := m.svc.UpdateDocument(ctx, ns, in.ID, api.UpdateDocumentRequest{
 			Title:         in.Title,
 			Content:       in.Content,
 			AuthorType:    in.AuthorType,
@@ -286,7 +286,7 @@ func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
 		if !auth.HasScopes(principal, auth.ScopeDocumentsArchive) {
 			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsArchive)
 		}
-		resp, err := m.svc.ArchiveDocument(ctx, tenantID, in.ID, api.ArchiveDocumentRequest{
+		resp, err := m.svc.ArchiveDocument(ctx, ns, in.ID, api.ArchiveDocumentRequest{
 			AuthorType:    in.AuthorType,
 			AuthorID:      in.AuthorID,
 			ChangeSummary: in.ChangeSummary,
@@ -296,33 +296,33 @@ func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
 }
 
 func (m *Manager) registerResources(server *mcp.Server, principal auth.Principal) {
-	tenantID := principal.TenantID
+	tenantID := principal.NS
 	server.AddResource(&mcp.Resource{
-		Name:        "llm-wiki-spaces",
+		Name:        "llm-wiki-ns",
 		Title:       "LLM-Wiki Spaces",
-		Description: "All spaces visible in the current LLM-Wiki tenant.",
+		Description: "All ns visible to the current principal.",
 		MIMEType:    "application/json",
-		URI:         "llm-wiki://spaces",
+		URI:         "llm-wiki://ns",
 	}, func(ctx context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
-		resp, err := m.svc.ListSpaces(ctx, tenantID)
+		resp, err := m.svc.ListNS(ctx, tenantID)
 		if err != nil {
 			return nil, err
 		}
-		return jsonResource("llm-wiki://spaces", resp)
+		return jsonResource("llm-wiki://ns", resp)
 	})
 
 	server.AddResource(&mcp.Resource{
-		Name:        "llm-wiki-namespaces",
-		Title:       "LLM-Wiki Namespaces",
-		Description: "All namespaces visible in the current LLM-Wiki tenant.",
+		Name:        "llm-wiki-folders",
+		Title:       "LLM-Wiki Folders",
+		Description: "All folders visible in the current ns.",
 		MIMEType:    "application/json",
-		URI:         "llm-wiki://namespaces",
+		URI:         "llm-wiki://folders",
 	}, func(ctx context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
-		resp, err := m.svc.ListNamespaces(ctx, tenantID)
+		resp, err := m.svc.ListFolders(ctx, tenantID)
 		if err != nil {
 			return nil, err
 		}
-		return jsonResource("llm-wiki://namespaces", resp)
+		return jsonResource("llm-wiki://folders", resp)
 	})
 
 	server.AddResourceTemplate(&mcp.ResourceTemplate{
@@ -346,9 +346,9 @@ func (m *Manager) registerResources(server *mcp.Server, principal auth.Principal
 	server.AddResourceTemplate(&mcp.ResourceTemplate{
 		Name:        "llm-wiki-document-by-slug",
 		Title:       "LLM-Wiki Document By Slug",
-		Description: "Read a document by namespace ID and slug.",
+		Description: "Read a document by folder ID and slug.",
 		MIMEType:    "application/json",
-		URITemplate: "llm-wiki://documents/by-slug/{namespace_id}/{slug}",
+		URITemplate: "llm-wiki://documents/by-slug/{folder_id}/{slug}",
 	}, func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
 		namespaceID, slug, err := documentSlugFromURI(req.Params.URI)
 		if err != nil {

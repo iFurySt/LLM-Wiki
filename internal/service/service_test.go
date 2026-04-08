@@ -7,7 +7,7 @@ func TestNormalizeVisibility(t *testing.T) {
 
 	cases := map[string]string{
 		"":           "private",
-		"tenant":     "tenant",
+		"ns":         "ns",
 		"TEAM":       "team",
 		"restricted": "restricted",
 		"weird":      "private",

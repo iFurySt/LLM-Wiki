@@ -19,8 +19,8 @@ func (s *Service) SetupStatus(ctx context.Context, defaultTenant string) (api.Se
 		return api.SetupStatusResponse{}, err
 	}
 	return api.SetupStatusResponse{
-		Initialized:   exists,
-		DefaultTenant: defaultTenant,
+		Initialized: exists,
+		DefaultNS:   defaultTenant,
 	}, nil
 }
 
@@ -32,7 +32,7 @@ func (s *Service) Initialize(ctx context.Context, req api.InitializeRequest) (ap
 	if exists {
 		return api.UserResponse{}, repository.ErrConflict
 	}
-	return s.createUser(ctx, strings.TrimSpace(req.TenantID), api.CreateUserRequest{
+	return s.createUser(ctx, strings.TrimSpace(req.NS), api.CreateUserRequest{
 		Username:    req.Username,
 		DisplayName: req.DisplayName,
 		Password:    req.Password,
@@ -56,7 +56,7 @@ func (s *Service) LoginUser(ctx context.Context, tenantID string, username strin
 	principal := auth.Principal{
 		PrincipalID:   user.PrincipalID,
 		PrincipalType: principalType,
-		TenantID:      user.TenantID,
+		NS:            user.NS,
 		DisplayName:   user.DisplayName,
 		Scopes:        adminScopes(user.IsAdmin),
 		TokenType:     tokenType,
@@ -83,7 +83,7 @@ func (s *Service) GetWebSession(ctx context.Context, sessionID string) (reposito
 	principal := auth.Principal{
 		PrincipalID:   user.PrincipalID,
 		PrincipalType: principalType,
-		TenantID:      user.TenantID,
+		NS:            user.NS,
 		DisplayName:   user.DisplayName,
 		Scopes:        adminScopes(user.IsAdmin),
 		TokenType:     "web_session",
@@ -116,7 +116,7 @@ func (s *Service) ApproveAuthRequestWithPassword(ctx context.Context, requestID 
 	if err != nil {
 		return repository.AuthRequest{}, err
 	}
-	user, _, err := s.LoginUser(ctx, request.TenantID, username, password)
+	user, _, err := s.LoginUser(ctx, request.NS, username, password)
 	if err != nil {
 		return repository.AuthRequest{}, err
 	}
@@ -154,7 +154,7 @@ func userResponse(item repository.UserRecord) api.UserResponse {
 	return api.UserResponse{
 		ID:          item.ID,
 		PrincipalID: item.PrincipalID,
-		TenantID:    item.TenantID,
+		NS:          item.NS,
 		Username:    item.Username,
 		DisplayName: item.DisplayName,
 		IsAdmin:     item.IsAdmin,
@@ -191,9 +191,9 @@ func normalizeUsername(value string) string {
 
 func adminScopes(isAdmin bool) []string {
 	scopes := []string{
-		auth.ScopeSpacesRead,
-		auth.ScopeNamespacesRead,
-		auth.ScopeNamespacesWrite,
+		auth.ScopeNSRead,
+		auth.ScopeFoldersRead,
+		auth.ScopeFoldersWrite,
 		auth.ScopeDocumentsRead,
 		auth.ScopeDocumentsWrite,
 		auth.ScopeDocumentsArchive,
@@ -201,7 +201,7 @@ func adminScopes(isAdmin bool) []string {
 		auth.ScopeMCPInvoke,
 	}
 	if isAdmin {
-		scopes = append(scopes, auth.ScopeTokensIssue, auth.ScopeTokensRevoke, auth.ScopeAdminTenants)
+		scopes = append(scopes, auth.ScopeTokensIssue, auth.ScopeTokensRevoke, auth.ScopeAdminNS)
 	}
 	return scopes
 }

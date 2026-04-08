@@ -1,6 +1,8 @@
 package httpserver
 
 import (
+	"encoding/json"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,7 +31,7 @@ type uiNamespaceCard struct {
 
 type uiDocumentCard struct {
 	ID                int64
-	NamespaceID       int64
+	FolderID          int64
 	NamespaceLabel    string
 	Slug              string
 	Title             string
@@ -40,12 +42,12 @@ type uiDocumentCard struct {
 }
 
 type uiNamespaceTree struct {
-	ID          int64
-	Key         string
-	DisplayName string
-	Status      string
+	ID            int64
+	Key           string
+	DisplayName   string
+	Status        string
 	DocumentCount int
-	Documents   []uiDocumentCard
+	Documents     []uiDocumentCard
 }
 
 type uiFlash struct {
@@ -55,14 +57,14 @@ type uiFlash struct {
 
 type uiIndexData struct {
 	CurrentPage         string
-	TenantID            string
+	NS                  string
 	InstallBaseURL      string
 	InstallDocURL       string
 	InstallScriptURL    string
 	InstallSkillURL     string
 	MCPURL              string
 	Spaces              []uiSpaceCard
-	Namespaces          []uiNamespaceCard
+	Folders             []uiNamespaceCard
 	NamespaceTree       []uiNamespaceTree
 	Documents           []uiDocumentCard
 	SelectedDocument    *api.DocumentResponse
@@ -71,6 +73,7 @@ type uiIndexData struct {
 	DocumentCount       int
 	ArchivedCount       int
 	NamespaceCount      int
+	TreeStateJSON       template.JS
 	Flash               *uiFlash
 }
 
@@ -102,41 +105,49 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		renderUIPage(c, svc, cfg, "install")
 	})
 
-	engine.POST("/ui/namespaces", func(c *gin.Context) {
-		req := api.CreateNamespaceRequest{
+	engine.GET("/ui/fragment/wiki", func(c *gin.Context) {
+		renderUIFragment(c, svc, cfg, "wiki", "ui_wiki_content.html")
+	})
+
+	engine.GET("/ui/fragment/install", func(c *gin.Context) {
+		renderUIFragment(c, svc, cfg, "install", "ui_install_content.html")
+	})
+
+	engine.POST("/ui/folders", func(c *gin.Context) {
+		req := api.CreateFolderRequest{
 			Key:         c.PostForm("key"),
 			DisplayName: c.PostForm("display_name"),
 			Description: c.PostForm("description"),
 			Visibility:  c.PostForm("visibility"),
 		}
-		if _, err := svc.CreateNamespace(c.Request.Context(), tenantIDFromRequest(c), req); err != nil {
+		if _, err := svc.CreateFolder(c.Request.Context(), tenantIDFromRequest(c), req); err != nil {
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=namespace+created")
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=folder+created")
 	})
 
-	engine.POST("/ui/namespaces/:id/archive", func(c *gin.Context) {
+	engine.POST("/ui/folders/:id/archive", func(c *gin.Context) {
 		namespaceID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
 			return
 		}
-		if _, err := svc.ArchiveNamespace(c.Request.Context(), tenantIDFromRequest(c), namespaceID); err != nil {
+		if _, err := svc.ArchiveFolder(c.Request.Context(), tenantIDFromRequest(c), namespaceID); err != nil {
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=namespace+archived")
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=folder+archived")
 	})
 
 	engine.POST("/ui/documents", func(c *gin.Context) {
-		namespaceID, err := strconv.ParseInt(c.PostForm("namespace_id"), 10, 64)
+		namespaceID, err := strconv.ParseInt(c.PostForm("folder_id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
 			return
 		}
 		req := api.CreateDocumentRequest{
-			NamespaceID:   namespaceID,
+			FolderID:      namespaceID,
 			Slug:          c.PostForm("slug"),
 			Title:         c.PostForm("title"),
 			Content:       c.PostForm("content"),
@@ -200,12 +211,23 @@ func renderUIPage(c *gin.Context, svc *service.Service, cfg config.Config, curre
 	c.HTML(http.StatusOK, "index.html", data)
 }
 
+func renderUIFragment(c *gin.Context, svc *service.Service, cfg config.Config, currentPage string, templateName string) {
+	data, err := buildUIIndexData(c, svc, cfg)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	data.CurrentPage = currentPage
+	c.Header("Cache-Control", "no-store")
+	c.HTML(http.StatusOK, templateName, data)
+}
+
 func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (uiIndexData, error) {
 	tenantID := tenantIDFromRequest(c)
 	baseURL := strings.TrimRight(cfg.Install.BaseURL, "/")
 	var namespaceFilter *int64
 	var selectedNamespaceID int64
-	if raw := c.Query("namespace_id"); raw != "" {
+	if raw := c.Query("folder_id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil {
 			return uiIndexData{}, err
@@ -220,11 +242,11 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		statusFilter = &statusRaw
 	}
 
-	spaces, err := svc.ListSpaces(c.Request.Context(), tenantID)
+	ns, err := svc.ListNS(c.Request.Context(), tenantID)
 	if err != nil {
 		return uiIndexData{}, err
 	}
-	namespaces, err := svc.ListNamespaces(c.Request.Context(), tenantID)
+	folders, err := svc.ListFolders(c.Request.Context(), tenantID)
 	if err != nil {
 		return uiIndexData{}, err
 	}
@@ -233,13 +255,13 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		return uiIndexData{}, err
 	}
 
-	namespaceNames := make(map[int64]string, len(namespaces.Items))
-	namespaceDocCount := make(map[int64]int, len(namespaces.Items))
-	for _, item := range namespaces.Items {
+	namespaceNames := make(map[int64]string, len(folders.Items))
+	namespaceDocCount := make(map[int64]int, len(folders.Items))
+	for _, item := range folders.Items {
 		namespaceNames[item.ID] = item.DisplayName
 	}
 	for _, item := range documents.Items {
-		namespaceDocCount[item.NamespaceID]++
+		namespaceDocCount[item.FolderID]++
 	}
 
 	var selectedDocument *api.DocumentResponse
@@ -260,12 +282,12 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		}
 		selectedDocument = &doc
 		if selectedNamespaceID == 0 {
-			selectedNamespaceID = doc.NamespaceID
+			selectedNamespaceID = doc.FolderID
 		}
 	}
 
-	spaceCards := make([]uiSpaceCard, 0, len(spaces.Items))
-	for _, item := range spaces.Items {
+	spaceCards := make([]uiSpaceCard, 0, len(ns.Items))
+	for _, item := range ns.Items {
 		spaceCards = append(spaceCards, uiSpaceCard{
 			ID:          item.ID,
 			Key:         item.Key,
@@ -273,9 +295,9 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		})
 	}
 
-	namespaceCards := make([]uiNamespaceCard, 0, len(namespaces.Items))
-	namespaceTree := make([]uiNamespaceTree, 0, len(namespaces.Items))
-	for _, item := range namespaces.Items {
+	namespaceCards := make([]uiNamespaceCard, 0, len(folders.Items))
+	namespaceTree := make([]uiNamespaceTree, 0, len(folders.Items))
+	for _, item := range folders.Items {
 		namespaceCards = append(namespaceCards, uiNamespaceCard{
 			ID:            item.ID,
 			Key:           item.Key,
@@ -285,13 +307,13 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 			Status:        item.Status,
 			DocumentCount: namespaceDocCount[item.ID],
 		})
-			namespaceTree = append(namespaceTree, uiNamespaceTree{
-				ID:            item.ID,
-				Key:           item.Key,
-				DisplayName:   item.DisplayName,
-				Status:        item.Status,
-				DocumentCount: namespaceDocCount[item.ID],
-			})
+		namespaceTree = append(namespaceTree, uiNamespaceTree{
+			ID:            item.ID,
+			Key:           item.Key,
+			DisplayName:   item.DisplayName,
+			Status:        item.Status,
+			DocumentCount: namespaceDocCount[item.ID],
+		})
 	}
 
 	documentCards := make([]uiDocumentCard, 0, len(documents.Items))
@@ -302,8 +324,8 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		}
 		card := uiDocumentCard{
 			ID:                item.ID,
-			NamespaceID:       item.NamespaceID,
-			NamespaceLabel:    namespaceNames[item.NamespaceID],
+			FolderID:          item.FolderID,
+			NamespaceLabel:    namespaceNames[item.FolderID],
 			Slug:              item.Slug,
 			Title:             item.Title,
 			ContentPreview:    item.Content,
@@ -313,11 +335,16 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		}
 		documentCards = append(documentCards, card)
 		for index := range namespaceTree {
-			if namespaceTree[index].ID == item.NamespaceID {
+			if namespaceTree[index].ID == item.FolderID {
 				namespaceTree[index].Documents = append(namespaceTree[index].Documents, card)
 				break
 			}
 		}
+	}
+
+	treeStateJSON, err := buildUITreeStateJSON(tenantID, c.DefaultQuery("status", "all"), selectedNamespaceID, selectedDocument, namespaceTree)
+	if err != nil {
+		return uiIndexData{}, err
 	}
 
 	var flash *uiFlash
@@ -329,14 +356,14 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 	}
 
 	return uiIndexData{
-		TenantID:            tenantID,
+		NS:                  tenantID,
 		InstallBaseURL:      baseURL,
 		InstallDocURL:       baseURL + "/install/LLM-Wiki.md",
 		InstallScriptURL:    baseURL + "/install/install-cli.sh",
 		InstallSkillURL:     baseURL + "/install/skills/LLM-Wiki.skill",
 		MCPURL:              baseURL + "/mcp",
 		Spaces:              spaceCards,
-		Namespaces:          namespaceCards,
+		Folders:             namespaceCards,
 		NamespaceTree:       namespaceTree,
 		Documents:           documentCards,
 		SelectedDocument:    selectedDocument,
@@ -345,6 +372,63 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		DocumentCount:       len(documentCards),
 		ArchivedCount:       archivedCount,
 		NamespaceCount:      len(namespaceCards),
+		TreeStateJSON:       treeStateJSON,
 		Flash:               flash,
 	}, nil
+}
+
+type uiTreeState struct {
+	NS              string       `json:"tenantId"`
+	StatusFilter    string       `json:"statusFilter"`
+	SelectedItemID  string       `json:"selectedItemId,omitempty"`
+	ExpandedItemIDs []string     `json:"expandedItemIds,omitempty"`
+	Folders         []uiTreeNode `json:"folders"`
+}
+
+type uiTreeNode struct {
+	ID       string       `json:"id"`
+	Label    string       `json:"label"`
+	Href     string       `json:"href,omitempty"`
+	Children []uiTreeNode `json:"children,omitempty"`
+}
+
+func buildUITreeStateJSON(tenantID string, statusFilter string, selectedNamespaceID int64, selectedDocument *api.DocumentResponse, namespaceTree []uiNamespaceTree) (template.JS, error) {
+	state := uiTreeState{
+		NS:           tenantID,
+		StatusFilter: statusFilter,
+		Folders:      make([]uiTreeNode, 0, len(namespaceTree)),
+	}
+	if selectedDocument != nil {
+		state.SelectedItemID = "doc-" + strconv.FormatInt(selectedDocument.ID, 10)
+		state.ExpandedItemIDs = append(state.ExpandedItemIDs, "ns-"+strconv.FormatInt(selectedDocument.FolderID, 10))
+	} else if selectedNamespaceID != 0 {
+		state.SelectedItemID = "ns-" + strconv.FormatInt(selectedNamespaceID, 10)
+		state.ExpandedItemIDs = append(state.ExpandedItemIDs, "ns-"+strconv.FormatInt(selectedNamespaceID, 10))
+	}
+
+	for _, folder := range namespaceTree {
+		nsNode := uiTreeNode{
+			ID:       "ns-" + strconv.FormatInt(folder.ID, 10),
+			Label:    folder.DisplayName,
+			Children: make([]uiTreeNode, 0, len(folder.Documents)),
+		}
+		for _, document := range folder.Documents {
+			href := "/ui?document_id=" + strconv.FormatInt(document.ID, 10) + "&folder_id=" + strconv.FormatInt(document.FolderID, 10)
+			if statusFilter != "" && statusFilter != "all" {
+				href += "&status=" + statusFilter
+			}
+			nsNode.Children = append(nsNode.Children, uiTreeNode{
+				ID:    "doc-" + strconv.FormatInt(document.ID, 10),
+				Label: document.Title,
+				Href:  href,
+			})
+		}
+		state.Folders = append(state.Folders, nsNode)
+	}
+
+	payload, err := json.Marshal(state)
+	if err != nil {
+		return "", err
+	}
+	return template.JS(payload), nil
 }

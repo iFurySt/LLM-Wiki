@@ -22,12 +22,12 @@ Protocol v0 rules:
 - downstream clients may cache remote state for rendering, but should not treat local cache or vault files as canonical state
 - the minimum browse contract is:
   - `GET /v1/auth/whoami`
-  - `GET /v1/workspaces`
-  - `POST /v1/auth/switch-tenant`
-  - `GET /v1/namespaces`
+  - `GET /v1/ns`
+  - `POST /v1/auth/switch-ns`
+  - `GET /v1/folders`
   - `GET /v1/documents`
 - auth uses bearer tokens, and desktop clients may reuse `~/.llm-wiki/config.json` as the default local credential source
-- `ns` switching is token-based, using `switch-tenant` to mint an `ns`-bound token for the selected scope
+- `ns` switching is token-based, using `switch-ns` to mint an `ns`-bound token for the selected scope
 - live sync in v0 is polling-based; clients should re-fetch list and document state on refresh or interval
 - v0 is read-first; editing and bidirectional sync are deferred until revision-safe write semantics are specified for non-CLI clients
 

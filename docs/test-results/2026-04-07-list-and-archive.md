@@ -25,4 +25,4 @@
 
 ## Notes
 
-- During this round, a Gin wildcard route conflict surfaced between `/v1/namespaces/:id` and a nested slug route. The slug lookup API was changed to `/v1/document-by-slug?namespace_id=...&slug=...` to avoid ambiguous router shape.
+- During this round, a Gin wildcard route conflict surfaced between `/v1/folders/:id` and a nested slug route. The slug lookup API was changed to `/v1/document-by-slug?folder_id=...&slug=...` to avoid ambiguous router shape.

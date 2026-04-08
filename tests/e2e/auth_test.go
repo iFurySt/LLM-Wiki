@@ -47,7 +47,7 @@ func TestDeviceLoginAndWhoAmI(t *testing.T) {
 
 	svc := service.New(repository.New(pool))
 	if _, err := svc.Initialize(ctx, api.InitializeRequest{
-		TenantID:    "tenant-device",
+		NS:          "tenant-device",
 		Username:    "admin",
 		DisplayName: "Device User",
 		Password:    "secret123",
@@ -59,7 +59,7 @@ func TestDeviceLoginAndWhoAmI(t *testing.T) {
 
 	client := httpclient.New(server.URL, 10*time.Second, "")
 	startResp, err := client.StartDeviceLogin(ctx, api.StartDeviceLoginRequest{
-		TenantID:    "tenant-device",
+		NS:          "tenant-device",
 		DisplayName: "Device User",
 	})
 	if err != nil {
@@ -92,8 +92,8 @@ func TestDeviceLoginAndWhoAmI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("whoami: %v", err)
 	}
-	if whoami.TenantID != "tenant-device" {
-		t.Fatalf("unexpected tenant: %q", whoami.TenantID)
+	if whoami.NS != "tenant-device" {
+		t.Fatalf("unexpected tenant: %q", whoami.NS)
 	}
 	if whoami.PrincipalType != "user" {
 		t.Fatalf("unexpected principal type: %q", whoami.PrincipalType)
@@ -218,17 +218,17 @@ func TestBrowserOAuthAutoProvisionAndWhoAmI(t *testing.T) {
 	defer providerServer.Close()
 
 	if _, err := svc.UpsertOAuthProvider(ctx, api.UpsertOAuthProviderRequest{
-		Name:              "github",
-		DisplayName:       "GitHub",
-		AuthURL:           providerServer.URL + "/authorize",
-		TokenURL:          providerServer.URL + "/token",
-		UserinfoURL:       providerServer.URL + "/userinfo",
-		ClientID:          "client-id",
-		ClientSecret:      "client-secret",
-		Scopes:            []string{"openid", "email", "profile"},
-		Enabled:           true,
-		AutoCreateUsers:   true,
-		AutoCreateTenants: true,
+		Name:            "github",
+		DisplayName:     "GitHub",
+		AuthURL:         providerServer.URL + "/authorize",
+		TokenURL:        providerServer.URL + "/token",
+		UserinfoURL:     providerServer.URL + "/userinfo",
+		ClientID:        "client-id",
+		ClientSecret:    "client-secret",
+		Scopes:          []string{"openid", "email", "profile"},
+		Enabled:         true,
+		AutoCreateUsers: true,
+		AutoCreateNS:    true,
 	}); err != nil {
 		t.Fatalf("upsert oauth provider: %v", err)
 	}
@@ -298,8 +298,8 @@ func TestBrowserOAuthAutoProvisionAndWhoAmI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("whoami: %v", err)
 	}
-	if whoami.TenantID != "octocat" {
-		t.Fatalf("unexpected tenant id: %q", whoami.TenantID)
+	if whoami.NS != "octocat" {
+		t.Fatalf("unexpected tenant id: %q", whoami.NS)
 	}
 	if whoami.DisplayName != "The Octocat" {
 		t.Fatalf("unexpected display name: %q", whoami.DisplayName)
@@ -372,17 +372,17 @@ func TestWorkspaceCreateInviteAcceptAndSwitch(t *testing.T) {
 	defer providerServer.Close()
 
 	if _, err := svc.UpsertOAuthProvider(ctx, api.UpsertOAuthProviderRequest{
-		Name:              "github",
-		DisplayName:       "GitHub",
-		AuthURL:           providerServer.URL + "/authorize",
-		TokenURL:          providerServer.URL + "/token",
-		UserinfoURL:       providerServer.URL + "/userinfo",
-		ClientID:          "client-id",
-		ClientSecret:      "client-secret",
-		Scopes:            []string{"openid", "email", "profile"},
-		Enabled:           true,
-		AutoCreateUsers:   true,
-		AutoCreateTenants: true,
+		Name:            "github",
+		DisplayName:     "GitHub",
+		AuthURL:         providerServer.URL + "/authorize",
+		TokenURL:        providerServer.URL + "/token",
+		UserinfoURL:     providerServer.URL + "/userinfo",
+		ClientID:        "client-id",
+		ClientSecret:    "client-secret",
+		Scopes:          []string{"openid", "email", "profile"},
+		Enabled:         true,
+		AutoCreateUsers: true,
+		AutoCreateNS:    true,
 	}); err != nil {
 		t.Fatalf("upsert oauth provider: %v", err)
 	}
@@ -394,17 +394,17 @@ func TestWorkspaceCreateInviteAcceptAndSwitch(t *testing.T) {
 	ownerToken := oauthBrowserLoginForTest(t, ctx, ownerClient, appServer.URL, "github", "code-user1")
 	ownerClient.SetAccessToken(ownerToken.AccessToken)
 
-	workspace, err := ownerClient.CreateWorkspace(ctx, api.CreateWorkspaceRequest{
-		TenantID:    "team-space",
-		DisplayName: "Team Space",
+	ns, err := ownerClient.CreateNS(ctx, api.CreateNSRequest{
+		NS:          "team-space",
+		DisplayName: "Team NS",
 	})
 	if err != nil {
-		t.Fatalf("create workspace: %v", err)
+		t.Fatalf("create ns: %v", err)
 	}
-	if workspace.TenantID != "team-space" {
-		t.Fatalf("unexpected workspace tenant id: %q", workspace.TenantID)
+	if ns.NS != "team-space" {
+		t.Fatalf("unexpected ns tenant id: %q", ns.NS)
 	}
-	switchedOwner, err := ownerClient.SwitchTenant(ctx, "team-space")
+	switchedOwner, err := ownerClient.SwitchNS(ctx, "team-space")
 	if err != nil {
 		t.Fatalf("owner switch tenant: %v", err)
 	}
@@ -429,15 +429,15 @@ func TestWorkspaceCreateInviteAcceptAndSwitch(t *testing.T) {
 	if _, err := memberClient.AcceptInvite(ctx, invite.Token); err != nil {
 		t.Fatalf("accept invite: %v", err)
 	}
-	workspaces, err := memberClient.ListWorkspaces(ctx)
+	nsList, err := memberClient.ListNS(ctx)
 	if err != nil {
-		t.Fatalf("list workspaces: %v", err)
+		t.Fatalf("list ns: %v", err)
 	}
-	if len(workspaces.Items) < 2 {
-		t.Fatalf("expected at least 2 workspaces, got %d", len(workspaces.Items))
+	if len(nsList.Items) < 2 {
+		t.Fatalf("expected at least 2 ns, got %d", len(nsList.Items))
 	}
 
-	switched, err := memberClient.SwitchTenant(ctx, "team-space")
+	switched, err := memberClient.SwitchNS(ctx, "team-space")
 	if err != nil {
 		t.Fatalf("switch tenant: %v", err)
 	}
@@ -446,8 +446,8 @@ func TestWorkspaceCreateInviteAcceptAndSwitch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("whoami after switch: %v", err)
 	}
-	if whoami.TenantID != "team-space" {
-		t.Fatalf("unexpected switched tenant: %q", whoami.TenantID)
+	if whoami.NS != "team-space" {
+		t.Fatalf("unexpected switched tenant: %q", whoami.NS)
 	}
 }
 

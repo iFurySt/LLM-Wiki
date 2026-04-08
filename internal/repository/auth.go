@@ -19,7 +19,7 @@ var ErrPending = errors.New("pending")
 
 type PrincipalRecord struct {
 	ID            string
-	TenantID      string
+	NS            string
 	PrincipalType string
 	DisplayName   string
 	CreatedAt     time.Time
@@ -29,7 +29,7 @@ type TokenRecord struct {
 	ID                   int64
 	TokenType            string
 	PrincipalID          string
-	TenantID             string
+	NS                   string
 	DisplayName          string
 	TokenPrefix          string
 	Scopes               []string
@@ -43,7 +43,7 @@ type TokenRecord struct {
 type AuthRequest struct {
 	ID                  string
 	FlowType            string
-	TenantID            string
+	NS                  string
 	OAuthProvider       string
 	DisplayName         string
 	Scopes              []string
@@ -69,7 +69,7 @@ type AuthenticatedPrincipal struct {
 type IssueTokenParams struct {
 	TokenType            string
 	PrincipalID          string
-	TenantID             string
+	NS                   string
 	DisplayName          string
 	Scopes               []string
 	ExpiresAt            *time.Time
@@ -78,7 +78,7 @@ type IssueTokenParams struct {
 
 type CreateAuthRequestParams struct {
 	FlowType            string
-	TenantID            string
+	NS                  string
 	OAuthProvider       string
 	DisplayName         string
 	Scopes              []string
@@ -98,14 +98,14 @@ func (r *Repository) EnsurePrincipal(ctx context.Context, tenantID string, princ
 		return PrincipalRecord{}, err
 	}
 	err = r.pool.QueryRow(ctx, `
-		INSERT INTO principals (id, tenant_id, principal_type, display_name)
+		INSERT INTO principals (id, ns, principal_type, display_name)
 		VALUES ($1, $2, $3, $4)
-		ON CONFLICT (tenant_id, principal_type, display_name)
+		ON CONFLICT (ns, principal_type, display_name)
 		DO UPDATE SET display_name = EXCLUDED.display_name
-		RETURNING id, tenant_id, principal_type, display_name, created_at
+		RETURNING id, ns, principal_type, display_name, created_at
 	`, id, tenantID, principalType, displayName).Scan(
 		&record.ID,
-		&record.TenantID,
+		&record.NS,
 		&record.PrincipalType,
 		&record.DisplayName,
 		&record.CreatedAt,
@@ -115,9 +115,9 @@ func (r *Repository) EnsurePrincipal(ctx context.Context, tenantID string, princ
 
 func (r *Repository) ListPrincipalsByType(ctx context.Context, tenantID string, principalType string) ([]PrincipalRecord, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, tenant_id, principal_type, display_name, created_at
+		SELECT id, ns, principal_type, display_name, created_at
 		FROM principals
-		WHERE tenant_id = $1 AND principal_type = $2
+		WHERE ns = $1 AND principal_type = $2
 		ORDER BY display_name ASC
 	`, tenantID, principalType)
 	if err != nil {
@@ -128,7 +128,7 @@ func (r *Repository) ListPrincipalsByType(ctx context.Context, tenantID string, 
 	items := make([]PrincipalRecord, 0)
 	for rows.Next() {
 		var item PrincipalRecord
-		if err := rows.Scan(&item.ID, &item.TenantID, &item.PrincipalType, &item.DisplayName, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.NS, &item.PrincipalType, &item.DisplayName, &item.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, item)
@@ -139,12 +139,12 @@ func (r *Repository) ListPrincipalsByType(ctx context.Context, tenantID string, 
 func (r *Repository) GetPrincipal(ctx context.Context, principalID string) (PrincipalRecord, error) {
 	var record PrincipalRecord
 	err := r.pool.QueryRow(ctx, `
-		SELECT id, tenant_id, principal_type, display_name, created_at
+		SELECT id, ns, principal_type, display_name, created_at
 		FROM principals
 		WHERE id = $1
 	`, principalID).Scan(
 		&record.ID,
-		&record.TenantID,
+		&record.NS,
 		&record.PrincipalType,
 		&record.DisplayName,
 		&record.CreatedAt,
@@ -181,14 +181,14 @@ func (r *Repository) UpsertStaticToken(ctx context.Context, params IssueTokenPar
 	var existing TokenRecord
 	var scopesJSON string
 	err = r.pool.QueryRow(ctx, `
-		SELECT id, token_type, principal_id, tenant_id, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
+		SELECT id, token_type, principal_id, ns, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
 		FROM api_tokens
 		WHERE token_hash = $1
 	`, auth.HashToken(rawToken)).Scan(
 		&existing.ID,
 		&existing.TokenType,
 		&existing.PrincipalID,
-		&existing.TenantID,
+		&existing.NS,
 		&existing.DisplayName,
 		&existing.TokenPrefix,
 		&scopesJSON,
@@ -215,14 +215,14 @@ func (r *Repository) insertToken(ctx context.Context, params IssueTokenParams, r
 	var record TokenRecord
 	err = r.pool.QueryRow(ctx, `
 		INSERT INTO api_tokens (
-			token_type, principal_id, tenant_id, display_name, token_hash, token_prefix, scopes_json, expires_at, created_by_principal_id
+			token_type, principal_id, ns, display_name, token_hash, token_prefix, scopes_json, expires_at, created_by_principal_id
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		RETURNING id, token_type, principal_id, tenant_id, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
-	`, params.TokenType, params.PrincipalID, params.TenantID, params.DisplayName, hash, prefix, scopesJSON, params.ExpiresAt, params.CreatedByPrincipalID).Scan(
+		RETURNING id, token_type, principal_id, ns, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
+	`, params.TokenType, params.PrincipalID, params.NS, params.DisplayName, hash, prefix, scopesJSON, params.ExpiresAt, params.CreatedByPrincipalID).Scan(
 		&record.ID,
 		&record.TokenType,
 		&record.PrincipalID,
-		&record.TenantID,
+		&record.NS,
 		&record.DisplayName,
 		&record.TokenPrefix,
 		&scopesJSON,
@@ -244,9 +244,9 @@ func (r *Repository) insertToken(ctx context.Context, params IssueTokenParams, r
 
 func (r *Repository) ListTokens(ctx context.Context, tenantID string) ([]TokenRecord, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, token_type, principal_id, tenant_id, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
+		SELECT id, token_type, principal_id, ns, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
 		FROM api_tokens
-		WHERE tenant_id = $1
+		WHERE ns = $1
 		ORDER BY created_at DESC
 	`, tenantID)
 	if err != nil {
@@ -262,7 +262,7 @@ func (r *Repository) ListTokens(ctx context.Context, tenantID string) ([]TokenRe
 			&item.ID,
 			&item.TokenType,
 			&item.PrincipalID,
-			&item.TenantID,
+			&item.NS,
 			&item.DisplayName,
 			&item.TokenPrefix,
 			&scopesJSON,
@@ -289,13 +289,13 @@ func (r *Repository) RevokeToken(ctx context.Context, tenantID string, tokenID i
 	err := r.pool.QueryRow(ctx, `
 		UPDATE api_tokens
 		SET revoked_at = NOW()
-		WHERE tenant_id = $1 AND id = $2
-		RETURNING id, token_type, principal_id, tenant_id, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
+		WHERE ns = $1 AND id = $2
+		RETURNING id, token_type, principal_id, ns, display_name, token_prefix, scopes_json, expires_at, last_used_at, revoked_at, created_by_principal_id, created_at
 	`, tenantID, tokenID).Scan(
 		&item.ID,
 		&item.TokenType,
 		&item.PrincipalID,
-		&item.TenantID,
+		&item.NS,
 		&item.DisplayName,
 		&item.TokenPrefix,
 		&scopesJSON,
@@ -334,14 +334,14 @@ func (r *Repository) authenticateTokenByType(ctx context.Context, rawToken strin
 	err := r.pool.QueryRow(ctx, `
 		SELECT
 			p.id,
-			p.tenant_id,
+			p.ns,
 			p.principal_type,
 			p.display_name,
 			p.created_at,
 			t.id,
 			t.token_type,
 			t.principal_id,
-			t.tenant_id,
+			t.ns,
 			t.display_name,
 			t.token_prefix,
 			t.scopes_json,
@@ -355,14 +355,14 @@ func (r *Repository) authenticateTokenByType(ctx context.Context, rawToken strin
 		WHERE t.token_hash = $1
 	`, hash).Scan(
 		&principal.ID,
-		&principal.TenantID,
+		&principal.NS,
 		&principal.PrincipalType,
 		&principal.DisplayName,
 		&principal.CreatedAt,
 		&token.ID,
 		&token.TokenType,
 		&token.PrincipalID,
-		&token.TenantID,
+		&token.NS,
 		&token.DisplayName,
 		&token.TokenPrefix,
 		&scopesJSON,
@@ -414,13 +414,13 @@ func (r *Repository) CreateAuthRequest(ctx context.Context, params CreateAuthReq
 	var item AuthRequest
 	err = r.pool.QueryRow(ctx, `
 		INSERT INTO auth_requests (
-			id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, device_code, user_code, expires_at
+			id, flow_type, ns, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, device_code, user_code, expires_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-		RETURNING id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
-	`, id, params.FlowType, params.TenantID, params.OAuthProvider, params.DisplayName, scopesJSON, params.State, params.RedirectURI, params.CodeChallenge, params.CodeChallengeMethod, params.DeviceCode, params.UserCode, params.ExpiresAt).Scan(
+		RETURNING id, flow_type, ns, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+	`, id, params.FlowType, params.NS, params.OAuthProvider, params.DisplayName, scopesJSON, params.State, params.RedirectURI, params.CodeChallenge, params.CodeChallengeMethod, params.DeviceCode, params.UserCode, params.ExpiresAt).Scan(
 		&item.ID,
 		&item.FlowType,
-		&item.TenantID,
+		&item.NS,
 		&item.OAuthProvider,
 		&item.DisplayName,
 		&scopesJSON,
@@ -462,7 +462,7 @@ func (r *Repository) ExchangeAuthorizationCode(ctx context.Context, authCode str
 
 func (r *Repository) getAuthRequestBy(ctx context.Context, column string, value string) (AuthRequest, error) {
 	query := fmt.Sprintf(`
-		SELECT id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+		SELECT id, flow_type, ns, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
 		FROM auth_requests
 		WHERE %s = $1
 	`, column)
@@ -471,7 +471,7 @@ func (r *Repository) getAuthRequestBy(ctx context.Context, column string, value 
 	err := r.pool.QueryRow(ctx, query, value).Scan(
 		&item.ID,
 		&item.FlowType,
-		&item.TenantID,
+		&item.NS,
 		&item.OAuthProvider,
 		&item.DisplayName,
 		&scopesJSON,
@@ -515,14 +515,14 @@ func (r *Repository) ApproveAuthRequest(ctx context.Context, requestID string, d
 	var request AuthRequest
 	var scopesJSON string
 	err = tx.QueryRow(ctx, `
-		SELECT id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+		SELECT id, flow_type, ns, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
 		FROM auth_requests
 		WHERE id = $1
 		FOR UPDATE
 	`, requestID).Scan(
 		&request.ID,
 		&request.FlowType,
-		&request.TenantID,
+		&request.NS,
 		&request.OAuthProvider,
 		&request.DisplayName,
 		&scopesJSON,
@@ -559,14 +559,14 @@ func (r *Repository) ApproveAuthRequest(ctx context.Context, requestID string, d
 	}
 	var principal PrincipalRecord
 	err = tx.QueryRow(ctx, `
-		INSERT INTO principals (id, tenant_id, principal_type, display_name)
+		INSERT INTO principals (id, ns, principal_type, display_name)
 		VALUES ($1, $2, 'user', $3)
-		ON CONFLICT (tenant_id, principal_type, display_name)
+		ON CONFLICT (ns, principal_type, display_name)
 		DO UPDATE SET display_name = EXCLUDED.display_name
-		RETURNING id, tenant_id, principal_type, display_name, created_at
-	`, principalID, request.TenantID, displayName).Scan(
+		RETURNING id, ns, principal_type, display_name, created_at
+	`, principalID, request.NS, displayName).Scan(
 		&principal.ID,
-		&principal.TenantID,
+		&principal.NS,
 		&principal.PrincipalType,
 		&principal.DisplayName,
 		&principal.CreatedAt,
@@ -583,11 +583,11 @@ func (r *Repository) ApproveAuthRequest(ctx context.Context, requestID string, d
 		UPDATE auth_requests
 		SET principal_id = $1, display_name = $2, auth_code = $3, approved_at = NOW()
 		WHERE id = $4
-		RETURNING id, flow_type, tenant_id, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
+		RETURNING id, flow_type, ns, oauth_provider, display_name, scopes_json, state, redirect_uri, code_challenge, code_challenge_method, auth_code, device_code, user_code, principal_id, approved_at, denied_at, expires_at, created_at
 	`, principal.ID, displayName, authCode, request.ID).Scan(
 		&request.ID,
 		&request.FlowType,
-		&request.TenantID,
+		&request.NS,
 		&request.OAuthProvider,
 		&request.DisplayName,
 		&scopesJSON,
@@ -629,7 +629,7 @@ func (r *Repository) ApproveAuthRequestForPrincipal(ctx context.Context, request
 		SET principal_id = $1,
 			auth_code = $2,
 			approved_at = NOW(),
-			tenant_id = p.tenant_id,
+			ns = p.ns,
 			display_name = p.display_name
 		FROM principals p
 		WHERE auth_requests.id = $3
@@ -637,7 +637,7 @@ func (r *Repository) ApproveAuthRequestForPrincipal(ctx context.Context, request
 		RETURNING
 			auth_requests.id,
 			auth_requests.flow_type,
-			auth_requests.tenant_id,
+			auth_requests.ns,
 			auth_requests.oauth_provider,
 			auth_requests.display_name,
 			auth_requests.scopes_json,
@@ -656,7 +656,7 @@ func (r *Repository) ApproveAuthRequestForPrincipal(ctx context.Context, request
 	`, principalID, authCode, requestID).Scan(
 		&request.ID,
 		&request.FlowType,
-		&request.TenantID,
+		&request.NS,
 		&request.OAuthProvider,
 		&request.DisplayName,
 		&scopesJSON,

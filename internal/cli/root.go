@@ -34,24 +34,14 @@ func NewRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "llm-wiki",
 		Short: "LLM-Wiki CLI",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if strings.TrimSpace(ns) == "" {
-				if value, err := cmd.Flags().GetString("tenant"); err == nil && strings.TrimSpace(value) != "" {
-					ns = value
-				}
-			}
-			return nil
-		},
 	}
 
 	root.PersistentFlags().StringVar(&baseURL, "base-url", "", "LLM-Wiki server base URL")
 	root.PersistentFlags().DurationVar(&timeout, "timeout", 10*time.Second, "HTTP timeout")
 	root.PersistentFlags().StringVar(&accessToken, "token", "", "Bearer token")
 	root.PersistentFlags().StringVar(&tokenFile, "token-file", "", "Path to a bearer token file")
-	root.PersistentFlags().StringVar(&ns, "ns", "", "Namespace scope used for auth/profile flows")
+	root.PersistentFlags().StringVar(&ns, "ns", "", "NS used for auth/profile flows")
 	root.PersistentFlags().StringVar(&profileName, "profile", "", "CLI profile name under ~/.llm-wiki/config.json")
-	root.PersistentFlags().String("tenant", "", "Deprecated alias for --ns")
-	_ = root.PersistentFlags().MarkHidden("tenant")
 
 	root.AddCommand(newVersionCommand())
 	root.AddCommand(newAuthCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
@@ -101,8 +91,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 				}
 				return persistProfile(options.ProfileName, storedProfile{
 					BaseURL:     options.BaseURL,
-					NS:          whoami.TenantID,
-					TenantID:    whoami.TenantID,
+					NS:          whoami.NS,
 					AccessToken: accessTokenToStore,
 					PrincipalID: whoami.PrincipalID,
 					DisplayName: whoami.DisplayName,
@@ -130,24 +119,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 			if err != nil {
 				return err
 			}
-			resp, err := client.SwitchTenant(context.Background(), args[0])
-			if err != nil {
-				return err
-			}
-			return persistLoginProfile(options, resp, "")
-		},
-	})
-	cmd.AddCommand(&cobra.Command{
-		Use:    "switch-tenant <tenant-id>",
-		Short:  "Deprecated alias for switch-ns",
-		Hidden: true,
-		Args:   cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
-			if err != nil {
-				return err
-			}
-			resp, err := client.SwitchTenant(context.Background(), args[0])
+			resp, err := client.SwitchNS(context.Background(), args[0])
 			if err != nil {
 				return err
 			}
@@ -169,7 +141,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 			payload := map[string]any{
 				"profile":        options.ProfileName,
 				"base_url":       options.BaseURL,
-				"ns":             whoami.TenantID,
+				"ns":             whoami.NS,
 				"principal_id":   whoami.PrincipalID,
 				"principal_type": whoami.PrincipalType,
 				"display_name":   whoami.DisplayName,
@@ -325,7 +297,7 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 			if err != nil {
 				return err
 			}
-			resp, err := client.ListWorkspaces(context.Background())
+			resp, err := client.ListNS(context.Background())
 			if err != nil {
 				return err
 			}
@@ -340,8 +312,8 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 			if err != nil {
 				return err
 			}
-			resp, err := client.CreateWorkspace(context.Background(), api.CreateWorkspaceRequest{
-				TenantID:    nsKey,
+			resp, err := client.CreateNS(context.Background(), api.CreateNSRequest{
+				NS:          nsKey,
 				DisplayName: nsDisplayName,
 			})
 			if err != nil {
@@ -419,7 +391,7 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 			if err != nil {
 				return err
 			}
-			namespacesResp, err := client.ListNamespaces(context.Background())
+			namespacesResp, err := client.ListFolders(context.Background())
 			if err != nil {
 				return err
 			}
@@ -487,7 +459,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 			if err != nil {
 				return err
 			}
-			resp, err := client.CreateNamespace(context.Background(), api.CreateNamespaceRequest{
+			resp, err := client.CreateFolder(context.Background(), api.CreateFolderRequest{
 				Key:         key,
 				DisplayName: displayName,
 				Description: description,
@@ -519,7 +491,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 			if err != nil {
 				return err
 			}
-			resp, err := client.GetNamespace(context.Background(), namespaceID)
+			resp, err := client.GetFolder(context.Background(), namespaceID)
 			if err != nil {
 				return err
 			}
@@ -535,7 +507,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 			if err != nil {
 				return err
 			}
-			resp, err := client.ListNamespaces(context.Background())
+			resp, err := client.ListFolders(context.Background())
 			if err != nil {
 				return err
 			}
@@ -556,7 +528,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 			if err != nil {
 				return err
 			}
-			resp, err := client.ArchiveNamespace(context.Background(), namespaceID)
+			resp, err := client.ArchiveFolder(context.Background(), namespaceID)
 			if err != nil {
 				return err
 			}
@@ -593,7 +565,7 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 				return err
 			}
 			resp, err := client.CreateDocument(context.Background(), api.CreateDocumentRequest{
-				NamespaceID:   folderID,
+				FolderID:      folderID,
 				Slug:          slug,
 				Title:         title,
 				Content:       content,
@@ -793,8 +765,7 @@ func authorizedClient(baseURL string, timeout time.Duration, accessToken string,
 			options.ExpiresAt = expiresAt
 			_ = persistProfile(options.ProfileName, storedProfile{
 				BaseURL:      options.BaseURL,
-				NS:           resp.TenantID,
-				TenantID:     resp.TenantID,
+				NS:           resp.NS,
 				AccessToken:  resp.AccessToken,
 				RefreshToken: resp.RefreshToken,
 				ExpiresAt:    expiresAt.Format(time.RFC3339),
@@ -848,7 +819,7 @@ func browserLogin(cmd *cobra.Command, options runtimeOptions, displayName string
 	redirectURI := "http://" + listener.Addr().String() + "/auth/callback"
 	client := httpclient.New(options.BaseURL, options.Timeout, "")
 	startResp, err := client.StartBrowserLogin(context.Background(), api.StartBrowserLoginRequest{
-		TenantID:            options.TenantID,
+		NS:                  options.NS,
 		Provider:            provider,
 		DisplayName:         displayName,
 		State:               state,
@@ -885,7 +856,7 @@ func browserLogin(cmd *cobra.Command, options runtimeOptions, displayName string
 func deviceLogin(cmd *cobra.Command, options runtimeOptions, displayName string, noOpen bool) error {
 	client := httpclient.New(options.BaseURL, options.Timeout, "")
 	startResp, err := client.StartDeviceLogin(context.Background(), api.StartDeviceLoginRequest{
-		TenantID:    options.TenantID,
+		NS:          options.NS,
 		DisplayName: displayName,
 	})
 	if err != nil {
@@ -929,8 +900,7 @@ func persistLoginProfile(options runtimeOptions, tokenResp api.TokenExchangeResp
 	}
 	return persistProfile(options.ProfileName, storedProfile{
 		BaseURL:      options.BaseURL,
-		NS:           tokenResp.TenantID,
-		TenantID:     tokenResp.TenantID,
+		NS:           tokenResp.NS,
 		AccessToken:  tokenResp.AccessToken,
 		RefreshToken: tokenResp.RefreshToken,
 		ExpiresAt:    expiresAt.Format(time.RFC3339),

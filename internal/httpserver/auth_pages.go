@@ -23,7 +23,7 @@ type authPageData struct {
 	Heading      string
 	Description  string
 	Action       string
-	TenantID     string
+	NS           string
 	RequestID    string
 	UserCode     string
 	ErrorMessage string
@@ -31,7 +31,7 @@ type authPageData struct {
 }
 
 type adminPageData struct {
-	TenantID       string
+	NS             string
 	DisplayName    string
 	Users          []api.UserResponse
 	Providers      []api.OAuthProviderResponse
@@ -53,14 +53,14 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 		renderAuthShell(c, authPageData{
 			Title:       "Initialize LLM-Wiki",
 			Heading:     "Initialize LLM-Wiki",
-			Description: "Create the first admin account and default tenant.",
+			Description: "Create the first admin account and default ns.",
 			Action:      "/setup",
-			TenantID:    status.DefaultTenant,
+			NS:          status.DefaultNS,
 		}, setupFormHTML)
 	})
 	engine.POST("/setup", func(c *gin.Context) {
 		user, err := svc.Initialize(c.Request.Context(), api.InitializeRequest{
-			TenantID:    c.PostForm("tenant_id"),
+			NS:          c.PostForm("ns"),
 			Username:    c.PostForm("username"),
 			DisplayName: c.PostForm("display_name"),
 			Password:    c.PostForm("password"),
@@ -69,14 +69,14 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 			renderAuthShell(c, authPageData{
 				Title:        "Initialize LLM-Wiki",
 				Heading:      "Initialize LLM-Wiki",
-				Description:  "Create the first admin account and default tenant.",
+				Description:  "Create the first admin account and default ns.",
 				Action:       "/setup",
-				TenantID:     c.PostForm("tenant_id"),
+				NS:           c.PostForm("ns"),
 				ErrorMessage: err.Error(),
 			}, setupFormHTML)
 			return
 		}
-		session, err := svc.CreateWebSession(c.Request.Context(), user.PrincipalID, user.TenantID)
+		session, err := svc.CreateWebSession(c.Request.Context(), user.PrincipalID, user.NS)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -98,25 +98,25 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 		renderAuthShell(c, authPageData{
 			Title:       "Admin Login",
 			Heading:     "Admin Login",
-			Description: "Sign in with a tenant, username, and password.",
+			Description: "Sign in with an ns, username, and password.",
 			Action:      "/admin/login",
-			TenantID:    status.DefaultTenant,
+			NS:          status.DefaultNS,
 		}, loginFormHTML)
 	})
 	engine.POST("/admin/login", func(c *gin.Context) {
-		user, _, err := svc.LoginUser(c.Request.Context(), c.PostForm("tenant_id"), c.PostForm("username"), c.PostForm("password"))
+		user, _, err := svc.LoginUser(c.Request.Context(), c.PostForm("ns"), c.PostForm("username"), c.PostForm("password"))
 		if err != nil {
 			renderAuthShell(c, authPageData{
 				Title:        "Admin Login",
 				Heading:      "Admin Login",
-				Description:  "Sign in with a tenant, username, and password.",
+				Description:  "Sign in with an ns, username, and password.",
 				Action:       "/admin/login",
-				TenantID:     c.PostForm("tenant_id"),
-				ErrorMessage: "Invalid tenant, username, or password.",
+				NS:           c.PostForm("ns"),
+				ErrorMessage: "Invalid ns, username, or password.",
 			}, loginFormHTML)
 			return
 		}
-		session, err := svc.CreateWebSession(c.Request.Context(), user.PrincipalID, user.TenantID)
+		session, err := svc.CreateWebSession(c.Request.Context(), user.PrincipalID, user.NS)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -134,7 +134,7 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 
 	engine.GET("/admin/users", requireAdminWebSession(svc), func(c *gin.Context) {
 		principal, _ := auth.PrincipalFromContext(c.Request.Context())
-		users, err := svc.ListUsers(c.Request.Context(), principal.TenantID)
+		users, err := svc.ListUsers(c.Request.Context(), principal.NS)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -145,7 +145,7 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 			return
 		}
 		renderAdminUsersPage(c, adminPageData{
-			TenantID:    principal.TenantID,
+			NS:          principal.NS,
 			DisplayName: principal.DisplayName,
 			Users:       users.Items,
 			Providers:   providers.Items,
@@ -153,17 +153,17 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 	})
 	engine.POST("/admin/users", requireAdminWebSession(svc), func(c *gin.Context) {
 		principal, _ := auth.PrincipalFromContext(c.Request.Context())
-		_, err := svc.CreateUser(c.Request.Context(), principal.TenantID, api.CreateUserRequest{
+		_, err := svc.CreateUser(c.Request.Context(), principal.NS, api.CreateUserRequest{
 			Username:    c.PostForm("username"),
 			DisplayName: c.PostForm("display_name"),
 			Password:    c.PostForm("password"),
 			IsAdmin:     c.PostForm("is_admin") == "on",
 		})
 		if err != nil {
-			users, _ := svc.ListUsers(c.Request.Context(), principal.TenantID)
+			users, _ := svc.ListUsers(c.Request.Context(), principal.NS)
 			providers, _ := svc.ListAdminOAuthProviders(c.Request.Context())
 			renderAdminUsersPage(c, adminPageData{
-				TenantID:     principal.TenantID,
+				NS:           principal.NS,
 				DisplayName:  principal.DisplayName,
 				Users:        users.Items,
 				Providers:    providers.Items,
@@ -176,26 +176,26 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 	engine.POST("/admin/auth-providers", requireAdminWebSession(svc), func(c *gin.Context) {
 		enabled := c.PostForm("enabled") == "on"
 		autoCreateUsers := c.PostForm("auto_create_users") == "on"
-		autoCreateTenants := c.PostForm("auto_create_tenants") == "on"
+		autoCreateNS := c.PostForm("auto_create_ns") == "on"
 		_, err := svc.UpsertOAuthProvider(c.Request.Context(), api.UpsertOAuthProviderRequest{
-			Name:              c.PostForm("name"),
-			DisplayName:       c.PostForm("display_name"),
-			AuthURL:           c.PostForm("auth_url"),
-			TokenURL:          c.PostForm("token_url"),
-			UserinfoURL:       c.PostForm("userinfo_url"),
-			ClientID:          c.PostForm("client_id"),
-			ClientSecret:      c.PostForm("client_secret"),
-			Scopes:            strings.Fields(c.PostForm("scopes")),
-			Enabled:           enabled,
-			AutoCreateUsers:   autoCreateUsers,
-			AutoCreateTenants: autoCreateTenants,
+			Name:            c.PostForm("name"),
+			DisplayName:     c.PostForm("display_name"),
+			AuthURL:         c.PostForm("auth_url"),
+			TokenURL:        c.PostForm("token_url"),
+			UserinfoURL:     c.PostForm("userinfo_url"),
+			ClientID:        c.PostForm("client_id"),
+			ClientSecret:    c.PostForm("client_secret"),
+			Scopes:          strings.Fields(c.PostForm("scopes")),
+			Enabled:         enabled,
+			AutoCreateUsers: autoCreateUsers,
+			AutoCreateNS:    autoCreateNS,
 		})
 		if err != nil {
 			principal, _ := auth.PrincipalFromContext(c.Request.Context())
-			users, _ := svc.ListUsers(c.Request.Context(), principal.TenantID)
+			users, _ := svc.ListUsers(c.Request.Context(), principal.NS)
 			providers, _ := svc.ListAdminOAuthProviders(c.Request.Context())
 			renderAdminUsersPage(c, adminPageData{
-				TenantID:     principal.TenantID,
+				NS:           principal.NS,
 				DisplayName:  principal.DisplayName,
 				Users:        users.Items,
 				Providers:    providers.Items,
@@ -222,7 +222,7 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 			Heading:      "Approve CLI Login",
 			Description:  "Choose a login provider or fall back to local username and password approval.",
 			Action:       "/auth/authorize",
-			TenantID:     request.TenantID,
+			NS:           request.NS,
 			RequestID:    request.ID,
 			ProviderHTML: renderOAuthProviderButtons(request.ID, providers),
 		}, oauthApproveFormHTML)
@@ -235,7 +235,7 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 				Heading:      "Approve CLI Login",
 				Description:  "Choose a login provider or fall back to local username and password approval.",
 				Action:       "/auth/authorize",
-				TenantID:     c.PostForm("tenant_id"),
+				NS:           c.PostForm("ns"),
 				RequestID:    c.PostForm("request_id"),
 				ErrorMessage: "Login failed.",
 			}, oauthApproveFormHTML)
@@ -266,7 +266,7 @@ func registerAuthBrowserRoutes(engine *gin.Engine, svc *service.Service, cfg con
 				Heading:      "Approve CLI Login",
 				Description:  "OAuth login failed.",
 				Action:       "/auth/authorize",
-				TenantID:     request.TenantID,
+				NS:           request.NS,
 				RequestID:    request.ID,
 				ErrorMessage: err.Error(),
 				ProviderHTML: renderOAuthProviderButtons(request.ID, providers),
@@ -336,7 +336,7 @@ func renderAuthShell(c *gin.Context, data authPageData, content string) {
 	html := fmt.Sprintf(authShellHTML, template.HTMLEscapeString(data.Title), template.HTMLEscapeString(data.Heading), template.HTMLEscapeString(data.Description), content)
 	replacer := strings.NewReplacer(
 		"{{action}}", template.HTMLEscapeString(data.Action),
-		"{{tenant_id}}", template.HTMLEscapeString(data.TenantID),
+		"{{ns}}", template.HTMLEscapeString(data.NS),
 		"{{request_id}}", template.HTMLEscapeString(data.RequestID),
 		"{{user_code}}", template.HTMLEscapeString(data.UserCode),
 		"{{error}}", template.HTMLEscapeString(data.ErrorMessage),
@@ -366,11 +366,11 @@ func renderAdminUsersPage(c *gin.Context, data adminPageData) {
 			template.HTMLEscapeString(item.DisplayName),
 			item.Enabled,
 			item.AutoCreateUsers,
-			item.AutoCreateTenants,
+			item.AutoCreateNS,
 		))
 	}
 	html := fmt.Sprintf(adminUsersHTML,
-		template.HTMLEscapeString(data.TenantID),
+		template.HTMLEscapeString(data.NS),
 		template.HTMLEscapeString(data.DisplayName),
 		template.HTMLEscapeString(data.ErrorMessage),
 		template.HTMLEscapeString(c.Query("success")),
@@ -431,7 +431,7 @@ const authShellHTML = `<!doctype html>
 const setupFormHTML = `<form method="post" action="{{action}}">
   <div class="error">{{error}}</div>
   <label>Tenant</label>
-  <input name="tenant_id" value="{{tenant_id}}" placeholder="default" required>
+  <input name="ns" value="{{ns}}" placeholder="default" required>
   <label>Username</label>
   <input name="username" placeholder="admin" required>
   <label>Display Name</label>
@@ -444,7 +444,7 @@ const setupFormHTML = `<form method="post" action="{{action}}">
 const loginFormHTML = `<form method="post" action="{{action}}">
   <div class="error">{{error}}</div>
   <label>Tenant</label>
-  <input name="tenant_id" value="{{tenant_id}}" placeholder="default" required>
+  <input name="ns" value="{{ns}}" placeholder="default" required>
   <label>Username</label>
   <input name="username" placeholder="admin" required>
   <label>Password</label>
@@ -456,7 +456,7 @@ const oauthApproveFormHTML = `{{provider_html}}<form method="post" action="{{act
   <div class="error">{{error}}</div>
   <input type="hidden" name="request_id" value="{{request_id}}">
   <label>Tenant</label>
-  <input name="tenant_id" value="{{tenant_id}}" readonly>
+  <input name="ns" value="{{ns}}" readonly>
   <label>Username</label>
   <input name="username" placeholder="admin" required>
   <label>Password</label>
@@ -540,7 +540,7 @@ const adminUsersHTML = `<!doctype html>
             <input name="scopes" placeholder="openid email profile">
             <label><input type="checkbox" name="enabled" style="width:auto; margin-right:8px;" checked> Enabled</label>
             <label><input type="checkbox" name="auto_create_users" style="width:auto; margin-right:8px;" checked> Auto Create Users</label>
-            <label><input type="checkbox" name="auto_create_tenants" style="width:auto; margin-right:8px;" checked> Auto Create Tenants</label>
+            <label><input type="checkbox" name="auto_create_ns" style="width:auto; margin-right:8px;" checked> Auto Create NS</label>
             <button type="submit">Save OAuth Provider</button>
           </form>
         </div>

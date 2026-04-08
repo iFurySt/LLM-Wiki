@@ -5,13 +5,13 @@
 [GIN-debug] GET    /healthz                  --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func1 (3 handlers)
 [GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func2 (3 handlers)
 [GIN-debug] GET    /readyz                   --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
-[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] GET    /v1/folders            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] POST   /v1/folders            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] GET    /v1/folders/:id        --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
 [GIN-debug] POST   /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
 [GIN-debug] GET    /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
 [GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
+[GIN-debug] GET    /v1/folders/:namespaceID/documents/:slug --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
@@ -19,15 +19,15 @@
 [GIN-debug] GET    /healthz                  --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func1 (3 handlers)
 [GIN-debug] GET    /v1/system/info           --> github.com/ifuryst/llm-wiki/internal/httpserver.registerRoutes.func2 (3 handlers)
 [GIN-debug] GET    /readyz                   --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func1 (3 handlers)
-[GIN-debug] GET    /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
-[GIN-debug] POST   /v1/namespaces            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:id        --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
+[GIN-debug] GET    /v1/folders            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func2 (3 handlers)
+[GIN-debug] POST   /v1/folders            --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func3 (3 handlers)
+[GIN-debug] GET    /v1/folders/:id        --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func4 (3 handlers)
 [GIN-debug] POST   /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func5 (3 handlers)
 [GIN-debug] GET    /v1/documents             --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func6 (3 handlers)
 [GIN-debug] GET    /v1/documents/:id         --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func7 (3 handlers)
-[GIN-debug] GET    /v1/namespaces/:namespaceID/documents/:slug --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
+[GIN-debug] GET    /v1/folders/:namespaceID/documents/:slug --> github.com/ifuryst/llm-wiki/internal/httpserver.registerAPIRoutes.func8 (3 handlers)
 --- FAIL: TestReadyz (3.21s)
-panic: ':namespaceID' in new path '/v1/namespaces/:namespaceID/documents/:slug' conflicts with existing wildcard ':id' in existing prefix '/v1/namespaces/:id' [recovered, repanicked]
+panic: ':namespaceID' in new path '/v1/folders/:namespaceID/documents/:slug' conflicts with existing wildcard ':id' in existing prefix '/v1/folders/:id' [recovered, repanicked]
 
 goroutine 67 [running]:
 testing.tRunner.func1.2({0x101e69460, 0x5d081a2b50e0})

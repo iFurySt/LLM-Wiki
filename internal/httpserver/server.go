@@ -42,6 +42,9 @@ func NewHandler(cfg config.Config, logger *zap.Logger, svc *service.Service) htt
 	if templates, err := ui.ParseTemplates(); err == nil {
 		engine.SetHTMLTemplate(templates)
 	}
+	if assetFS, err := ui.AssetFS(); err == nil {
+		engine.StaticFS("/ui/assets", assetFS)
+	}
 	mcpManager := mcpserver.NewManager(svc)
 
 	registerRoutes(engine, cfg)

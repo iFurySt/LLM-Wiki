@@ -79,13 +79,13 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 	protected := v1.Group("")
 	protected.Use(authenticateRequest(svc))
 
-	protected.POST("/auth/switch-tenant", func(c *gin.Context) {
-		var req api.SwitchTenantRequest
+	protected.POST("/auth/switch-ns", func(c *gin.Context) {
+		var req api.SwitchNSRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.SwitchTenant(c.Request.Context(), strings.TrimSpace(req.TenantID))
+		resp, err := svc.SwitchNS(c.Request.Context(), strings.TrimSpace(req.NS))
 		if err != nil {
 			handleError(c, err)
 			return
@@ -126,7 +126,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		c.JSON(http.StatusCreated, resp)
 	})
 	authAdmin.GET("/service-principals", func(c *gin.Context) {
-		resp, err := svc.ListServicePrincipals(c.Request.Context(), principalFromRequest(c).TenantID)
+		resp, err := svc.ListServicePrincipals(c.Request.Context(), principalFromRequest(c).NS)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -139,7 +139,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.CreateServicePrincipal(c.Request.Context(), principalFromRequest(c).TenantID, req)
+		resp, err := svc.CreateServicePrincipal(c.Request.Context(), principalFromRequest(c).NS, req)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -147,7 +147,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		c.JSON(http.StatusCreated, resp)
 	})
 	authAdmin.GET("/tokens", func(c *gin.Context) {
-		resp, err := svc.ListTokens(c.Request.Context(), principalFromRequest(c).TenantID)
+		resp, err := svc.ListTokens(c.Request.Context(), principalFromRequest(c).NS)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -160,7 +160,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.IssueServiceToken(c.Request.Context(), principalFromRequest(c).TenantID, req)
+		resp, err := svc.IssueServiceToken(c.Request.Context(), principalFromRequest(c).NS, req)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -176,7 +176,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.RevokeToken(c.Request.Context(), principalFromRequest(c).TenantID, tokenID)
+		resp, err := svc.RevokeToken(c.Request.Context(), principalFromRequest(c).NS, tokenID)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -184,38 +184,30 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		c.JSON(http.StatusOK, resp)
 	})
 
-	spaces := protected.Group("")
-	spaces.Use(requireScopes(auth.ScopeSpacesRead))
-	spaces.GET("/spaces", func(c *gin.Context) {
-		resp, err := svc.ListSpaces(c.Request.Context(), principalFromRequest(c).TenantID)
+	ns := protected.Group("")
+	ns.Use(requireScopes(auth.ScopeNSRead))
+	ns.GET("/ns", func(c *gin.Context) {
+		resp, err := svc.ListNS(c.Request.Context())
 		if err != nil {
 			handleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, resp)
 	})
-	spaces.GET("/workspaces", func(c *gin.Context) {
-		resp, err := svc.ListWorkspaces(c.Request.Context())
-		if err != nil {
-			handleError(c, err)
-			return
-		}
-		c.JSON(http.StatusOK, resp)
-	})
-	spaces.POST("/workspaces", func(c *gin.Context) {
-		var req api.CreateWorkspaceRequest
+	ns.POST("/ns", func(c *gin.Context) {
+		var req api.CreateNSRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.CreateWorkspace(c.Request.Context(), req)
+		resp, err := svc.CreateNS(c.Request.Context(), req)
 		if err != nil {
 			handleError(c, err)
 			return
 		}
 		c.JSON(http.StatusCreated, resp)
 	})
-	spaces.GET("/workspaces/invites", func(c *gin.Context) {
+	ns.GET("/ns/invites", func(c *gin.Context) {
 		resp, err := svc.ListInvites(c.Request.Context())
 		if err != nil {
 			handleError(c, err)
@@ -223,7 +215,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		}
 		c.JSON(http.StatusOK, resp)
 	})
-	spaces.POST("/workspaces/invites", func(c *gin.Context) {
+	ns.POST("/ns/invites", func(c *gin.Context) {
 		var req api.CreateInviteRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			badRequest(c, err)
@@ -236,7 +228,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		}
 		c.JSON(http.StatusCreated, resp)
 	})
-	spaces.POST("/workspaces/invites/accept", func(c *gin.Context) {
+	ns.POST("/ns/invites/accept", func(c *gin.Context) {
 		var req api.AcceptInviteRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			badRequest(c, err)
@@ -251,22 +243,22 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 	})
 
 	namespacesRead := protected.Group("")
-	namespacesRead.Use(requireScopes(auth.ScopeNamespacesRead))
-	namespacesRead.GET("/namespaces", func(c *gin.Context) {
-		resp, err := svc.ListNamespaces(c.Request.Context(), principalFromRequest(c).TenantID)
+	namespacesRead.Use(requireScopes(auth.ScopeFoldersRead))
+	namespacesRead.GET("/folders", func(c *gin.Context) {
+		resp, err := svc.ListFolders(c.Request.Context(), principalFromRequest(c).NS)
 		if err != nil {
 			handleError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, resp)
 	})
-	namespacesRead.GET("/namespaces/:id", func(c *gin.Context) {
+	namespacesRead.GET("/folders/:id", func(c *gin.Context) {
 		namespaceID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.GetNamespace(c.Request.Context(), principalFromRequest(c).TenantID, namespaceID)
+		resp, err := svc.GetFolder(c.Request.Context(), principalFromRequest(c).NS, namespaceID)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -275,27 +267,27 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 	})
 
 	namespacesWrite := protected.Group("")
-	namespacesWrite.Use(requireScopes(auth.ScopeNamespacesWrite))
-	namespacesWrite.POST("/namespaces", func(c *gin.Context) {
-		var req api.CreateNamespaceRequest
+	namespacesWrite.Use(requireScopes(auth.ScopeFoldersWrite))
+	namespacesWrite.POST("/folders", func(c *gin.Context) {
+		var req api.CreateFolderRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.CreateNamespace(c.Request.Context(), principalFromRequest(c).TenantID, req)
+		resp, err := svc.CreateFolder(c.Request.Context(), principalFromRequest(c).NS, req)
 		if err != nil {
 			handleError(c, err)
 			return
 		}
 		c.JSON(http.StatusCreated, resp)
 	})
-	namespacesWrite.POST("/namespaces/:id/archive", func(c *gin.Context) {
+	namespacesWrite.POST("/folders/:id/archive", func(c *gin.Context) {
 		namespaceID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.ArchiveNamespace(c.Request.Context(), principalFromRequest(c).TenantID, namespaceID)
+		resp, err := svc.ArchiveFolder(c.Request.Context(), principalFromRequest(c).NS, namespaceID)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -308,7 +300,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 	documentsRead.GET("/documents", func(c *gin.Context) {
 		var namespaceID *int64
 		var status *string
-		if raw := c.Query("namespace_id"); raw != "" {
+		if raw := c.Query("folder_id"); raw != "" {
 			parsed, err := strconv.ParseInt(raw, 10, 64)
 			if err != nil {
 				badRequest(c, err)
@@ -319,7 +311,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		if raw := c.Query("status"); raw != "" {
 			status = &raw
 		}
-		resp, err := svc.ListDocuments(c.Request.Context(), principalFromRequest(c).TenantID, namespaceID, status)
+		resp, err := svc.ListDocuments(c.Request.Context(), principalFromRequest(c).NS, namespaceID, status)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -332,7 +324,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.GetDocument(c.Request.Context(), principalFromRequest(c).TenantID, documentID)
+		resp, err := svc.GetDocument(c.Request.Context(), principalFromRequest(c).NS, documentID)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -340,12 +332,12 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 		c.JSON(http.StatusOK, resp)
 	})
 	documentsRead.GET("/document-by-slug", func(c *gin.Context) {
-		namespaceID, err := strconv.ParseInt(c.Query("namespace_id"), 10, 64)
+		namespaceID, err := strconv.ParseInt(c.Query("folder_id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.GetDocumentBySlug(c.Request.Context(), principalFromRequest(c).TenantID, namespaceID, c.Query("slug"))
+		resp, err := svc.GetDocumentBySlug(c.Request.Context(), principalFromRequest(c).NS, namespaceID, c.Query("slug"))
 		if err != nil {
 			handleError(c, err)
 			return
@@ -361,7 +353,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.CreateDocument(c.Request.Context(), principalFromRequest(c).TenantID, req)
+		resp, err := svc.CreateDocument(c.Request.Context(), principalFromRequest(c).NS, req)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -379,7 +371,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.UpdateDocument(c.Request.Context(), principalFromRequest(c).TenantID, documentID, req)
+		resp, err := svc.UpdateDocument(c.Request.Context(), principalFromRequest(c).NS, documentID, req)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -400,7 +392,7 @@ func registerAPIRoutes(engine *gin.Engine, svc *service.Service) {
 			badRequest(c, err)
 			return
 		}
-		resp, err := svc.ArchiveDocument(c.Request.Context(), principalFromRequest(c).TenantID, documentID, req)
+		resp, err := svc.ArchiveDocument(c.Request.Context(), principalFromRequest(c).NS, documentID, req)
 		if err != nil {
 			handleError(c, err)
 			return
@@ -447,11 +439,11 @@ func principalFromRequest(c *gin.Context) auth.Principal {
 
 func tenantIDFromRequest(c *gin.Context) string {
 	principal := principalFromRequest(c)
-	if principal.TenantID != "" {
-		return principal.TenantID
+	if principal.NS != "" {
+		return principal.NS
 	}
-	if principal, ok := auth.PrincipalFromContext(c.Request.Context()); ok && principal.TenantID != "" {
-		return principal.TenantID
+	if principal, ok := auth.PrincipalFromContext(c.Request.Context()); ok && principal.NS != "" {
+		return principal.NS
 	}
 	return "default"
 }

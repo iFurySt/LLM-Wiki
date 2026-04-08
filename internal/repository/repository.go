@@ -17,19 +17,18 @@ type Repository struct {
 	pool *pgxpool.Pool
 }
 
-type Space struct {
+type NS struct {
 	ID          int64
-	TenantID    string
+	NS          string
 	Key         string
 	DisplayName string
 	CreatedAt   time.Time
 	Role        string
 }
 
-type Namespace struct {
+type Folder struct {
 	ID          int64
-	TenantID    string
-	SpaceID     int64
+	NS          string
 	Key         string
 	DisplayName string
 	Description string
@@ -41,8 +40,8 @@ type Namespace struct {
 
 type Document struct {
 	ID                int64
-	TenantID          string
-	NamespaceID       int64
+	NS                string
+	FolderID          int64
 	Slug              string
 	Title             string
 	Content           string
@@ -65,17 +64,19 @@ type Revision struct {
 	CreatedAt     time.Time
 }
 
-type CreateNamespaceParams struct {
-	TenantID    string
+type CreateFolderParams struct {
+	NS          string
 	Key         string
 	DisplayName string
 	Description string
 	Visibility  string
 }
 
+type CreateNamespaceParams = CreateFolderParams
+
 type CreateDocumentParams struct {
-	TenantID      string
-	NamespaceID   int64
+	NS            string
+	FolderID      int64
 	Slug          string
 	Title         string
 	Content       string
@@ -85,7 +86,7 @@ type CreateDocumentParams struct {
 }
 
 type UpdateDocumentParams struct {
-	TenantID      string
+	NS            string
 	DocumentID    int64
 	Title         string
 	Content       string
@@ -95,7 +96,7 @@ type UpdateDocumentParams struct {
 }
 
 type ArchiveDocumentParams struct {
-	TenantID      string
+	NS            string
 	DocumentID    int64
 	AuthorType    string
 	AuthorID      string
@@ -110,117 +111,120 @@ func (r *Repository) Ping(ctx context.Context) error {
 	return r.pool.Ping(ctx)
 }
 
-func (r *Repository) EnsureTenantSpace(ctx context.Context, tenantID string) (Space, error) {
-	return r.EnsureTenantSpaceWithDisplayName(ctx, tenantID, "Default Space")
+func (r *Repository) EnsureNS(ctx context.Context, ns string) (NS, error) {
+	return r.EnsureNSWithDisplayName(ctx, ns, "Default NS")
 }
 
-func (r *Repository) EnsureTenantSpaceWithDisplayName(ctx context.Context, tenantID string, displayName string) (Space, error) {
-	var space Space
+func (r *Repository) EnsureTenantSpace(ctx context.Context, tenantID string) (NS, error) {
+	return r.EnsureNS(ctx, tenantID)
+}
+
+func (r *Repository) EnsureNSWithDisplayName(ctx context.Context, ns string, displayName string) (NS, error) {
+	var item NS
 	err := r.pool.QueryRow(ctx, `
-		INSERT INTO spaces (tenant_id, key, display_name)
+		INSERT INTO ns (ns, key, display_name)
 		VALUES ($1, 'default', $2)
-		ON CONFLICT (tenant_id) DO UPDATE SET
-			tenant_id = EXCLUDED.tenant_id,
+		ON CONFLICT (ns) DO UPDATE SET
+			ns = EXCLUDED.ns,
 			display_name = CASE
-				WHEN spaces.display_name = '' OR spaces.display_name = 'Default Space' THEN EXCLUDED.display_name
-				ELSE spaces.display_name
+				WHEN ns.display_name = '' OR ns.display_name = 'Default NS' THEN EXCLUDED.display_name
+				ELSE ns.display_name
 			END
-		RETURNING id, tenant_id, key, display_name, created_at
-	`, tenantID, displayName).Scan(
-		&space.ID,
-		&space.TenantID,
-		&space.Key,
-		&space.DisplayName,
-		&space.CreatedAt,
+		RETURNING id, ns, key, display_name, created_at
+	`, ns, displayName).Scan(
+		&item.ID,
+		&item.NS,
+		&item.Key,
+		&item.DisplayName,
+		&item.CreatedAt,
 	)
-	return space, err
+	return item, err
 }
 
-func (r *Repository) ListSpaces(ctx context.Context, tenantID string) ([]Space, error) {
-	space, err := r.EnsureTenantSpace(ctx, tenantID)
+func (r *Repository) EnsureTenantSpaceWithDisplayName(ctx context.Context, tenantID string, displayName string) (NS, error) {
+	return r.EnsureNSWithDisplayName(ctx, tenantID, displayName)
+}
+
+func (r *Repository) ListNS(ctx context.Context, ns string) ([]NS, error) {
+	item, err := r.EnsureNS(ctx, ns)
 	if err != nil {
 		return nil, err
 	}
-	return []Space{space}, nil
+	return []NS{item}, nil
 }
 
-func (r *Repository) CreateNamespace(ctx context.Context, params CreateNamespaceParams) (Namespace, error) {
-	space, err := r.EnsureTenantSpace(ctx, params.TenantID)
-	if err != nil {
-		return Namespace{}, err
+func (r *Repository) CreateFolder(ctx context.Context, params CreateFolderParams) (Folder, error) {
+	if _, err := r.EnsureNS(ctx, params.NS); err != nil {
+		return Folder{}, err
 	}
 
-	var namespace Namespace
-	err = r.pool.QueryRow(ctx, `
-		INSERT INTO namespaces (
-			tenant_id, space_id, key, display_name, description, visibility, status
-		) VALUES ($1, $2, $3, $4, $5, $6, 'active')
-		RETURNING id, tenant_id, space_id, key, display_name, description, visibility, status, created_at, updated_at
+	var folder Folder
+	err := r.pool.QueryRow(ctx, `
+		INSERT INTO folders (
+			ns, key, display_name, description, visibility, status
+		) VALUES ($1, $2, $3, $4, $5, 'active')
+		RETURNING id, ns, key, display_name, description, visibility, status, created_at, updated_at
 	`,
-		params.TenantID,
-		space.ID,
+		params.NS,
 		params.Key,
 		params.DisplayName,
 		params.Description,
 		params.Visibility,
 	).Scan(
-		&namespace.ID,
-		&namespace.TenantID,
-		&namespace.SpaceID,
-		&namespace.Key,
-		&namespace.DisplayName,
-		&namespace.Description,
-		&namespace.Visibility,
-		&namespace.Status,
-		&namespace.CreatedAt,
-		&namespace.UpdatedAt,
+		&folder.ID,
+		&folder.NS,
+		&folder.Key,
+		&folder.DisplayName,
+		&folder.Description,
+		&folder.Visibility,
+		&folder.Status,
+		&folder.CreatedAt,
+		&folder.UpdatedAt,
 	)
-	return namespace, err
+	return folder, err
 }
 
-func (r *Repository) GetNamespace(ctx context.Context, tenantID string, namespaceID int64) (Namespace, error) {
-	var namespace Namespace
+func (r *Repository) GetFolder(ctx context.Context, ns string, folderID int64) (Folder, error) {
+	var folder Folder
 	err := r.pool.QueryRow(ctx, `
-		SELECT id, tenant_id, space_id, key, display_name, description, visibility, status, created_at, updated_at
-		FROM namespaces
-		WHERE tenant_id = $1 AND id = $2
-	`, tenantID, namespaceID).Scan(
-		&namespace.ID,
-		&namespace.TenantID,
-		&namespace.SpaceID,
-		&namespace.Key,
-		&namespace.DisplayName,
-		&namespace.Description,
-		&namespace.Visibility,
-		&namespace.Status,
-		&namespace.CreatedAt,
-		&namespace.UpdatedAt,
+		SELECT id, ns, key, display_name, description, visibility, status, created_at, updated_at
+		FROM folders
+		WHERE ns = $1 AND id = $2
+	`, ns, folderID).Scan(
+		&folder.ID,
+		&folder.NS,
+		&folder.Key,
+		&folder.DisplayName,
+		&folder.Description,
+		&folder.Visibility,
+		&folder.Status,
+		&folder.CreatedAt,
+		&folder.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return Namespace{}, ErrNotFound
+		return Folder{}, ErrNotFound
 	}
-	return namespace, err
+	return folder, err
 }
 
-func (r *Repository) ListNamespaces(ctx context.Context, tenantID string) ([]Namespace, error) {
+func (r *Repository) ListFolders(ctx context.Context, ns string) ([]Folder, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, tenant_id, space_id, key, display_name, description, visibility, status, created_at, updated_at
-		FROM namespaces
-		WHERE tenant_id = $1
+		SELECT id, ns, key, display_name, description, visibility, status, created_at, updated_at
+		FROM folders
+		WHERE ns = $1
 		ORDER BY key ASC
-	`, tenantID)
+	`, ns)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	items := make([]Namespace, 0)
+	items := make([]Folder, 0)
 	for rows.Next() {
-		var item Namespace
+		var item Folder
 		if err := rows.Scan(
 			&item.ID,
-			&item.TenantID,
-			&item.SpaceID,
+			&item.NS,
 			&item.Key,
 			&item.DisplayName,
 			&item.Description,
@@ -236,41 +240,40 @@ func (r *Repository) ListNamespaces(ctx context.Context, tenantID string) ([]Nam
 	return items, rows.Err()
 }
 
-func (r *Repository) ArchiveNamespace(ctx context.Context, tenantID string, namespaceID int64) (Namespace, error) {
+func (r *Repository) ArchiveFolder(ctx context.Context, ns string, folderID int64) (Folder, error) {
 	var activeDocs int
 	if err := r.pool.QueryRow(ctx, `
 		SELECT COUNT(1)
 		FROM documents
-		WHERE tenant_id = $1 AND namespace_id = $2 AND status = 'active'
-	`, tenantID, namespaceID).Scan(&activeDocs); err != nil {
-		return Namespace{}, err
+		WHERE ns = $1 AND folder_id = $2 AND status = 'active'
+	`, ns, folderID).Scan(&activeDocs); err != nil {
+		return Folder{}, err
 	}
 	if activeDocs > 0 {
-		return Namespace{}, ErrConflict
+		return Folder{}, ErrConflict
 	}
 
-	var namespace Namespace
+	var folder Folder
 	err := r.pool.QueryRow(ctx, `
-		UPDATE namespaces
+		UPDATE folders
 		SET status = 'archived', updated_at = NOW()
-		WHERE tenant_id = $1 AND id = $2
-		RETURNING id, tenant_id, space_id, key, display_name, description, visibility, status, created_at, updated_at
-	`, tenantID, namespaceID).Scan(
-		&namespace.ID,
-		&namespace.TenantID,
-		&namespace.SpaceID,
-		&namespace.Key,
-		&namespace.DisplayName,
-		&namespace.Description,
-		&namespace.Visibility,
-		&namespace.Status,
-		&namespace.CreatedAt,
-		&namespace.UpdatedAt,
+		WHERE ns = $1 AND id = $2
+		RETURNING id, ns, key, display_name, description, visibility, status, created_at, updated_at
+	`, ns, folderID).Scan(
+		&folder.ID,
+		&folder.NS,
+		&folder.Key,
+		&folder.DisplayName,
+		&folder.Description,
+		&folder.Visibility,
+		&folder.Status,
+		&folder.CreatedAt,
+		&folder.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return Namespace{}, ErrNotFound
+		return Folder{}, ErrNotFound
 	}
-	return namespace, err
+	return folder, err
 }
 
 func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentParams) (Document, Revision, error) {
@@ -287,9 +290,9 @@ func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentPa
 	var namespaceExists bool
 	if err = tx.QueryRow(ctx, `
 		SELECT EXISTS (
-			SELECT 1 FROM namespaces WHERE tenant_id = $1 AND id = $2
+			SELECT 1 FROM folders WHERE ns = $1 AND id = $2
 		)
-	`, params.TenantID, params.NamespaceID).Scan(&namespaceExists); err != nil {
+	`, params.NS, params.FolderID).Scan(&namespaceExists); err != nil {
 		return Document{}, Revision{}, err
 	}
 	if !namespaceExists {
@@ -300,12 +303,12 @@ func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentPa
 	var createdAt time.Time
 	if err = tx.QueryRow(ctx, `
 		INSERT INTO documents (
-			tenant_id, namespace_id, slug, title, content_md, status
+			ns, folder_id, slug, title, content_md, status
 		) VALUES ($1, $2, $3, $4, $5, 'active')
 		RETURNING id, created_at
 	`,
-		params.TenantID,
-		params.NamespaceID,
+		params.NS,
+		params.FolderID,
 		params.Slug,
 		params.Title,
 		params.Content,
@@ -323,11 +326,11 @@ func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentPa
 		UPDATE documents
 		SET current_revision_id = $1, updated_at = NOW()
 		WHERE id = $2
-		RETURNING id, tenant_id, namespace_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		RETURNING id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
 	`, revision.ID, documentID).Scan(
 		&document.ID,
-		&document.TenantID,
-		&document.NamespaceID,
+		&document.NS,
+		&document.FolderID,
 		&document.Slug,
 		&document.Title,
 		&document.Content,
@@ -359,13 +362,13 @@ func (r *Repository) UpdateDocument(ctx context.Context, params UpdateDocumentPa
 
 	var existing Document
 	err = tx.QueryRow(ctx, `
-		SELECT id, tenant_id, namespace_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		SELECT id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
 		FROM documents
-		WHERE tenant_id = $1 AND id = $2
-	`, params.TenantID, params.DocumentID).Scan(
+		WHERE ns = $1 AND id = $2
+	`, params.NS, params.DocumentID).Scan(
 		&existing.ID,
-		&existing.TenantID,
-		&existing.NamespaceID,
+		&existing.NS,
+		&existing.FolderID,
 		&existing.Slug,
 		&existing.Title,
 		&existing.Content,
@@ -409,12 +412,12 @@ func (r *Repository) UpdateDocument(ctx context.Context, params UpdateDocumentPa
 	if err = tx.QueryRow(ctx, `
 		UPDATE documents
 		SET title = $1, content_md = $2, current_revision_id = $3, updated_at = NOW()
-		WHERE tenant_id = $4 AND id = $5
-		RETURNING id, tenant_id, namespace_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
-	`, params.Title, params.Content, revision.ID, params.TenantID, params.DocumentID).Scan(
+		WHERE ns = $4 AND id = $5
+		RETURNING id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+	`, params.Title, params.Content, revision.ID, params.NS, params.DocumentID).Scan(
 		&document.ID,
-		&document.TenantID,
-		&document.NamespaceID,
+		&document.NS,
+		&document.FolderID,
 		&document.Slug,
 		&document.Title,
 		&document.Content,
@@ -438,8 +441,8 @@ func (r *Repository) GetDocument(ctx context.Context, tenantID string, documentI
 	err := r.pool.QueryRow(ctx, `
 		SELECT
 			d.id,
-			d.tenant_id,
-			d.namespace_id,
+			d.ns,
+			d.folder_id,
 			d.slug,
 			d.title,
 			d.content_md,
@@ -450,11 +453,11 @@ func (r *Repository) GetDocument(ctx context.Context, tenantID string, documentI
 			d.updated_at
 		FROM documents d
 		LEFT JOIN revisions r ON r.id = d.current_revision_id
-		WHERE d.tenant_id = $1 AND d.id = $2
+		WHERE d.ns = $1 AND d.id = $2
 	`, tenantID, documentID).Scan(
 		&document.ID,
-		&document.TenantID,
-		&document.NamespaceID,
+		&document.NS,
+		&document.FolderID,
 		&document.Slug,
 		&document.Title,
 		&document.Content,
@@ -512,7 +515,7 @@ func (r *Repository) GetDocumentBySlug(ctx context.Context, tenantID string, nam
 	err := r.pool.QueryRow(ctx, `
 		SELECT id
 		FROM documents
-		WHERE tenant_id = $1 AND namespace_id = $2 AND slug = $3
+		WHERE ns = $1 AND folder_id = $2 AND slug = $3
 	`, tenantID, namespaceID, slug).Scan(&documentID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Document{}, nil, ErrNotFound
@@ -525,16 +528,16 @@ func (r *Repository) GetDocumentBySlug(ctx context.Context, tenantID string, nam
 
 func (r *Repository) ListDocuments(ctx context.Context, tenantID string, namespaceID *int64, status *string) ([]Document, error) {
 	query := `
-		SELECT d.id, d.tenant_id, d.namespace_id, d.slug, d.title, d.content_md, d.status, d.current_revision_id,
+		SELECT d.id, d.ns, d.folder_id, d.slug, d.title, d.content_md, d.status, d.current_revision_id,
 		       COALESCE(r.revision_no, 0), d.created_at, d.updated_at
 		FROM documents d
 		LEFT JOIN revisions r ON r.id = d.current_revision_id
-		WHERE d.tenant_id = $1
+		WHERE d.ns = $1
 	`
 	args := []any{tenantID}
 	nextArg := 2
 	if namespaceID != nil {
-		query += fmt.Sprintf(` AND d.namespace_id = $%d`, nextArg)
+		query += fmt.Sprintf(` AND d.folder_id = $%d`, nextArg)
 		args = append(args, *namespaceID)
 		nextArg++
 	}
@@ -555,8 +558,8 @@ func (r *Repository) ListDocuments(ctx context.Context, tenantID string, namespa
 		var item Document
 		if err := rows.Scan(
 			&item.ID,
-			&item.TenantID,
-			&item.NamespaceID,
+			&item.NS,
+			&item.FolderID,
 			&item.Slug,
 			&item.Title,
 			&item.Content,
@@ -586,13 +589,13 @@ func (r *Repository) ArchiveDocument(ctx context.Context, params ArchiveDocument
 
 	var current Document
 	err = tx.QueryRow(ctx, `
-		SELECT id, tenant_id, namespace_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		SELECT id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
 		FROM documents
-		WHERE tenant_id = $1 AND id = $2
-	`, params.TenantID, params.DocumentID).Scan(
+		WHERE ns = $1 AND id = $2
+	`, params.NS, params.DocumentID).Scan(
 		&current.ID,
-		&current.TenantID,
-		&current.NamespaceID,
+		&current.NS,
+		&current.FolderID,
 		&current.Slug,
 		&current.Title,
 		&current.Content,
@@ -636,12 +639,12 @@ func (r *Repository) ArchiveDocument(ctx context.Context, params ArchiveDocument
 	if err = tx.QueryRow(ctx, `
 		UPDATE documents
 		SET status = 'archived', current_revision_id = $1, updated_at = NOW()
-		WHERE tenant_id = $2 AND id = $3
-		RETURNING id, tenant_id, namespace_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
-	`, revision.ID, params.TenantID, params.DocumentID).Scan(
+		WHERE ns = $2 AND id = $3
+		RETURNING id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+	`, revision.ID, params.NS, params.DocumentID).Scan(
 		&document.ID,
-		&document.TenantID,
-		&document.NamespaceID,
+		&document.NS,
+		&document.FolderID,
 		&document.Slug,
 		&document.Title,
 		&document.Content,

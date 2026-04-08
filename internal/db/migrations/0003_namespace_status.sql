@@ -1,2 +1,2 @@
-ALTER TABLE namespaces
+ALTER TABLE folders
     ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';

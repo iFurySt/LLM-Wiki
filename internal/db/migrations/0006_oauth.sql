@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS oauth_accounts (
     provider_name TEXT NOT NULL REFERENCES oauth_providers(name) ON DELETE CASCADE,
     external_subject TEXT NOT NULL,
     principal_id TEXT NOT NULL REFERENCES principals(id) ON DELETE CASCADE,
-    tenant_id TEXT NOT NULL,
+    ns TEXT NOT NULL,
     email TEXT NOT NULL DEFAULT '',
     username TEXT NOT NULL DEFAULT '',
     display_name TEXT NOT NULL DEFAULT '',

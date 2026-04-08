@@ -30,123 +30,61 @@ func (s *Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
 }
 
-func (s *Service) ListSpaces(ctx context.Context, tenantID string) (api.ListSpacesResponse, error) {
-	items, err := s.repo.ListSpaces(ctx, tenantID)
-	if err != nil {
-		return api.ListSpacesResponse{}, err
-	}
-	resp := make([]api.SpaceResponse, 0, len(items))
-	for _, item := range items {
-		resp = append(resp, api.SpaceResponse{
-			ID:          item.ID,
-			TenantID:    item.TenantID,
-			Key:         item.Key,
-			DisplayName: item.DisplayName,
-			CreatedAt:   item.CreatedAt.Format(time.RFC3339),
-		})
-	}
-	return api.ListSpacesResponse{Items: resp}, nil
-}
-
-func (s *Service) CreateNamespace(ctx context.Context, tenantID string, req api.CreateNamespaceRequest) (api.NamespaceResponse, error) {
+func (s *Service) CreateFolder(ctx context.Context, ns string, req api.CreateFolderRequest) (api.FolderResponse, error) {
 	key := normalizeKey(req.Key)
-	if err := validateKeyLike("namespace key", key); err != nil {
-		return api.NamespaceResponse{}, err
+	if err := validateKeyLike("folder key", key); err != nil {
+		return api.FolderResponse{}, err
 	}
-	item, err := s.repo.CreateNamespace(ctx, repository.CreateNamespaceParams{
-		TenantID:    tenantID,
+	item, err := s.repo.CreateFolder(ctx, repository.CreateFolderParams{
+		NS:          ns,
 		Key:         key,
 		DisplayName: strings.TrimSpace(req.DisplayName),
 		Description: strings.TrimSpace(req.Description),
 		Visibility:  normalizeVisibility(req.Visibility),
 	})
 	if err != nil {
-		return api.NamespaceResponse{}, err
+		return api.FolderResponse{}, err
 	}
-
-	return api.NamespaceResponse{
-		ID:          item.ID,
-		TenantID:    item.TenantID,
-		SpaceID:     item.SpaceID,
-		Key:         item.Key,
-		DisplayName: item.DisplayName,
-		Description: item.Description,
-		Visibility:  item.Visibility,
-		Status:      item.Status,
-		CreatedAt:   item.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
-	}, nil
+	return folderResponse(item), nil
 }
 
-func (s *Service) GetNamespace(ctx context.Context, tenantID string, namespaceID int64) (api.NamespaceResponse, error) {
-	item, err := s.repo.GetNamespace(ctx, tenantID, namespaceID)
+func (s *Service) GetFolder(ctx context.Context, ns string, folderID int64) (api.FolderResponse, error) {
+	item, err := s.repo.GetFolder(ctx, ns, folderID)
 	if err != nil {
-		return api.NamespaceResponse{}, err
+		return api.FolderResponse{}, err
 	}
-	return api.NamespaceResponse{
-		ID:          item.ID,
-		TenantID:    item.TenantID,
-		SpaceID:     item.SpaceID,
-		Key:         item.Key,
-		DisplayName: item.DisplayName,
-		Description: item.Description,
-		Visibility:  item.Visibility,
-		CreatedAt:   item.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
-	}, nil
+	return folderResponse(item), nil
 }
 
-func (s *Service) ListNamespaces(ctx context.Context, tenantID string) (api.ListNamespacesResponse, error) {
-	items, err := s.repo.ListNamespaces(ctx, tenantID)
+func (s *Service) ListFolders(ctx context.Context, ns string) (api.ListFoldersResponse, error) {
+	items, err := s.repo.ListFolders(ctx, ns)
 	if err != nil {
-		return api.ListNamespacesResponse{}, err
+		return api.ListFoldersResponse{}, err
 	}
-	resp := make([]api.NamespaceResponse, 0, len(items))
+	resp := make([]api.FolderResponse, 0, len(items))
 	for _, item := range items {
-		resp = append(resp, api.NamespaceResponse{
-			ID:          item.ID,
-			TenantID:    item.TenantID,
-			SpaceID:     item.SpaceID,
-			Key:         item.Key,
-			DisplayName: item.DisplayName,
-			Description: item.Description,
-			Visibility:  item.Visibility,
-			Status:      item.Status,
-			CreatedAt:   item.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
-		})
+		resp = append(resp, folderResponse(item))
 	}
-	return api.ListNamespacesResponse{Items: resp}, nil
+	return api.ListFoldersResponse{Items: resp}, nil
 }
 
-func (s *Service) ArchiveNamespace(ctx context.Context, tenantID string, namespaceID int64) (api.NamespaceResponse, error) {
-	item, err := s.repo.ArchiveNamespace(ctx, tenantID, namespaceID)
+func (s *Service) ArchiveFolder(ctx context.Context, ns string, folderID int64) (api.FolderResponse, error) {
+	item, err := s.repo.ArchiveFolder(ctx, ns, folderID)
 	if err != nil {
-		return api.NamespaceResponse{}, err
+		return api.FolderResponse{}, err
 	}
-	return api.NamespaceResponse{
-		ID:          item.ID,
-		TenantID:    item.TenantID,
-		SpaceID:     item.SpaceID,
-		Key:         item.Key,
-		DisplayName: item.DisplayName,
-		Description: item.Description,
-		Visibility:  item.Visibility,
-		Status:      item.Status,
-		CreatedAt:   item.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
-	}, nil
+	return folderResponse(item), nil
 }
 
-func (s *Service) CreateDocument(ctx context.Context, tenantID string, req api.CreateDocumentRequest) (api.DocumentResponse, error) {
+func (s *Service) CreateDocument(ctx context.Context, ns string, req api.CreateDocumentRequest) (api.DocumentResponse, error) {
 	slug := normalizeKey(req.Slug)
 	if err := validateKeyLike("document slug", slug); err != nil {
 		return api.DocumentResponse{}, err
 	}
 	authorType, authorID := authorFromContext(ctx, req.AuthorType, req.AuthorID)
 	doc, rev, err := s.repo.CreateDocument(ctx, repository.CreateDocumentParams{
-		TenantID:      tenantID,
-		NamespaceID:   req.NamespaceID,
+		NS:            ns,
+		FolderID:      req.FolderID,
 		Slug:          slug,
 		Title:         strings.TrimSpace(req.Title),
 		Content:       req.Content,
@@ -160,10 +98,10 @@ func (s *Service) CreateDocument(ctx context.Context, tenantID string, req api.C
 	return toDocumentResponse(doc, []repository.Revision{rev}), nil
 }
 
-func (s *Service) UpdateDocument(ctx context.Context, tenantID string, documentID int64, req api.UpdateDocumentRequest) (api.DocumentResponse, error) {
+func (s *Service) UpdateDocument(ctx context.Context, ns string, documentID int64, req api.UpdateDocumentRequest) (api.DocumentResponse, error) {
 	authorType, authorID := authorFromContext(ctx, req.AuthorType, req.AuthorID)
 	doc, rev, err := s.repo.UpdateDocument(ctx, repository.UpdateDocumentParams{
-		TenantID:      tenantID,
+		NS:            ns,
 		DocumentID:    documentID,
 		Title:         strings.TrimSpace(req.Title),
 		Content:       req.Content,
@@ -177,28 +115,28 @@ func (s *Service) UpdateDocument(ctx context.Context, tenantID string, documentI
 	return toDocumentResponse(doc, []repository.Revision{rev}), nil
 }
 
-func (s *Service) GetDocument(ctx context.Context, tenantID string, documentID int64) (api.DocumentResponse, error) {
-	doc, revisions, err := s.repo.GetDocument(ctx, tenantID, documentID)
+func (s *Service) GetDocument(ctx context.Context, ns string, documentID int64) (api.DocumentResponse, error) {
+	doc, revisions, err := s.repo.GetDocument(ctx, ns, documentID)
 	if err != nil {
 		return api.DocumentResponse{}, err
 	}
 	return toDocumentResponse(doc, revisions), nil
 }
 
-func (s *Service) GetDocumentBySlug(ctx context.Context, tenantID string, namespaceID int64, slug string) (api.DocumentResponse, error) {
+func (s *Service) GetDocumentBySlug(ctx context.Context, ns string, folderID int64, slug string) (api.DocumentResponse, error) {
 	normalizedSlug := normalizeKey(slug)
 	if err := validateKeyLike("document slug", normalizedSlug); err != nil {
 		return api.DocumentResponse{}, err
 	}
-	doc, revisions, err := s.repo.GetDocumentBySlug(ctx, tenantID, namespaceID, normalizedSlug)
+	doc, revisions, err := s.repo.GetDocumentBySlug(ctx, ns, folderID, normalizedSlug)
 	if err != nil {
 		return api.DocumentResponse{}, err
 	}
 	return toDocumentResponse(doc, revisions), nil
 }
 
-func (s *Service) ListDocuments(ctx context.Context, tenantID string, namespaceID *int64, status *string) (api.ListDocumentsResponse, error) {
-	items, err := s.repo.ListDocuments(ctx, tenantID, namespaceID, status)
+func (s *Service) ListDocuments(ctx context.Context, ns string, folderID *int64, status *string) (api.ListDocumentsResponse, error) {
+	items, err := s.repo.ListDocuments(ctx, ns, folderID, status)
 	if err != nil {
 		return api.ListDocumentsResponse{}, err
 	}
@@ -209,10 +147,10 @@ func (s *Service) ListDocuments(ctx context.Context, tenantID string, namespaceI
 	return api.ListDocumentsResponse{Items: resp}, nil
 }
 
-func (s *Service) ArchiveDocument(ctx context.Context, tenantID string, documentID int64, req api.ArchiveDocumentRequest) (api.DocumentResponse, error) {
+func (s *Service) ArchiveDocument(ctx context.Context, ns string, documentID int64, req api.ArchiveDocumentRequest) (api.DocumentResponse, error) {
 	authorType, authorID := authorFromContext(ctx, req.AuthorType, req.AuthorID)
 	doc, rev, err := s.repo.ArchiveDocument(ctx, repository.ArchiveDocumentParams{
-		TenantID:      tenantID,
+		NS:            ns,
 		DocumentID:    documentID,
 		AuthorType:    authorType,
 		AuthorID:      authorID,
@@ -224,11 +162,25 @@ func (s *Service) ArchiveDocument(ctx context.Context, tenantID string, document
 	return toDocumentResponse(doc, []repository.Revision{rev}), nil
 }
 
+func folderResponse(item repository.Folder) api.FolderResponse {
+	return api.FolderResponse{
+		ID:          item.ID,
+		NS:          item.NS,
+		Key:         item.Key,
+		DisplayName: item.DisplayName,
+		Description: item.Description,
+		Visibility:  item.Visibility,
+		Status:      item.Status,
+		CreatedAt:   item.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
 func toDocumentResponse(doc repository.Document, revisions []repository.Revision) api.DocumentResponse {
 	result := api.DocumentResponse{
 		ID:                doc.ID,
-		TenantID:          doc.TenantID,
-		NamespaceID:       doc.NamespaceID,
+		NS:                doc.NS,
+		FolderID:          doc.FolderID,
 		Slug:              doc.Slug,
 		Title:             doc.Title,
 		Content:           doc.Content,
@@ -261,7 +213,7 @@ func toDocumentResponse(doc repository.Document, revisions []repository.Revision
 func normalizeVisibility(value string) string {
 	normalized := strings.TrimSpace(strings.ToLower(value))
 	switch normalized {
-	case "tenant", "team", "restricted", "private":
+	case "ns", "team", "restricted", "private":
 		return normalized
 	default:
 		return "private"

@@ -12,7 +12,7 @@ import (
 type UserRecord struct {
 	ID           int64
 	PrincipalID  string
-	TenantID     string
+	NS           string
 	Username     string
 	DisplayName  string
 	PasswordHash string
@@ -23,7 +23,7 @@ type UserRecord struct {
 type WebSessionRecord struct {
 	ID          string
 	PrincipalID string
-	TenantID    string
+	NS          string
 	ExpiresAt   time.Time
 	CreatedAt   time.Time
 }
@@ -48,13 +48,13 @@ func (r *Repository) CreateUser(ctx context.Context, tenantID string, username s
 
 	var item UserRecord
 	err = r.pool.QueryRow(ctx, `
-		INSERT INTO users (principal_id, tenant_id, username, display_name, password_hash, is_admin)
+		INSERT INTO users (principal_id, ns, username, display_name, password_hash, is_admin)
 		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, principal_id, tenant_id, username, display_name, password_hash, is_admin, created_at
+		RETURNING id, principal_id, ns, username, display_name, password_hash, is_admin, created_at
 	`, principal.ID, tenantID, username, displayName, passwordHash, isAdmin).Scan(
 		&item.ID,
 		&item.PrincipalID,
-		&item.TenantID,
+		&item.NS,
 		&item.Username,
 		&item.DisplayName,
 		&item.PasswordHash,
@@ -69,9 +69,9 @@ func (r *Repository) CreateUser(ctx context.Context, tenantID string, username s
 
 func (r *Repository) ListUsers(ctx context.Context, tenantID string) ([]UserRecord, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, principal_id, tenant_id, username, display_name, password_hash, is_admin, created_at
+		SELECT id, principal_id, ns, username, display_name, password_hash, is_admin, created_at
 		FROM users
-		WHERE tenant_id = $1
+		WHERE ns = $1
 		ORDER BY username ASC
 	`, tenantID)
 	if err != nil {
@@ -82,7 +82,7 @@ func (r *Repository) ListUsers(ctx context.Context, tenantID string) ([]UserReco
 	items := make([]UserRecord, 0)
 	for rows.Next() {
 		var item UserRecord
-		if err := rows.Scan(&item.ID, &item.PrincipalID, &item.TenantID, &item.Username, &item.DisplayName, &item.PasswordHash, &item.IsAdmin, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.PrincipalID, &item.NS, &item.Username, &item.DisplayName, &item.PasswordHash, &item.IsAdmin, &item.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, item)
@@ -93,13 +93,13 @@ func (r *Repository) ListUsers(ctx context.Context, tenantID string) ([]UserReco
 func (r *Repository) GetUserByUsername(ctx context.Context, tenantID string, username string) (UserRecord, error) {
 	var item UserRecord
 	err := r.pool.QueryRow(ctx, `
-		SELECT id, principal_id, tenant_id, username, display_name, password_hash, is_admin, created_at
+		SELECT id, principal_id, ns, username, display_name, password_hash, is_admin, created_at
 		FROM users
-		WHERE tenant_id = $1 AND username = $2
+		WHERE ns = $1 AND username = $2
 	`, tenantID, username).Scan(
 		&item.ID,
 		&item.PrincipalID,
-		&item.TenantID,
+		&item.NS,
 		&item.Username,
 		&item.DisplayName,
 		&item.PasswordHash,
@@ -115,13 +115,13 @@ func (r *Repository) GetUserByUsername(ctx context.Context, tenantID string, use
 func (r *Repository) GetUserByPrincipalID(ctx context.Context, principalID string) (UserRecord, error) {
 	var item UserRecord
 	err := r.pool.QueryRow(ctx, `
-		SELECT id, principal_id, tenant_id, username, display_name, password_hash, is_admin, created_at
+		SELECT id, principal_id, ns, username, display_name, password_hash, is_admin, created_at
 		FROM users
 		WHERE principal_id = $1
 	`, principalID).Scan(
 		&item.ID,
 		&item.PrincipalID,
-		&item.TenantID,
+		&item.NS,
 		&item.Username,
 		&item.DisplayName,
 		&item.PasswordHash,
@@ -138,11 +138,11 @@ func (r *Repository) TenantExists(ctx context.Context, tenantID string) (bool, e
 	var exists bool
 	err := r.pool.QueryRow(ctx, `
 		SELECT EXISTS (
-			SELECT 1 FROM users WHERE tenant_id = $1
+			SELECT 1 FROM users WHERE ns = $1
 			UNION
-			SELECT 1 FROM principals WHERE tenant_id = $1
+			SELECT 1 FROM principals WHERE ns = $1
 			UNION
-			SELECT 1 FROM spaces WHERE tenant_id = $1
+			SELECT 1 FROM ns WHERE ns = $1
 		)
 	`, tenantID).Scan(&exists)
 	return exists, err
@@ -156,13 +156,13 @@ func (r *Repository) CreateWebSession(ctx context.Context, principalID string, t
 	expiresAt := time.Now().Add(ttl)
 	var item WebSessionRecord
 	err = r.pool.QueryRow(ctx, `
-		INSERT INTO web_sessions (id, principal_id, tenant_id, expires_at)
+		INSERT INTO web_sessions (id, principal_id, ns, expires_at)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, principal_id, tenant_id, expires_at, created_at
+		RETURNING id, principal_id, ns, expires_at, created_at
 	`, sessionID, principalID, tenantID, expiresAt).Scan(
 		&item.ID,
 		&item.PrincipalID,
-		&item.TenantID,
+		&item.NS,
 		&item.ExpiresAt,
 		&item.CreatedAt,
 	)
@@ -174,20 +174,20 @@ func (r *Repository) GetWebSession(ctx context.Context, sessionID string) (WebSe
 	var user UserRecord
 	err := r.pool.QueryRow(ctx, `
 		SELECT
-			s.id, s.principal_id, s.tenant_id, s.expires_at, s.created_at,
-			u.id, u.principal_id, u.tenant_id, u.username, u.display_name, u.password_hash, u.is_admin, u.created_at
+			s.id, s.principal_id, s.ns, s.expires_at, s.created_at,
+			u.id, u.principal_id, u.ns, u.username, u.display_name, u.password_hash, u.is_admin, u.created_at
 		FROM web_sessions s
 		JOIN users u ON u.principal_id = s.principal_id
 		WHERE s.id = $1
 	`, sessionID).Scan(
 		&session.ID,
 		&session.PrincipalID,
-		&session.TenantID,
+		&session.NS,
 		&session.ExpiresAt,
 		&session.CreatedAt,
 		&user.ID,
 		&user.PrincipalID,
-		&user.TenantID,
+		&user.NS,
 		&user.Username,
 		&user.DisplayName,
 		&user.PasswordHash,

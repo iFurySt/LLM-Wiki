@@ -13,10 +13,10 @@ Current external model:
 - `documents`
 - `revisions`
 
-Current internal note:
+Current storage note:
 
-- storage still contains some legacy names such as `tenant`, `space`, and `namespace`
-- user-facing docs and CLI should use `ns` and `folder`
+- tables and columns use `ns`, `folders`, and `folder_id`
+- user-facing docs and CLI use the same names
 
 Assumptions:
 

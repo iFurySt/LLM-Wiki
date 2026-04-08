@@ -16,7 +16,6 @@ type storedConfig struct {
 type storedProfile struct {
 	BaseURL      string `json:"base_url"`
 	NS           string `json:"ns,omitempty"`
-	TenantID     string `json:"tenant_id"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	ExpiresAt    string `json:"expires_at"`
@@ -27,7 +26,6 @@ type storedProfile struct {
 type resolvedOptions struct {
 	BaseURL      string
 	NS           string
-	TenantID     string
 	AccessToken  string
 	RefreshToken string
 	ProfileName  string
@@ -91,11 +89,10 @@ func resolveOptions(baseURL string, tenantID string, accessToken string, refresh
 		profileName = firstNonEmpty(os.Getenv("LLM_WIKI_PROFILE"), cfg.CurrentProfile)
 	}
 	profile := cfg.Profiles[profileName]
-	ns := firstNonEmpty(tenantID, os.Getenv("LLM_WIKI_NS"), os.Getenv("LLM_WIKI_TENANT"), profile.NS, profile.TenantID, "default")
+	ns := firstNonEmpty(tenantID, os.Getenv("LLM_WIKI_NS"), profile.NS, "default")
 	options := resolvedOptions{
 		BaseURL:      firstNonEmpty(baseURL, os.Getenv("LLM_WIKI_BASE_URL"), os.Getenv("LLM_WIKI_CLI_BASE_URL"), profile.BaseURL, "https://llm-wiki.ifuryst.com"),
 		NS:           ns,
-		TenantID:     ns,
 		AccessToken:  firstNonEmpty(accessToken, os.Getenv("LLM_WIKI_TOKEN"), profile.AccessToken),
 		RefreshToken: firstNonEmpty(refreshToken, os.Getenv("LLM_WIKI_REFRESH_TOKEN"), profile.RefreshToken),
 		ProfileName:  profileName,

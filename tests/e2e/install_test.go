@@ -63,7 +63,7 @@ func TestInstallRoutes(t *testing.T) {
 		}
 	}
 
-	assertBodyContains("/install/LLM-Wiki.md", "LLM-Wiki Skill Install")
+	assertBodyContains("/install/LLM-Wiki.md", "LLM-Wiki is a shared knowledge service for agents.")
 	assertBodyContains("/install/install-cli.sh", "LLM_WIKI_RELEASE_REPO")
 	assertBodyContains("/install/skills/LLM-Wiki.skill", "llm-wiki/SKILL.md")
 }

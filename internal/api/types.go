@@ -13,14 +13,14 @@ type WhoAmIResponse struct {
 	PrincipalID   string   `json:"principal_id"`
 	PrincipalType string   `json:"principal_type"`
 	DisplayName   string   `json:"display_name"`
-	TenantID      string   `json:"tenant_id"`
+	NS            string   `json:"ns"`
 	Scopes        []string `json:"scopes"`
 	TokenID       int64    `json:"token_id"`
 	TokenType     string   `json:"token_type"`
 }
 
 type StartBrowserLoginRequest struct {
-	TenantID            string   `json:"tenant_id"`
+	NS                  string   `json:"ns"`
 	Provider            string   `json:"provider"`
 	DisplayName         string   `json:"display_name"`
 	Scopes              []string `json:"scopes"`
@@ -37,18 +37,18 @@ type StartBrowserLoginResponse struct {
 }
 
 type OAuthProviderResponse struct {
-	Name              string   `json:"name"`
-	DisplayName       string   `json:"display_name"`
-	AuthURL           string   `json:"auth_url,omitempty"`
-	TokenURL          string   `json:"token_url,omitempty"`
-	UserinfoURL       string   `json:"userinfo_url,omitempty"`
-	ClientID          string   `json:"client_id,omitempty"`
-	Scopes            []string `json:"scopes,omitempty"`
-	Enabled           bool     `json:"enabled"`
-	AutoCreateUsers   bool     `json:"auto_create_users"`
-	AutoCreateTenants bool     `json:"auto_create_tenants"`
-	CreatedAt         string   `json:"created_at,omitempty"`
-	UpdatedAt         string   `json:"updated_at,omitempty"`
+	Name            string   `json:"name"`
+	DisplayName     string   `json:"display_name"`
+	AuthURL         string   `json:"auth_url,omitempty"`
+	TokenURL        string   `json:"token_url,omitempty"`
+	UserinfoURL     string   `json:"userinfo_url,omitempty"`
+	ClientID        string   `json:"client_id,omitempty"`
+	Scopes          []string `json:"scopes,omitempty"`
+	Enabled         bool     `json:"enabled"`
+	AutoCreateUsers bool     `json:"auto_create_users"`
+	AutoCreateNS    bool     `json:"auto_create_ns"`
+	CreatedAt       string   `json:"created_at,omitempty"`
+	UpdatedAt       string   `json:"updated_at,omitempty"`
 }
 
 type ListOAuthProvidersResponse struct {
@@ -56,21 +56,21 @@ type ListOAuthProvidersResponse struct {
 }
 
 type UpsertOAuthProviderRequest struct {
-	Name              string   `json:"name" binding:"required"`
-	DisplayName       string   `json:"display_name" binding:"required"`
-	AuthURL           string   `json:"auth_url" binding:"required"`
-	TokenURL          string   `json:"token_url" binding:"required"`
-	UserinfoURL       string   `json:"userinfo_url" binding:"required"`
-	ClientID          string   `json:"client_id" binding:"required"`
-	ClientSecret      string   `json:"client_secret" binding:"required"`
-	Scopes            []string `json:"scopes"`
-	Enabled           bool     `json:"enabled"`
-	AutoCreateUsers   bool     `json:"auto_create_users"`
-	AutoCreateTenants bool     `json:"auto_create_tenants"`
+	Name            string   `json:"name" binding:"required"`
+	DisplayName     string   `json:"display_name" binding:"required"`
+	AuthURL         string   `json:"auth_url" binding:"required"`
+	TokenURL        string   `json:"token_url" binding:"required"`
+	UserinfoURL     string   `json:"userinfo_url" binding:"required"`
+	ClientID        string   `json:"client_id" binding:"required"`
+	ClientSecret    string   `json:"client_secret" binding:"required"`
+	Scopes          []string `json:"scopes"`
+	Enabled         bool     `json:"enabled"`
+	AutoCreateUsers bool     `json:"auto_create_users"`
+	AutoCreateNS    bool     `json:"auto_create_ns"`
 }
 
 type StartDeviceLoginRequest struct {
-	TenantID    string   `json:"tenant_id" binding:"required"`
+	NS          string   `json:"ns" binding:"required"`
 	DisplayName string   `json:"display_name"`
 	Scopes      []string `json:"scopes"`
 }
@@ -98,17 +98,17 @@ type TokenExchangeResponse struct {
 	ExpiresIn    int      `json:"expires_in"`
 	RefreshToken string   `json:"refresh_token,omitempty"`
 	Scopes       []string `json:"scopes"`
-	TenantID     string   `json:"tenant_id"`
+	NS           string   `json:"ns"`
 	PrincipalID  string   `json:"principal_id"`
 }
 
 type SetupStatusResponse struct {
-	Initialized   bool   `json:"initialized"`
-	DefaultTenant string `json:"default_tenant"`
+	Initialized bool   `json:"initialized"`
+	DefaultNS   string `json:"default_ns"`
 }
 
 type InitializeRequest struct {
-	TenantID    string `json:"tenant_id" binding:"required"`
+	NS          string `json:"ns" binding:"required"`
 	Username    string `json:"username" binding:"required"`
 	DisplayName string `json:"display_name" binding:"required"`
 	Password    string `json:"password" binding:"required"`
@@ -117,7 +117,7 @@ type InitializeRequest struct {
 type UserResponse struct {
 	ID          int64  `json:"id"`
 	PrincipalID string `json:"principal_id"`
-	TenantID    string `json:"tenant_id"`
+	NS          string `json:"ns"`
 	Username    string `json:"username"`
 	DisplayName string `json:"display_name"`
 	IsAdmin     bool   `json:"is_admin"`
@@ -137,7 +137,7 @@ type CreateUserRequest struct {
 
 type ServicePrincipalResponse struct {
 	ID            string `json:"id"`
-	TenantID      string `json:"tenant_id"`
+	NS            string `json:"ns"`
 	PrincipalType string `json:"principal_type"`
 	DisplayName   string `json:"display_name"`
 	CreatedAt     string `json:"created_at"`
@@ -162,7 +162,7 @@ type TokenResponse struct {
 	ID                   int64    `json:"id"`
 	TokenType            string   `json:"token_type"`
 	PrincipalID          string   `json:"principal_id"`
-	TenantID             string   `json:"tenant_id"`
+	NS                   string   `json:"ns"`
 	DisplayName          string   `json:"display_name"`
 	TokenPrefix          string   `json:"token_prefix"`
 	Scopes               []string `json:"scopes"`
@@ -178,26 +178,27 @@ type ListTokensResponse struct {
 	Items []TokenResponse `json:"items"`
 }
 
-type WorkspaceResponse struct {
-	TenantID    string `json:"tenant_id"`
-	Key         string `json:"key"`
+type NSResponse struct {
+	ID          int64  `json:"id"`
+	NS          string `json:"ns"`
+	Key         string `json:"key,omitempty"`
 	DisplayName string `json:"display_name"`
 	Role        string `json:"role,omitempty"`
 	CreatedAt   string `json:"created_at"`
 }
 
-type ListWorkspacesResponse struct {
-	Items []WorkspaceResponse `json:"items"`
+type ListNSResponse struct {
+	Items []NSResponse `json:"items"`
 }
 
-type CreateWorkspaceRequest struct {
-	TenantID    string `json:"tenant_id"`
+type CreateNSRequest struct {
+	NS          string `json:"ns"`
 	DisplayName string `json:"display_name" binding:"required"`
 }
 
 type InviteResponse struct {
 	ID         int64  `json:"id"`
-	TenantID   string `json:"tenant_id"`
+	NS         string `json:"ns"`
 	Email      string `json:"email"`
 	Role       string `json:"role"`
 	Token      string `json:"token,omitempty"`
@@ -220,37 +221,24 @@ type AcceptInviteRequest struct {
 	InviteToken string `json:"invite_token" binding:"required"`
 }
 
-type SwitchTenantRequest struct {
-	TenantID string `json:"tenant_id" binding:"required"`
+type SwitchNSRequest struct {
+	NS string `json:"ns" binding:"required"`
 }
 
-type SpaceResponse struct {
-	ID          int64  `json:"id"`
-	TenantID    string `json:"tenant_id"`
-	Key         string `json:"key"`
-	DisplayName string `json:"display_name"`
-	CreatedAt   string `json:"created_at"`
-}
-
-type ListSpacesResponse struct {
-	Items []SpaceResponse `json:"items"`
-}
-
-type CreateNamespaceRequest struct {
+type CreateFolderRequest struct {
 	Key         string `json:"key" binding:"required"`
 	DisplayName string `json:"display_name" binding:"required"`
 	Description string `json:"description"`
 	Visibility  string `json:"visibility"`
 }
 
-type ArchiveNamespaceRequest struct {
+type ArchiveFolderRequest struct {
 	Reason string `json:"reason"`
 }
 
-type NamespaceResponse struct {
+type FolderResponse struct {
 	ID          int64  `json:"id"`
-	TenantID    string `json:"tenant_id"`
-	SpaceID     int64  `json:"space_id"`
+	NS          string `json:"ns"`
 	Key         string `json:"key"`
 	DisplayName string `json:"display_name"`
 	Description string `json:"description"`
@@ -260,12 +248,12 @@ type NamespaceResponse struct {
 	UpdatedAt   string `json:"updated_at"`
 }
 
-type ListNamespacesResponse struct {
-	Items []NamespaceResponse `json:"items"`
+type ListFoldersResponse struct {
+	Items []FolderResponse `json:"items"`
 }
 
 type CreateDocumentRequest struct {
-	NamespaceID   int64  `json:"namespace_id" binding:"required"`
+	FolderID      int64  `json:"folder_id" binding:"required"`
 	Slug          string `json:"slug" binding:"required"`
 	Title         string `json:"title" binding:"required"`
 	Content       string `json:"content"`
@@ -284,8 +272,8 @@ type UpdateDocumentRequest struct {
 
 type DocumentResponse struct {
 	ID                int64              `json:"id"`
-	TenantID          string             `json:"tenant_id"`
-	NamespaceID       int64              `json:"namespace_id"`
+	NS                string             `json:"ns"`
+	FolderID          int64              `json:"folder_id"`
 	Slug              string             `json:"slug"`
 	Title             string             `json:"title"`
 	Content           string             `json:"content"`

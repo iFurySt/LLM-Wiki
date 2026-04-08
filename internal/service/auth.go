@@ -21,9 +21,9 @@ const (
 )
 
 var interactiveScopes = []string{
-	auth.ScopeSpacesRead,
-	auth.ScopeNamespacesRead,
-	auth.ScopeNamespacesWrite,
+	auth.ScopeNSRead,
+	auth.ScopeFoldersRead,
+	auth.ScopeFoldersWrite,
 	auth.ScopeDocumentsRead,
 	auth.ScopeDocumentsWrite,
 	auth.ScopeDocumentsArchive,
@@ -48,12 +48,12 @@ func (s *Service) BootstrapToken(ctx context.Context, tenantID string, displayNa
 	_, err = s.repo.UpsertStaticToken(ctx, repository.IssueTokenParams{
 		TokenType:   tokenTypeService,
 		PrincipalID: principal.ID,
-		TenantID:    tenantID,
+		NS:          tenantID,
 		DisplayName: "bootstrap-admin",
 		Scopes: []string{
-			auth.ScopeSpacesRead,
-			auth.ScopeNamespacesRead,
-			auth.ScopeNamespacesWrite,
+			auth.ScopeNSRead,
+			auth.ScopeFoldersRead,
+			auth.ScopeFoldersWrite,
 			auth.ScopeDocumentsRead,
 			auth.ScopeDocumentsWrite,
 			auth.ScopeDocumentsArchive,
@@ -61,7 +61,7 @@ func (s *Service) BootstrapToken(ctx context.Context, tenantID string, displayNa
 			auth.ScopeMCPInvoke,
 			auth.ScopeTokensIssue,
 			auth.ScopeTokensRevoke,
-			auth.ScopeAdminTenants,
+			auth.ScopeAdminNS,
 		},
 		ExpiresAt: &hashExpiry,
 	}, rawToken)
@@ -76,7 +76,7 @@ func (s *Service) AuthenticateBearerToken(ctx context.Context, rawToken string) 
 	return auth.Principal{
 		PrincipalID:   result.Principal.ID,
 		PrincipalType: result.Principal.PrincipalType,
-		TenantID:      result.Principal.TenantID,
+		NS:            result.Principal.NS,
 		DisplayName:   result.Principal.DisplayName,
 		Scopes:        result.Token.Scopes,
 		TokenID:       result.Token.ID,
@@ -93,7 +93,7 @@ func (s *Service) WhoAmI(ctx context.Context) (api.WhoAmIResponse, error) {
 		PrincipalID:   principal.PrincipalID,
 		PrincipalType: principal.PrincipalType,
 		DisplayName:   principal.DisplayName,
-		TenantID:      principal.TenantID,
+		NS:            principal.NS,
 		Scopes:        principal.Scopes,
 		TokenID:       principal.TokenID,
 		TokenType:     principal.TokenType,
@@ -103,7 +103,7 @@ func (s *Service) WhoAmI(ctx context.Context) (api.WhoAmIResponse, error) {
 func (s *Service) StartBrowserLogin(ctx context.Context, baseURL string, req api.StartBrowserLoginRequest) (api.StartBrowserLoginResponse, error) {
 	request, err := s.repo.CreateAuthRequest(ctx, repository.CreateAuthRequestParams{
 		FlowType:            "browser",
-		TenantID:            strings.TrimSpace(req.TenantID),
+		NS:                  strings.TrimSpace(req.NS),
 		OAuthProvider:       normalizeKey(req.Provider),
 		DisplayName:         strings.TrimSpace(req.DisplayName),
 		Scopes:              filterInteractiveScopes(req.Scopes),
@@ -134,7 +134,7 @@ func (s *Service) StartDeviceLogin(ctx context.Context, baseURL string, req api.
 	}
 	request, err := s.repo.CreateAuthRequest(ctx, repository.CreateAuthRequestParams{
 		FlowType:    "device",
-		TenantID:    strings.TrimSpace(req.TenantID),
+		NS:          strings.TrimSpace(req.NS),
 		DisplayName: strings.TrimSpace(req.DisplayName),
 		Scopes:      filterInteractiveScopes(req.Scopes),
 		DeviceCode:  deviceCode,
@@ -187,7 +187,7 @@ func (s *Service) CreateServicePrincipal(ctx context.Context, tenantID string, r
 	}
 	return api.ServicePrincipalResponse{
 		ID:            item.ID,
-		TenantID:      item.TenantID,
+		NS:            item.NS,
 		PrincipalType: item.PrincipalType,
 		DisplayName:   item.DisplayName,
 		CreatedAt:     item.CreatedAt.Format(time.RFC3339),
@@ -203,7 +203,7 @@ func (s *Service) ListServicePrincipals(ctx context.Context, tenantID string) (a
 	for _, item := range items {
 		resp = append(resp, api.ServicePrincipalResponse{
 			ID:            item.ID,
-			TenantID:      item.TenantID,
+			NS:            item.NS,
 			PrincipalType: item.PrincipalType,
 			DisplayName:   item.DisplayName,
 			CreatedAt:     item.CreatedAt.Format(time.RFC3339),
@@ -217,7 +217,7 @@ func (s *Service) IssueServiceToken(ctx context.Context, tenantID string, req ap
 	if err != nil {
 		return api.TokenResponse{}, err
 	}
-	if principal.TenantID != tenantID {
+	if principal.NS != tenantID {
 		return api.TokenResponse{}, repository.ErrForbidden
 	}
 	var expiresAt *time.Time
@@ -232,7 +232,7 @@ func (s *Service) IssueServiceToken(ctx context.Context, tenantID string, req ap
 	record, plaintext, err := s.repo.IssueToken(ctx, repository.IssueTokenParams{
 		TokenType:            tokenTypeService,
 		PrincipalID:          principal.ID,
-		TenantID:             tenantID,
+		NS:                   tenantID,
 		DisplayName:          strings.TrimSpace(req.DisplayName),
 		Scopes:               uniqueScopes(req.Scopes),
 		ExpiresAt:            expiresAt,
@@ -301,7 +301,7 @@ func (s *Service) exchangeRefreshToken(ctx context.Context, rawToken string) (ap
 		return api.TokenExchangeResponse{}, err
 	}
 	request := repository.AuthRequest{
-		TenantID:    authn.Principal.TenantID,
+		NS:          authn.Principal.NS,
 		Scopes:      authn.Token.Scopes,
 		PrincipalID: &authn.Principal.ID,
 	}
@@ -313,7 +313,7 @@ func (s *Service) issueInteractiveTokens(ctx context.Context, request repository
 		return api.TokenExchangeResponse{}, repository.ErrUnauthorized
 	}
 	if user, err := s.repo.GetUserByPrincipalID(ctx, *request.PrincipalID); err == nil && user.IsAdmin {
-		request.Scopes = uniqueScopes(append(request.Scopes, auth.ScopeTokensIssue, auth.ScopeTokensRevoke, auth.ScopeAdminTenants))
+		request.Scopes = uniqueScopes(append(request.Scopes, auth.ScopeTokensIssue, auth.ScopeTokensRevoke, auth.ScopeAdminNS))
 	}
 	accessExpiry := time.Now().Add(1 * time.Hour)
 	refreshExpiry := time.Now().Add(30 * 24 * time.Hour)
@@ -321,7 +321,7 @@ func (s *Service) issueInteractiveTokens(ctx context.Context, request repository
 	access, accessToken, err := s.repo.IssueToken(ctx, repository.IssueTokenParams{
 		TokenType:   tokenTypeAccess,
 		PrincipalID: *request.PrincipalID,
-		TenantID:    request.TenantID,
+		NS:          request.NS,
 		DisplayName: "cli-access",
 		Scopes:      request.Scopes,
 		ExpiresAt:   &accessExpiry,
@@ -332,7 +332,7 @@ func (s *Service) issueInteractiveTokens(ctx context.Context, request repository
 	_, refreshToken, err := s.repo.IssueToken(ctx, repository.IssueTokenParams{
 		TokenType:   tokenTypeRefresh,
 		PrincipalID: *request.PrincipalID,
-		TenantID:    request.TenantID,
+		NS:          request.NS,
 		DisplayName: "cli-refresh",
 		Scopes:      request.Scopes,
 		ExpiresAt:   &refreshExpiry,
@@ -346,7 +346,7 @@ func (s *Service) issueInteractiveTokens(ctx context.Context, request repository
 		ExpiresIn:    int(time.Until(accessExpiry).Seconds()),
 		RefreshToken: refreshToken,
 		Scopes:       access.Scopes,
-		TenantID:     access.TenantID,
+		NS:           access.NS,
 		PrincipalID:  access.PrincipalID,
 	}, nil
 }
@@ -356,7 +356,7 @@ func toTokenResponse(item repository.TokenRecord, plaintext string) api.TokenRes
 		ID:          item.ID,
 		TokenType:   item.TokenType,
 		PrincipalID: item.PrincipalID,
-		TenantID:    item.TenantID,
+		NS:          item.NS,
 		DisplayName: item.DisplayName,
 		TokenPrefix: item.TokenPrefix,
 		Scopes:      item.Scopes,

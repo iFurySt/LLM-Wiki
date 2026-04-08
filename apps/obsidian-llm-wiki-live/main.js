@@ -128,7 +128,7 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     const profile = this.loadCurrentCLIProfile();
     const baseURL = String(profile.base_url || "").trim().replace(/\/+$/, "");
     const accessToken = String(profile.access_token || "").trim();
-    const ns = String(profile.ns || profile.tenant_id || "").trim();
+    const ns = String(profile.ns || profile.ns || "").trim();
     if (!baseURL) {
       throw new Error("LLM-Wiki base URL is missing from ~/.llm-wiki/config.json.");
     }
@@ -163,40 +163,40 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
 
   async fetchSnapshot() {
     const connection = this.resolveConnection();
-    const [whoami, namespaces, documents] = await Promise.all([
+    const [whoami, folders, documents] = await Promise.all([
       this.requestJSON("GET", "/v1/auth/whoami"),
-      this.requestJSON("GET", "/v1/namespaces"),
+      this.requestJSON("GET", "/v1/folders"),
       this.requestJSON("GET", "/v1/documents")
     ]);
     return {
       connection,
       whoami,
-      namespaces: namespaces.items || [],
+      folders: folders.items || [],
       documents: documents.items || []
     };
   }
 
   async mirrorCurrentNSToVault() {
     const snapshot = await this.fetchSnapshot();
-    const nsFolder = sanitizePathSegment(snapshot.whoami.tenant_id, "ns");
+    const nsFolder = sanitizePathSegment(snapshot.whoami.ns, "ns");
     const rootPath = `${MIRROR_ROOT_FOLDER}/${nsFolder}`;
 
     await this.ensureFolder(MIRROR_ROOT_FOLDER);
     await this.ensureFolder(rootPath);
 
     const namespaceByID = new Map();
-    for (const namespace of snapshot.namespaces) {
-      namespaceByID.set(namespace.id, namespace);
-      await this.ensureFolder(`${rootPath}/${sanitizePathSegment(namespace.key || namespace.display_name, `namespace-${namespace.id}`)}`);
+    for (const folder of snapshot.folders) {
+      namespaceByID.set(folder.id, folder);
+      await this.ensureFolder(`${rootPath}/${sanitizePathSegment(folder.key || folder.display_name, `folder-${folder.id}`)}`);
     }
 
     let changedCount = 0;
     for (const document of snapshot.documents) {
-      const namespace = namespaceByID.get(document.namespace_id);
-      const namespaceSegment = sanitizePathSegment(namespace ? (namespace.key || namespace.display_name) : "", `namespace-${document.namespace_id}`);
+      const folder = namespaceByID.get(document.folder_id);
+      const namespaceSegment = sanitizePathSegment(folder ? (folder.key || folder.display_name) : "", `folder-${document.folder_id}`);
       const fileName = sanitizePathSegment(document.slug || document.title, `document-${document.id}`) + ".md";
       const filePath = `${rootPath}/${namespaceSegment}/${fileName}`;
-      const content = renderMirroredMarkdown(snapshot.whoami.tenant_id, namespace, document);
+      const content = renderMirroredMarkdown(snapshot.whoami.ns, folder, document);
       const changed = await this.upsertFile(filePath, content);
       if (changed) {
         changedCount += 1;
@@ -211,7 +211,7 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     this.settings.lastMirrorAt = new Date().toISOString();
     await this.saveData(this.settings);
     return {
-      ns: snapshot.whoami.tenant_id,
+      ns: snapshot.whoami.ns,
       rootPath,
       documentCount: snapshot.documents.length,
       changedCount
@@ -270,15 +270,15 @@ function yamlScalar(value) {
   return `"${trimmed.replace(/"/g, '\\"')}"`;
 }
 
-function renderMirroredMarkdown(ns, namespace, document) {
-  const folderKey = namespace ? (namespace.key || namespace.display_name) : "";
-  const folderName = namespace ? namespace.display_name || namespace.key : "";
+function renderMirroredMarkdown(ns, folder, document) {
+  const folderKey = folder ? (folder.key || folder.display_name) : "";
+  const folderName = folder ? folder.display_name || folder.key : "";
   const title = document.title || document.slug || `Document ${document.id}`;
   const frontmatter = [
     "---",
     "llm_wiki: true",
     `ns: ${yamlScalar(ns)}`,
-    `folder_id: ${document.namespace_id}`,
+    `folder_id: ${document.folder_id}`,
     `folder_key: ${yamlScalar(folderKey)}`,
     `folder_name: ${yamlScalar(folderName)}`,
     `document_id: ${document.id}`,
@@ -305,20 +305,20 @@ function renderTenantIndexMarkdown(snapshot) {
   const lines = [
     "---",
     "llm_wiki_index: true",
-    `ns: ${yamlScalar(snapshot.whoami.tenant_id)}`,
+    `ns: ${yamlScalar(snapshot.whoami.ns)}`,
     `base_url: ${yamlScalar(snapshot.connection.baseURL)}`,
     `mirrored_at: ${yamlScalar(new Date().toISOString())}`,
     "---",
     "",
-    `# ${snapshot.whoami.tenant_id}`,
+    `# ${snapshot.whoami.ns}`,
     "",
-    `- Folders mirrored: ${snapshot.namespaces.length}`,
+    `- Folders mirrored: ${snapshot.folders.length}`,
     `- Documents mirrored: ${snapshot.documents.length}`,
     ""
   ];
-  for (const namespace of snapshot.namespaces) {
-    const docs = snapshot.documents.filter((item) => item.namespace_id === namespace.id);
-    lines.push(`## ${namespace.display_name || namespace.key}`);
+  for (const folder of snapshot.folders) {
+    const docs = snapshot.documents.filter((item) => item.folder_id === folder.id);
+    lines.push(`## ${folder.display_name || folder.key}`);
     lines.push("");
     if (docs.length === 0) {
       lines.push("- No documents");

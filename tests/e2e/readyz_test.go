@@ -40,12 +40,12 @@ func TestReadyz(t *testing.T) {
 
 	svc := service.New(repository.New(pool))
 	if _, err := svc.Initialize(ctx, api.InitializeRequest{
-		TenantID:    "default",
+		NS:          "default",
 		Username:    "admin",
 		DisplayName: "Admin",
 		Password:    "secret123",
 	}); err != nil {
-		t.Fatalf("initialize workspace: %v", err)
+		t.Fatalf("initialize ns: %v", err)
 	}
 	server := httptest.NewServer(httpserver.NewHandler(cfg, logger, svc))
 	defer server.Close()

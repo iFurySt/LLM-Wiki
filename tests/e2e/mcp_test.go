@@ -36,33 +36,33 @@ func TestMCPStreamableHTTP(t *testing.T) {
 	}
 
 	result, err := session.CallTool(context.Background(), &mcp.CallToolParams{
-		Name: "llm_wiki_create_namespace",
+		Name: "llm_wiki_create_folder",
 		Arguments: map[string]any{
 			"key":          "projects",
 			"display_name": "Projects",
 			"description":  "shared project docs",
-			"visibility":   "tenant",
+			"visibility":   "ns",
 		},
 	})
 	if err != nil {
-		t.Fatalf("create namespace tool: %v", err)
+		t.Fatalf("create folder tool: %v", err)
 	}
 	if result.IsError {
-		t.Fatalf("create namespace tool returned error result")
+		t.Fatalf("create folder tool returned error result")
 	}
 
 	listed, err := session.CallTool(context.Background(), &mcp.CallToolParams{
-		Name:      "llm_wiki_list_namespaces",
+		Name:      "llm_wiki_list_folders",
 		Arguments: map[string]any{},
 	})
 	if err != nil {
-		t.Fatalf("list namespaces tool: %v", err)
+		t.Fatalf("list folders tool: %v", err)
 	}
 	if len(listed.Content) == 0 {
-		t.Fatalf("expected namespace tool content")
+		t.Fatalf("expected folder tool content")
 	}
 
-	resource, err := session.ReadResource(context.Background(), &mcp.ReadResourceParams{URI: "llm-wiki://namespaces"})
+	resource, err := session.ReadResource(context.Background(), &mcp.ReadResourceParams{URI: "llm-wiki://folders"})
 	if err != nil {
 		t.Fatalf("read resource: %v", err)
 	}
@@ -82,14 +82,14 @@ func TestMCPSSE(t *testing.T) {
 	defer session.Close()
 
 	result, err := session.CallTool(context.Background(), &mcp.CallToolParams{
-		Name:      "llm_wiki_list_spaces",
+		Name:      "llm_wiki_list_ns",
 		Arguments: map[string]any{},
 	})
 	if err != nil {
-		t.Fatalf("list spaces over SSE: %v", err)
+		t.Fatalf("list ns over SSE: %v", err)
 	}
 	if result.IsError {
-		t.Fatalf("list spaces over SSE returned error")
+		t.Fatalf("list ns over SSE returned error")
 	}
 }
 
