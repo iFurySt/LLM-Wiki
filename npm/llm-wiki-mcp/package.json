@@ -12,7 +12,7 @@
     "url": "https://github.com/iFurySt/LLM-Wiki/issues"
   },
   "bin": {
-    "llm-wiki-mcp": "./bin/llm-wiki-mcp.js"
+    "llm-wiki-mcp": "bin/llm-wiki-mcp.js"
   },
   "files": [
     "bin",
