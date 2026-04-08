@@ -8,27 +8,27 @@ Add a real identity and authorization model for LLM-Wiki that works across:
 - local agent or MCP usage
 - browser-based OAuth sign-in
 - remote and headless environments such as CI, cloud VMs, and Kubernetes
-- service-to-service integrations that need tenant-scoped fine-grained tokens
-- multi-tenant workspaces where normal users can self-serve into a personal tenant and then create more
+- service-to-service integrations that need `ns`-scoped fine-grained tokens
+- multi-`ns` collaboration where normal users can self-serve into a personal `ns` and then create more
 
 ## Why Now
 
 The current model is still bootstrap-grade:
 
-- CLI is only a thin HTTP wrapper with `base-url` and `tenant`
+- CLI is only a thin HTTP wrapper with `base-url` and `ns`
 - HTTP and MCP integrations still rely on `X-LLM-Wiki-Tenant-ID`
 - there is no first-class user, session, or service principal identity
 - there is no central token issuance or revocation model
-- tenant creation still reads too much like an admin-only provisioning concern
+- `ns` creation still reads too much like an admin-only provisioning concern
 - CLI login is not yet optimized around the browser loopback callback path
 
-That is enough for local development, but not enough for hosted multi-tenant use.
+That is enough for local development, but not enough for hosted multi-`ns` use.
 
 ## Design Principles
 
 - Keep `cmd/cli` thin. Credential discovery and login UX can live in the CLI, but authorization decisions must stay server-side.
-- Treat tenant selection as a consequence of authenticated identity and granted access, not as a free-form client header.
-- Treat a personal default tenant as part of user onboarding, not as a separate manual provisioning step.
+- Treat `ns` selection as a consequence of authenticated identity and granted access, not as a free-form client header.
+- Treat a personal default `ns` as part of user onboarding, not as a separate manual provisioning step.
 - Separate human sessions from service tokens.
 - Support interactive and headless login flows from the start.
 - Prefer browser login with localhost callback for interactive CLI sessions; only fall back to device flow when needed.
@@ -134,7 +134,7 @@ CLI behavior:
 - open browser automatically when possible
 - bind a localhost listener for the callback instead of asking the user to paste codes in the common path
 - persist tokens in `~/.llm-wiki/`
-- store server metadata and the chosen tenant profile
+- store server metadata and the chosen `ns` profile
 - refresh access tokens automatically when refresh token is present
 
 Provider rollout for the first hosted flow:
@@ -142,7 +142,7 @@ Provider rollout for the first hosted flow:
 - admin configures required Google and GitHub OAuth client credentials
 - login screen shows enabled providers automatically
 - first successful OAuth login can create the internal user if policy allows
-- first successful OAuth login can also create the user's personal default tenant if it does not exist yet
+- first successful OAuth login can also create the user's personal default `ns` if it does not exist yet
 
 ### 4. Service tokens for cloud and K8s
 
@@ -151,7 +151,7 @@ Support server-issued fine-grained tokens for:
 - batch jobs
 - MCP bridges
 - in-cluster agents
-- namespace-specific automation
+- folder-specific or `ns`-specific automation
 - external systems with bounded permissions
 
 These should not reuse human refresh tokens.
@@ -177,7 +177,7 @@ These should not reuse human refresh tokens.
 - issued to a service principal
 - can be static with rotation or minted dynamically by a broker
 - principal type is `service`
-- never imply wildcard tenant access unless explicitly granted
+- never imply wildcard `ns` access unless explicitly granted
 
 ### Delegated agent session tokens
 
@@ -205,14 +205,14 @@ Base scopes:
 
 Resource restrictions:
 
-- tenant-bound
-- optionally restricted to selected spaces
-- optionally restricted to selected namespaces
+- `ns`-bound
+- optionally restricted to selected folders
+- optionally restricted to selected API namespace resources
 - optional read-only or write-only mode
 
 Token examples:
 
-- human CLI token for one tenant with full wiki write access
+- human CLI token for one `ns` with full wiki write access
 - service token only allowed to read `org/*` and write `drafts/*`
 - MCP token that can invoke tools but cannot archive documents
 
@@ -223,7 +223,7 @@ Add a dedicated auth subsystem with these responsibilities:
 1. Resolve bearer token or session credential from HTTP and MCP requests.
 2. Validate signature or introspect opaque token.
 3. Materialize a normalized auth context.
-4. Enforce tenant, namespace, and scope checks before handler logic runs.
+4. Enforce `ns`, folder, and scope checks before handler logic runs.
 5. Inject caller identity into audit and revision creation paths.
 
 Suggested internal packages:
@@ -244,7 +244,7 @@ There are two realistic deployment paths.
 
 ### Path A: LLM-Wiki as OAuth client to an external IdP
 
-Use when tenants already have:
+Use when users already have an external identity system:
 
 - Auth0
 - Okta
@@ -257,9 +257,9 @@ LLM-Wiki responsibilities:
 - redirect user to IdP
 - exchange code for tokens
 - map upstream identity to an internal principal
-- evaluate tenant memberships locally
+- evaluate `ns` memberships locally
 - auto-create the user on first login when policy allows
-- auto-create the personal default tenant on first login when policy allows
+- auto-create the personal default `ns` on first login when policy allows
 
 ### Path B: LLM-Wiki as its own authorization server for first-party CLI
 
@@ -282,15 +282,15 @@ This avoids overbuilding the identity stack too early.
 
 ## Workspace And Tenant Onboarding
 
-The target hosted behavior should be closer to a workspace product:
+The target hosted behavior should be closer to an `ns`-scoped collaboration product:
 
-- a user can sign in without an admin pre-creating a tenant for them
-- first login creates a personal default tenant named from username or email
-- the creator becomes owner or admin of that tenant
-- the same user can later create additional tenants or workspaces
-- membership grants, not free-form tenant ids, control access thereafter
+- a user can sign in without an admin pre-creating an `ns` for them
+- first login creates a personal default `ns` named from username or email
+- the creator becomes owner or admin of that `ns`
+- the same user can later create additional `ns` scopes
+- membership grants, not free-form `ns` ids, control access thereafter
 
-Naming guidance for the first tenant:
+Naming guidance for the first `ns`:
 
 - prefer a normalized username slug when present
 - otherwise derive from email local-part plus collision handling
@@ -316,7 +316,7 @@ Minimal first cut:
 
 ## MCP And Remote Agent Alignment
 
-MCP must not stay on tenant-header-only auth long-term.
+MCP must not stay on legacy tenant-header-only auth long-term.
 
 Recommended model:
 
@@ -346,7 +346,7 @@ Example:
 ### Internal service calling LLM-Wiki
 
 - create a service principal in LLM-Wiki
-- issue a tenant-scoped token with explicit scopes
+- issue an `ns`-scoped token with explicit scopes
 - rotate on a schedule
 - log token ID and service principal ID on every write
 
@@ -392,8 +392,8 @@ Only store token hashes server-side for static bearer tokens.
 
 - add auth context and middleware
 - accept bearer token on HTTP routes
-- keep tenant header only as temporary fallback
-- start rejecting missing tenant context on protected routes
+- keep the legacy tenant header only as temporary fallback
+- start rejecting missing `ns` context on protected routes
 
 ### Phase 2: service tokens
 
@@ -405,14 +405,14 @@ Only store token hashes server-side for static bearer tokens.
 
 - add OAuth provider config and account linkage
 - add first-login user provisioning
-- add first-login personal-tenant creation
+- add first-login personal-`ns` creation
 - make membership bootstrap deterministic
 
 ### Phase 4: CLI credential discovery and browser login
 
 - add `--token`, `--token-file`, env support, and `~/.llm-wiki/` profiles
 - add browser PKCE login with localhost callback
-- remove the need to always pass `--tenant` manually when token already binds tenant
+- remove the need to always pass `--ns` manually when token already binds an `ns`
 
 ### Phase 5: headless human fallback
 
@@ -421,21 +421,21 @@ Only store token hashes server-side for static bearer tokens.
 
 ### Phase 6: resource-aware policy
 
-- move from tenant-wide scopes to namespace and document ACL integration
+- move from `ns`-wide scopes to folder and document ACL integration
 - reduce trust in user-supplied `author_*` fields
 
 ## Key Decisions Proposed
 
 - Keep the CLI thin, but give it first-class credential discovery and login UX.
 - Make bearer auth the primary access path for HTTP and MCP.
-- Treat tenant as a grant on the token, not a free-text parameter.
+- Treat `ns` as a grant on the token, not a free-text parameter.
 - Support both interactive OAuth login and explicit token use.
 - Introduce service principals and short-lived delegated tokens for cloud automation.
 
 ## Risks
 
 - Building a full first-party OAuth server too early will slow product progress.
-- Keeping tenant-header auth too long will leak into downstream integrations and be harder to remove later.
+- Keeping legacy tenant-header auth too long will leak into downstream integrations and be harder to remove later.
 - Long-lived static service tokens without scope and resource constraints will create an avoidable security problem.
 - If revision authorship continues to trust raw request fields, audit history will be weak even after auth lands.
 
@@ -445,9 +445,9 @@ The highest-leverage next slice is:
 
 1. Add bearer-token auth context to the server.
 2. Add OAuth account linkage and first-login user provisioning.
-3. Add personal default-tenant auto provisioning and membership bootstrap.
+3. Add personal default-`ns` auto provisioning and membership bootstrap.
 4. Move CLI to browser-first login with localhost callback and `~/.llm-wiki/` profile persistence.
 5. Keep device code as explicit fallback for constrained environments.
-6. Add service principals and tenant-scoped service tokens after the human hosted flow is solid.
+6. Add service principals and `ns`-scoped service tokens after the human hosted flow is solid.
 
 That gets the real hosted user journey working first, while still leaving service-token plumbing on the same auth substrate.

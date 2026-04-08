@@ -18,7 +18,7 @@ Define the first client-sync contract as a service-first live browse protocol ov
 
 Protocol v0 rules:
 
-- LLM-Wiki remains the source of truth for documents, revisions, tenants, and memberships.
+- LLM-Wiki remains the source of truth for documents, revisions, `ns` scopes, and memberships.
 - downstream clients may cache remote state for rendering, but should not treat local cache or vault files as canonical state
 - the minimum browse contract is:
   - `GET /v1/auth/whoami`
@@ -27,7 +27,7 @@ Protocol v0 rules:
   - `GET /v1/namespaces`
   - `GET /v1/documents`
 - auth uses bearer tokens, and desktop clients may reuse `~/.llm-wiki/config.json` as the default local credential source
-- workspace switching is token-based, using `switch-tenant` to mint a tenant-bound token for the selected workspace
+- `ns` switching is token-based, using `switch-tenant` to mint an `ns`-bound token for the selected scope
 - live sync in v0 is polling-based; clients should re-fetch list and document state on refresh or interval
 - v0 is read-first; editing and bidirectional sync are deferred until revision-safe write semantics are specified for non-CLI clients
 

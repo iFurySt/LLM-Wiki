@@ -2,7 +2,7 @@
 
 ## Goal
 
-Turn the current scaffold into a minimal but real LLM-Wiki service with PostgreSQL-backed namespace and document primitives.
+Turn the current scaffold into a minimal but real LLM-Wiki service with PostgreSQL-backed folder and document primitives.
 
 ## Scope
 
@@ -20,16 +20,16 @@ Turn the current scaffold into a minimal but real LLM-Wiki service with PostgreS
 3. Done: choose direct `pgx` SQL for v0
 4. Done: add PostgreSQL connection and readiness checks
 5. Done: create initial schema and migrations
-6. Done: add namespace CRUD
+6. Done: add folder CRUD
 7. Done: add document create/get/update with revision tracking
 8. Done: add tests for bootstrap and first routes
 9. Done: add e2e and perf harnesses with docs-backed result storage
 10. Done: extend CRUD surface with list and lookup APIs
 11. In progress: harden validation and error model
 12. Done: add document archive lifecycle operation
-13. Done: add namespace archive lifecycle operation
+13. Done: add folder archive lifecycle operation
 14. Done: add active-vs-archived listing filters
-15. Done: add explicit spaces API
+15. Done: expose the initial grouping model API
 16. Done: add a minimal Gin-served HTML management page
 17. Next: add UI actions beyond create-only flows
 
