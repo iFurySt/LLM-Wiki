@@ -27,6 +27,7 @@ make dev
 Then open:
 
 - `http://127.0.0.1:8234/ui`
+- `http://127.0.0.1:8234/setup` on first boot to create the initial admin and default tenant
 
 If you want hosted install links and UI install prompts to point at a different public host, set:
 
@@ -56,9 +57,9 @@ Useful local commands:
 
 ```bash
 go run ./cmd/cli system info
-go run ./cmd/cli space list
-go run ./cmd/cli namespace list
-go run ./cmd/cli document list
+go run ./cmd/cli auth login --base-url http://127.0.0.1:8234 --device-code
+go run ./cmd/cli auth status --base-url http://127.0.0.1:8234
+go run ./cmd/cli namespace list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
 ```
 
 Install the CLI:
@@ -69,6 +70,17 @@ llm-wiki version
 lw version
 llm-wiki system info --base-url http://127.0.0.1:8234
 ```
+
+Auth model:
+
+- API, CLI, and MCP use `Authorization: Bearer <token>`
+- CLI supports `--token`, `--token-file`, `LLM_WIKI_TOKEN`, and `~/.llm-wiki/config.json`
+- CLI resolves base URL and tenant from flags, env, stored profile, then built-in defaults
+- `lw auth login` supports browser and device-code sign-in, opens a browser locally by default, and still prints the approval URL
+- first boot is driven by `/setup`, which creates the initial tenant and admin account
+- `/admin/login` and `/admin/users` provide a simple pixel-style user admin console
+- service principals and fine-grained service tokens can be issued through authenticated auth commands
+- development bootstrap token defaults to `dev-bootstrap-token` for tenant `default`
 
 Release model:
 
@@ -137,7 +149,7 @@ Copy this for MCP clients that support remote HTTP transport:
     "type": "http",
     "url": "https://your-llm-wiki-host/mcp",
     "headers": {
-      "X-LLM-Wiki-Tenant-ID": "default"
+      "Authorization": "Bearer <llm-wiki-token>"
     }
   }
 }
@@ -157,10 +169,11 @@ For a published npm package, copy this for local process-spawned MCP setups:
       "-y",
       "@ifuryst/llm-wiki-mcp",
       "--base-url",
-      "https://your-llm-wiki-host",
-      "--tenant",
-      "default"
-    ]
+      "https://your-llm-wiki-host"
+    ],
+    "env": {
+      "LLM_WIKI_TOKEN": "<llm-wiki-token>"
+    }
   }
 }
 ```
@@ -169,7 +182,7 @@ Before npm publish, use the in-repo package directly:
 
 ```bash
 npm install --prefix npm/llm-wiki-mcp --package-lock=false
-npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url http://127.0.0.1:8234 --tenant default
+LLM_WIKI_TOKEN=dev-bootstrap-token npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url http://127.0.0.1:8234
 ```
 
 ### Skill Install
@@ -192,13 +205,13 @@ Read and follow https://your-llm-wiki-host/install/LLM-Wiki.md
 If an agent is terminal-native, these are the shortest useful starting points:
 
 ```bash
-lw system info --base-url https://your-llm-wiki-host --tenant default
-lw namespace list --base-url https://your-llm-wiki-host --tenant default
-lw document list --base-url https://your-llm-wiki-host --tenant default
+lw auth login --base-url https://your-llm-wiki-host
+lw namespace list --base-url https://your-llm-wiki-host
+lw document list --base-url https://your-llm-wiki-host
 
-llm-wiki system info --base-url https://your-llm-wiki-host --tenant default
-llm-wiki namespace list --base-url https://your-llm-wiki-host --tenant default
-llm-wiki document list --base-url https://your-llm-wiki-host --tenant default
+llm-wiki auth login --base-url https://your-llm-wiki-host
+llm-wiki namespace list --base-url https://your-llm-wiki-host
+llm-wiki document list --base-url https://your-llm-wiki-host
 ```
 
 ### Docker Images

@@ -3,7 +3,6 @@ package e2e
 import (
 	"context"
 	"io"
-	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -21,10 +20,10 @@ import (
 func TestMCPStreamableHTTP(t *testing.T) {
 	t.Parallel()
 
-	serverURL := newMCPTestServer(t)
+	serverURL, token := newMCPTestServer(t, "tenant-mcp")
 	session := connectMCPClient(t, &mcp.StreamableClientTransport{
 		Endpoint:   serverURL + "/mcp",
-		HTTPClient: tenantHTTPClient("tenant-mcp"),
+		HTTPClient: bearerHTTPClient(token),
 	})
 	defer session.Close()
 
@@ -75,10 +74,10 @@ func TestMCPStreamableHTTP(t *testing.T) {
 func TestMCPSSE(t *testing.T) {
 	t.Parallel()
 
-	serverURL := newMCPTestServer(t)
+	serverURL, token := newMCPTestServer(t, "tenant-mcp-sse")
 	session := connectMCPClient(t, &mcp.SSEClientTransport{
 		Endpoint:   serverURL + "/sse",
-		HTTPClient: tenantHTTPClient("tenant-mcp-sse"),
+		HTTPClient: bearerHTTPClient(token),
 	})
 	defer session.Close()
 
@@ -94,7 +93,7 @@ func TestMCPSSE(t *testing.T) {
 	}
 }
 
-func newMCPTestServer(t *testing.T) string {
+func newMCPTestServer(t *testing.T, tenantID string) (string, string) {
 	t.Helper()
 
 	pg := testutil.StartPostgres(t)
@@ -117,9 +116,14 @@ func newMCPTestServer(t *testing.T) string {
 	}
 	t.Cleanup(func() { _ = logger.Sync() })
 
-	server := httptest.NewServer(httpserver.NewHandler(cfg, logger, service.New(repository.New(pool))))
+	svc := service.New(repository.New(pool))
+	token := "test-mcp-token-" + tenantID
+	if err := bootstrapTestToken(ctx, svc, tenantID, token); err != nil {
+		t.Fatalf("bootstrap token: %v", err)
+	}
+	server := httptest.NewServer(httpserver.NewHandler(cfg, logger, svc))
 	t.Cleanup(server.Close)
-	return server.URL
+	return server.URL, token
 }
 
 func connectMCPClient(t *testing.T, transport mcp.Transport) *mcp.ClientSession {
@@ -137,28 +141,6 @@ func connectMCPClient(t *testing.T, transport mcp.Transport) *mcp.ClientSession 
 		t.Fatalf("connect MCP client: %v", err)
 	}
 	return session
-}
-
-func tenantHTTPClient(tenantID string) *http.Client {
-	return &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &tenantRoundTripper{
-			base:     http.DefaultTransport,
-			tenantID: tenantID,
-		},
-	}
-}
-
-type tenantRoundTripper struct {
-	base     http.RoundTripper
-	tenantID string
-}
-
-func (r *tenantRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	cloned := req.Clone(req.Context())
-	cloned.Header = cloned.Header.Clone()
-	cloned.Header.Set("X-LLM-Wiki-Tenant-ID", r.tenantID)
-	return r.base.RoundTrip(cloned)
 }
 
 func readBody(t *testing.T, body io.ReadCloser) string {

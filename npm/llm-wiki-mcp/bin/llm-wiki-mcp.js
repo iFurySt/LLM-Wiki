@@ -16,7 +16,7 @@ if (options.version) {
 }
 
 const baseUrl = options.baseUrl || process.env.LLM_WIKI_BASE_URL || "http://127.0.0.1:8234";
-const tenantId = options.tenant || process.env.LLM_WIKI_TENANT_ID || "default";
+const bearerToken = options.token || process.env.LLM_WIKI_TOKEN || "";
 
 const [{ McpServer, ResourceTemplate }, { StdioServerTransport }, { z }] = await Promise.all([
   import("@modelcontextprotocol/sdk/server/mcp.js"),
@@ -234,12 +234,15 @@ const transport = new StdioServerTransport();
 await server.connect(transport);
 
 async function requestJSON(method, path, body) {
+  if (!bearerToken) {
+    throw new Error("LLM_WIKI_TOKEN or --token is required");
+  }
   const response = await fetch(new URL(path, ensureTrailingSlash(baseUrl)), {
     method,
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
-      "X-LLM-Wiki-Tenant-ID": tenantId
+      "Authorization": `Bearer ${bearerToken}`
     },
     body: body === undefined ? undefined : JSON.stringify(body)
   });
@@ -267,7 +270,7 @@ function parseArgs(args) {
     help: false,
     version: false,
     baseUrl: "",
-    tenant: ""
+    token: ""
   };
 
   for (let i = 0; i < args.length; i += 1) {
@@ -285,8 +288,8 @@ function parseArgs(args) {
         parsed.baseUrl = args[i + 1] || "";
         i += 1;
         break;
-      case "--tenant":
-        parsed.tenant = args[i + 1] || "";
+      case "--token":
+        parsed.token = args[i + 1] || "";
         i += 1;
         break;
       default:
@@ -301,13 +304,13 @@ function printHelp() {
   process.stdout.write(`LLM-Wiki MCP stdio bridge
 
 Usage:
-  llm-wiki-mcp [--base-url URL] [--tenant TENANT]
+  llm-wiki-mcp [--base-url URL] [--token TOKEN]
   llm-wiki-mcp --version
   llm-wiki-mcp --help
 
 Options:
   --base-url  LLM-Wiki server base URL. Defaults to LLM_WIKI_BASE_URL or http://127.0.0.1:8234
-  --tenant    LLM-Wiki tenant ID. Defaults to LLM_WIKI_TENANT_ID or default
+  --token     LLM-Wiki bearer token. Defaults to LLM_WIKI_TOKEN
   --version   Print package version
   --help      Show this help message
 `);

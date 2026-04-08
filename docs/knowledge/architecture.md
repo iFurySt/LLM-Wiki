@@ -5,7 +5,7 @@
 LLM-Wiki starts as a standalone Go service with:
 
 - HTTP API
-- thin CLI wrapper over HTTP
+- thin CLI wrapper over HTTP with browser/device login and local profile storage
 - MCP server over Streamable HTTP and SSE
 - PostgreSQL persistence
 - hosted install surfaces under `/install/*`
@@ -50,6 +50,16 @@ Access is expected to be evaluated by:
 - document ACL
 - caller identity
 
+Current implementation direction:
+
+- bearer token auth for HTTP, CLI, and MCP
+- service principals with tenant-scoped fine-grained tokens
+- browser and device-code login for human CLI sessions
+- first-boot setup flow for choosing the default tenant and initial admin account
+- username/password-backed browser approvals and device-code approvals for human login
+- cookie-backed web admin sessions for browser management pages
+- audit metadata derived from authenticated principal context when possible
+
 Caller identity should carry fields like:
 
 - `tenant_id`
@@ -81,10 +91,16 @@ The service is intended to integrate with agent platforms like `as-next` as a sh
 LLM-Wiki currently exposes these agent-facing entry points:
 
 - HTTP API for direct JSON integrations
-- thin `llm-wiki` CLI for terminal-first workflows
+- thin `llm-wiki` CLI for terminal-first workflows with `--token`, `--token-file`, env vars, and `~/.llm-wiki/config.json`
 - remote MCP endpoint at `/mcp`
 - legacy MCP SSE endpoint at `/sse`
 - official in-repo `llm-wiki` skill
 - `@ifuryst/llm-wiki-mcp` npm package for stdio MCP via `npx`
 
 This keeps the same backend reachable from hosted agents, local coding agents, and process-spawned MCP clients.
+
+For human operators, the service also exposes:
+
+- `/setup` for one-time initialization
+- `/admin/login` for browser login
+- `/admin/users` for basic user administration

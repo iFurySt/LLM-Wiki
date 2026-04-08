@@ -39,11 +39,15 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 	defer func() { _ = logger.Sync() }()
 
 	svc := service.New(repository.New(pool))
+	token := "test-api-token"
+	if err := bootstrapTestToken(ctx, svc, "tenant-e2e", token); err != nil {
+		t.Fatalf("bootstrap token: %v", err)
+	}
 	handler := httpserver.NewHandler(cfg, logger, svc)
 	server := httptest.NewServer(handler)
 	defer server.Close()
 
-	client := httpclient.New(server.URL, 10_000_000_000, "tenant-e2e")
+	client := httpclient.New(server.URL, 10_000_000_000, token)
 
 	namespace, err := client.CreateNamespace(ctx, api.CreateNamespaceRequest{
 		Key:         "org",

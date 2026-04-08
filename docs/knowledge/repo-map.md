@@ -51,9 +51,10 @@ Expected directories as implementation grows:
 - test-result tracking structure: initialized
 - database schema: initial v0 migration implemented
 - HTTP API: readiness, structured error responses, space list, namespace CRUD/list/archive, document CRUD/list/filter, slug lookup, and archive
-- MCP: streamable HTTP and legacy SSE endpoints with LLM-Wiki tools and resources
-- CLI: system, space, namespace, and document commands implemented, including list and archive flows
-- UI: retro wiki-style Gin-served HTML page for browsing, creating, editing, archiving, and install flows
+- auth: bearer token middleware, service principals, service-token issuance and revocation, browser/device login flows, first-boot setup, web admin sessions, and bootstrap admin token support
+- MCP: streamable HTTP and legacy SSE endpoints with bearer-token auth and scoped LLM-Wiki tools and resources
+- CLI: system, auth, space, namespace, and document commands implemented, including browser/device login, token-file support, local profiles, and token admin flows
+- UI: retro wiki-style Gin-served HTML page for browsing, creating, editing, archiving, install flows, first-run setup, and a pixel-style admin user console
 - infra manifests: local development compose initialized
 - dockerized dev entrypoint: `make dev` with containerized hot reload for the app service
 - install surfaces: hosted markdown guide, shell installer, and skill package download endpoints implemented

@@ -9,19 +9,19 @@
 ## Run
 
 ```bash
-npx -y @ifuryst/llm-wiki-mcp --base-url https://llm-wiki.ifuryst.com --tenant default
+LLM_WIKI_TOKEN=<llm-wiki-token> npx -y @ifuryst/llm-wiki-mcp --base-url https://llm-wiki.ifuryst.com
 ```
 
 Local dev equivalent:
 
 ```bash
-npx -y @ifuryst/llm-wiki-mcp --base-url http://127.0.0.1:8234 --tenant default
+LLM_WIKI_TOKEN=dev-bootstrap-token npx -y @ifuryst/llm-wiki-mcp --base-url http://127.0.0.1:8234
 ```
 
 Environment variables:
 
 - `LLM_WIKI_BASE_URL`
-- `LLM_WIKI_TENANT_ID`
+- `LLM_WIKI_TOKEN`
 
 ## Exposed Capabilities
 

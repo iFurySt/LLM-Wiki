@@ -30,6 +30,10 @@ func New(cfg config.Config, logger *zap.Logger) (*App, error) {
 	}
 	repo := repository.New(pool)
 	svc := service.New(repo)
+	if err := svc.BootstrapToken(context.Background(), cfg.Auth.BootstrapTenantID, cfg.Auth.BootstrapPrincipalName, cfg.Auth.BootstrapToken); err != nil {
+		pool.Close()
+		return nil, err
+	}
 
 	return &App{
 		server: httpserver.New(cfg, logger, svc),

@@ -902,7 +902,8 @@ Then run:
 curl -fsSL {{ .InstallScriptURL }} | sh
 
 After install, use:
-llm-wiki system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
+llm-wiki system info --base-url {{ .InstallBaseURL }}
+llm-wiki auth login --base-url {{ .InstallBaseURL }}</pre>
             </div>
 
             <div class="copy-block">
@@ -911,7 +912,8 @@ llm-wiki system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
                 <button type="button" class="copy-button secondary" data-copy-target="cli-human">Copy</button>
               </div>
               <pre id="cli-human" class="code-block">curl -fsSL {{ .InstallScriptURL }} | sh
-llm-wiki system info --base-url {{ .InstallBaseURL }} --tenant default</pre>
+llm-wiki system info --base-url {{ .InstallBaseURL }}
+llm-wiki auth login --base-url {{ .InstallBaseURL }}</pre>
             </div>
             <div class="copy-feedback" data-copy-feedback></div>
           </article>
@@ -965,11 +967,11 @@ curl -O {{ .InstallSkillURL }}</pre>
 Remote MCP endpoint:
 {{ .MCPURL }}
 
-Tenant header:
-X-LLM-Wiki-Tenant-ID: default
+Auth header:
+Authorization: Bearer &lt;llm-wiki-token&gt;
 
 If local stdio MCP is preferred, run:
-npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
+LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }}</pre>
             </div>
 
             <div class="copy-block">
@@ -978,7 +980,7 @@ npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }} --te
                 <button type="button" class="copy-button secondary" data-copy-target="mcp-human">Copy</button>
               </div>
               <pre id="mcp-human" class="code-block">npm install --prefix npm/llm-wiki-mcp --package-lock=false
-npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }} --tenant default</pre>
+LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }}</pre>
             </div>
             <div class="copy-feedback" data-copy-feedback></div>
           </article>

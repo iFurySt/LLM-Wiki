@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ifuryst/llm-wiki/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/auth"
 	"github.com/ifuryst/llm-wiki/internal/service"
 	"github.com/ifuryst/llm-wiki/internal/version"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -30,26 +31,24 @@ func NewManager(svc *service.Service) *Manager {
 	}
 }
 
-func (m *Manager) ServerForTenant(tenantID string) *mcp.Server {
-	if strings.TrimSpace(tenantID) == "" {
-		tenantID = "default"
-	}
-
+func (m *Manager) ServerForPrincipal(principal auth.Principal) *mcp.Server {
+	key := principal.TenantID + "|" + principal.PrincipalID + "|" + strings.Join(principal.Scopes, ",")
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if server, ok := m.servers[tenantID]; ok {
+	if server, ok := m.servers[key]; ok {
 		return server
 	}
 
-	server := m.newServer(tenantID)
-	m.servers[tenantID] = server
+	server := m.newServer(principal)
+	m.servers[key] = server
 	return server
 }
 
 func StreamableHTTPHandler(manager *Manager) http.Handler {
 	return mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		return manager.ServerForTenant(r.Header.Get("X-LLM-Wiki-Tenant-ID"))
+		principal, _ := auth.PrincipalFromContext(r.Context())
+		return manager.ServerForPrincipal(principal)
 	}, &mcp.StreamableHTTPOptions{
 		SessionTimeout: 30 * time.Minute,
 	})
@@ -57,18 +56,19 @@ func StreamableHTTPHandler(manager *Manager) http.Handler {
 
 func SSEHandler(manager *Manager) http.Handler {
 	return mcp.NewSSEHandler(func(r *http.Request) *mcp.Server {
-		return manager.ServerForTenant(r.Header.Get("X-LLM-Wiki-Tenant-ID"))
+		principal, _ := auth.PrincipalFromContext(r.Context())
+		return manager.ServerForPrincipal(principal)
 	}, &mcp.SSEOptions{})
 }
 
-func (m *Manager) newServer(tenantID string) *mcp.Server {
+func (m *Manager) newServer(principal auth.Principal) *mcp.Server {
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "LLM-Wiki",
 		Version: version.Version,
 	}, nil)
 
-	m.registerTools(server, tenantID)
-	m.registerResources(server, tenantID)
+	m.registerTools(server, principal)
+	m.registerResources(server, principal)
 	return server
 }
 
@@ -140,12 +140,16 @@ type archiveNamespaceInput struct {
 	ID int64 `json:"id" jsonschema:"namespace ID"`
 }
 
-func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
+func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
+	tenantID := principal.TenantID
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "llm_wiki_list_spaces",
 		Title:       "List Spaces",
 		Description: "List spaces for the current LLM-Wiki tenant.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyInput) (*mcp.CallToolResult, listSpacesOutput, error) {
+		if !auth.HasScopes(principal, auth.ScopeSpacesRead) {
+			return nil, listSpacesOutput{}, fmt.Errorf("missing %s scope", auth.ScopeSpacesRead)
+		}
 		resp, err := m.svc.ListSpaces(ctx, tenantID)
 		if err != nil {
 			return nil, listSpacesOutput{}, err
@@ -158,6 +162,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "List Namespaces",
 		Description: "List namespaces for the current LLM-Wiki tenant.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyInput) (*mcp.CallToolResult, listNamespacesOutput, error) {
+		if !auth.HasScopes(principal, auth.ScopeNamespacesRead) {
+			return nil, listNamespacesOutput{}, fmt.Errorf("missing %s scope", auth.ScopeNamespacesRead)
+		}
 		resp, err := m.svc.ListNamespaces(ctx, tenantID)
 		if err != nil {
 			return nil, listNamespacesOutput{}, err
@@ -170,6 +177,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "Create Namespace",
 		Description: "Create a namespace inside the current tenant's default space.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in createNamespaceInput) (*mcp.CallToolResult, api.NamespaceResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeNamespacesWrite) {
+			return nil, api.NamespaceResponse{}, fmt.Errorf("missing %s scope", auth.ScopeNamespacesWrite)
+		}
 		resp, err := m.svc.CreateNamespace(ctx, tenantID, api.CreateNamespaceRequest{
 			Key:         in.Key,
 			DisplayName: in.DisplayName,
@@ -184,6 +194,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "Archive Namespace",
 		Description: "Archive a namespace in the current tenant.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in archiveNamespaceInput) (*mcp.CallToolResult, api.NamespaceResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeNamespacesWrite) {
+			return nil, api.NamespaceResponse{}, fmt.Errorf("missing %s scope", auth.ScopeNamespacesWrite)
+		}
 		resp, err := m.svc.ArchiveNamespace(ctx, tenantID, in.ID)
 		return nil, resp, err
 	})
@@ -193,6 +206,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "List Documents",
 		Description: "List documents in the current tenant, optionally filtered by namespace or status.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in listDocumentsInput) (*mcp.CallToolResult, listDocumentsOutput, error) {
+		if !auth.HasScopes(principal, auth.ScopeDocumentsRead) {
+			return nil, listDocumentsOutput{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsRead)
+		}
 		resp, err := m.svc.ListDocuments(ctx, tenantID, in.NamespaceID, in.Status)
 		if err != nil {
 			return nil, listDocumentsOutput{}, err
@@ -205,6 +221,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "Get Document",
 		Description: "Fetch a document and its revisions by ID.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in getDocumentInput) (*mcp.CallToolResult, api.DocumentResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeDocumentsRead) {
+			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsRead)
+		}
 		resp, err := m.svc.GetDocument(ctx, tenantID, in.ID)
 		return nil, resp, err
 	})
@@ -214,6 +233,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "Get Document By Slug",
 		Description: "Fetch a document and its revisions by namespace ID and slug.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in getDocumentBySlugInput) (*mcp.CallToolResult, api.DocumentResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeDocumentsRead) {
+			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsRead)
+		}
 		resp, err := m.svc.GetDocumentBySlug(ctx, tenantID, in.NamespaceID, in.Slug)
 		return nil, resp, err
 	})
@@ -223,6 +245,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "Create Document",
 		Description: "Create a new LLM-Wiki document and its first revision.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in createDocumentInput) (*mcp.CallToolResult, api.DocumentResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeDocumentsWrite) {
+			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsWrite)
+		}
 		resp, err := m.svc.CreateDocument(ctx, tenantID, api.CreateDocumentRequest{
 			NamespaceID:   in.NamespaceID,
 			Slug:          in.Slug,
@@ -240,6 +265,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "Update Document",
 		Description: "Update an existing LLM-Wiki document and create a new revision.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in updateDocumentInput) (*mcp.CallToolResult, api.DocumentResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeDocumentsWrite) {
+			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsWrite)
+		}
 		resp, err := m.svc.UpdateDocument(ctx, tenantID, in.ID, api.UpdateDocumentRequest{
 			Title:         in.Title,
 			Content:       in.Content,
@@ -255,6 +283,9 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 		Title:       "Archive Document",
 		Description: "Archive a LLM-Wiki document while preserving revision history.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in archiveDocumentInput) (*mcp.CallToolResult, api.DocumentResponse, error) {
+		if !auth.HasScopes(principal, auth.ScopeDocumentsArchive) {
+			return nil, api.DocumentResponse{}, fmt.Errorf("missing %s scope", auth.ScopeDocumentsArchive)
+		}
 		resp, err := m.svc.ArchiveDocument(ctx, tenantID, in.ID, api.ArchiveDocumentRequest{
 			AuthorType:    in.AuthorType,
 			AuthorID:      in.AuthorID,
@@ -264,7 +295,8 @@ func (m *Manager) registerTools(server *mcp.Server, tenantID string) {
 	})
 }
 
-func (m *Manager) registerResources(server *mcp.Server, tenantID string) {
+func (m *Manager) registerResources(server *mcp.Server, principal auth.Principal) {
+	tenantID := principal.TenantID
 	server.AddResource(&mcp.Resource{
 		Name:        "llm-wiki-spaces",
 		Title:       "LLM-Wiki Spaces",

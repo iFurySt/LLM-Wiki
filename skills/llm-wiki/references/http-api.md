@@ -2,19 +2,19 @@
 
 Use the HTTP API when the environment cannot run the CLI or when a tool wrapper wants direct JSON.
 
-## Tenant Header
+## Authentication
 
-Every request should send the tenant header:
+Every request should send a bearer token:
 
 ```text
-X-LLM-Wiki-Tenant-ID: default
+Authorization: Bearer <llm-wiki-token>
 ```
 
 ## List Namespaces
 
 ```sh
 curl -s http://127.0.0.1:8234/v1/namespaces \
-  -H 'X-LLM-Wiki-Tenant-ID: default'
+  -H 'Authorization: Bearer <llm-wiki-token>'
 ```
 
 ## Create Namespace
@@ -22,7 +22,7 @@ curl -s http://127.0.0.1:8234/v1/namespaces \
 ```sh
 curl -s http://127.0.0.1:8234/v1/namespaces \
   -H 'Content-Type: application/json' \
-  -H 'X-LLM-Wiki-Tenant-ID: default' \
+  -H 'Authorization: Bearer <llm-wiki-token>' \
   -d '{
     "key": "projects",
     "display_name": "Projects",
@@ -36,7 +36,7 @@ curl -s http://127.0.0.1:8234/v1/namespaces \
 ```sh
 curl -s http://127.0.0.1:8234/v1/documents \
   -H 'Content-Type: application/json' \
-  -H 'X-LLM-Wiki-Tenant-ID: default' \
+  -H 'Authorization: Bearer <llm-wiki-token>' \
   -d '{
     "namespace_id": 1,
     "slug": "launch-plan",
@@ -53,7 +53,7 @@ curl -s http://127.0.0.1:8234/v1/documents \
 ```sh
 curl -s -X PUT http://127.0.0.1:8234/v1/documents/1 \
   -H 'Content-Type: application/json' \
-  -H 'X-LLM-Wiki-Tenant-ID: default' \
+  -H 'Authorization: Bearer <llm-wiki-token>' \
   -d '{
     "title": "Launch Plan",
     "content": "# Launch Plan\n\nUpdated by agent.",

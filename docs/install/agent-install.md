@@ -85,7 +85,7 @@ Example config:
     "type": "http",
     "url": "https://your-llm-wiki-host/mcp",
     "headers": {
-      "X-LLM-Wiki-Tenant-ID": "default"
+      "Authorization": "Bearer <llm-wiki-token>"
     }
   }
 }
@@ -96,14 +96,14 @@ Example config:
 Published package:
 
 ```sh
-npx -y @ifuryst/llm-wiki-mcp --base-url https://your-llm-wiki-host --tenant default
+LLM_WIKI_TOKEN=<llm-wiki-token> npx -y @ifuryst/llm-wiki-mcp --base-url https://your-llm-wiki-host
 ```
 
 In-repo package before publish:
 
 ```sh
 npm install --prefix npm/llm-wiki-mcp --package-lock=false
-npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url https://your-llm-wiki-host --tenant default
+LLM_WIKI_TOKEN=<llm-wiki-token> npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url https://your-llm-wiki-host
 ```
 
 Example config:
@@ -116,13 +116,43 @@ Example config:
       "-y",
       "@ifuryst/llm-wiki-mcp",
       "--base-url",
-      "https://your-llm-wiki-host",
-      "--tenant",
-      "default"
-    ]
+      "https://your-llm-wiki-host"
+    ],
+    "env": {
+      "LLM_WIKI_TOKEN": "<llm-wiki-token>"
+    }
   }
 }
 ```
+
+## CLI Authentication
+
+Preferred human flow:
+
+```sh
+lw auth login --base-url https://your-llm-wiki-host
+lw auth status --base-url https://your-llm-wiki-host
+lw namespace list --base-url https://your-llm-wiki-host
+```
+
+On a fresh instance, open `https://your-llm-wiki-host/setup` first to create the initial admin account and default tenant. After setup, the web admin console lives at `/admin/login` and `/admin/users`.
+
+Explicit token flow:
+
+```sh
+lw namespace list --base-url https://your-llm-wiki-host --token <llm-wiki-token>
+lw namespace list --base-url https://your-llm-wiki-host --token-file /var/run/secrets/llm-wiki/token
+```
+
+The CLI resolves credentials in this order:
+
+1. explicit flags
+2. environment variables such as `LLM_WIKI_TOKEN`
+3. the active profile in `~/.llm-wiki/config.json`
+
+Base URL and tenant resolve the same way. If tenant is not specified anywhere, the CLI falls back to the stored profile tenant and then `default`.
+
+Device-code login always prints the approval URL and code. On a local machine it also tries to open the browser unless `--no-open` is passed.
 
 ## Hosted Skill Docs
 
@@ -146,7 +176,7 @@ Read and follow https://your-llm-wiki-host/install/LLM-Wiki.md
 If an agent is terminal-native and already has the CLI:
 
 ```sh
-lw system info --base-url https://your-llm-wiki-host --tenant default
-lw namespace list --base-url https://your-llm-wiki-host --tenant default
-lw document list --base-url https://your-llm-wiki-host --tenant default
+lw auth login --base-url https://your-llm-wiki-host
+lw namespace list --base-url https://your-llm-wiki-host
+lw document list --base-url https://your-llm-wiki-host
 ```

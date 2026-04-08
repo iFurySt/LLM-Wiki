@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ifuryst/llm-wiki/internal/api"
+	"github.com/ifuryst/llm-wiki/internal/auth"
 	"github.com/ifuryst/llm-wiki/internal/repository"
 )
 
@@ -19,6 +20,10 @@ var keyPattern = regexp.MustCompile(`^[a-z0-9]+(?:[a-z0-9-_]*[a-z0-9])?$`)
 
 func New(repo *repository.Repository) *Service {
 	return &Service{repo: repo}
+}
+
+func (s *Service) Repo() *repository.Repository {
+	return s.repo
 }
 
 func (s *Service) Ping(ctx context.Context) error {
@@ -138,14 +143,15 @@ func (s *Service) CreateDocument(ctx context.Context, tenantID string, req api.C
 	if err := validateKeyLike("document slug", slug); err != nil {
 		return api.DocumentResponse{}, err
 	}
+	authorType, authorID := authorFromContext(ctx, req.AuthorType, req.AuthorID)
 	doc, rev, err := s.repo.CreateDocument(ctx, repository.CreateDocumentParams{
 		TenantID:      tenantID,
 		NamespaceID:   req.NamespaceID,
 		Slug:          slug,
 		Title:         strings.TrimSpace(req.Title),
 		Content:       req.Content,
-		AuthorType:    normalizeAuthorType(req.AuthorType),
-		AuthorID:      strings.TrimSpace(req.AuthorID),
+		AuthorType:    authorType,
+		AuthorID:      authorID,
 		ChangeSummary: strings.TrimSpace(req.ChangeSummary),
 	})
 	if err != nil {
@@ -155,13 +161,14 @@ func (s *Service) CreateDocument(ctx context.Context, tenantID string, req api.C
 }
 
 func (s *Service) UpdateDocument(ctx context.Context, tenantID string, documentID int64, req api.UpdateDocumentRequest) (api.DocumentResponse, error) {
+	authorType, authorID := authorFromContext(ctx, req.AuthorType, req.AuthorID)
 	doc, rev, err := s.repo.UpdateDocument(ctx, repository.UpdateDocumentParams{
 		TenantID:      tenantID,
 		DocumentID:    documentID,
 		Title:         strings.TrimSpace(req.Title),
 		Content:       req.Content,
-		AuthorType:    normalizeAuthorType(req.AuthorType),
-		AuthorID:      strings.TrimSpace(req.AuthorID),
+		AuthorType:    authorType,
+		AuthorID:      authorID,
 		ChangeSummary: strings.TrimSpace(req.ChangeSummary),
 	})
 	if err != nil {
@@ -203,11 +210,12 @@ func (s *Service) ListDocuments(ctx context.Context, tenantID string, namespaceI
 }
 
 func (s *Service) ArchiveDocument(ctx context.Context, tenantID string, documentID int64, req api.ArchiveDocumentRequest) (api.DocumentResponse, error) {
+	authorType, authorID := authorFromContext(ctx, req.AuthorType, req.AuthorID)
 	doc, rev, err := s.repo.ArchiveDocument(ctx, repository.ArchiveDocumentParams{
 		TenantID:      tenantID,
 		DocumentID:    documentID,
-		AuthorType:    normalizeAuthorType(req.AuthorType),
-		AuthorID:      strings.TrimSpace(req.AuthorID),
+		AuthorType:    authorType,
+		AuthorID:      authorID,
 		ChangeSummary: strings.TrimSpace(req.ChangeSummary),
 	})
 	if err != nil {
@@ -268,6 +276,27 @@ func normalizeAuthorType(value string) string {
 	default:
 		return "agent"
 	}
+}
+
+func authorFromContext(ctx context.Context, explicitType string, explicitID string) (string, string) {
+	authorType := normalizeAuthorType(explicitType)
+	authorID := strings.TrimSpace(explicitID)
+	if authorID != "" {
+		return authorType, authorID
+	}
+	principal, ok := auth.PrincipalFromContext(ctx)
+	if !ok {
+		return authorType, authorID
+	}
+	switch principal.PrincipalType {
+	case "user":
+		authorType = "user"
+	case "service", "admin":
+		authorType = "system"
+	default:
+		authorType = "agent"
+	}
+	return authorType, principal.PrincipalID
 }
 
 func normalizeKey(value string) string {

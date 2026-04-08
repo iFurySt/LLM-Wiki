@@ -75,14 +75,29 @@ type uiIndexData struct {
 
 func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Config) {
 	engine.GET("/", func(c *gin.Context) {
+		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
+		if err == nil && !status.Initialized {
+			c.Redirect(http.StatusTemporaryRedirect, "/setup")
+			return
+		}
 		c.Redirect(http.StatusTemporaryRedirect, "/ui")
 	})
 
 	engine.GET("/ui", func(c *gin.Context) {
+		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
+		if err == nil && !status.Initialized {
+			c.Redirect(http.StatusTemporaryRedirect, "/setup")
+			return
+		}
 		renderUIPage(c, svc, cfg, "wiki")
 	})
 
 	engine.GET("/ui/install", func(c *gin.Context) {
+		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
+		if err == nil && !status.Initialized {
+			c.Redirect(http.StatusTemporaryRedirect, "/setup")
+			return
+		}
 		renderUIPage(c, svc, cfg, "install")
 	})
 

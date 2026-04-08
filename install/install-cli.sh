@@ -3,7 +3,8 @@ set -eu
 
 RELEASE_REPO="${LLM_WIKI_RELEASE_REPO:-iFurySt/LLM-Wiki}"
 VERSION="${LLM_WIKI_VERSION:-latest}"
-DOWNLOAD_BASE_URL="${LLM_WIKI_DOWNLOAD_BASE_URL:-}"
+DEFAULT_DOWNLOAD_BASE_URL="{{LLM_WIKI_DOWNLOAD_BASE_URL}}"
+DOWNLOAD_BASE_URL="${LLM_WIKI_DOWNLOAD_BASE_URL:-$DEFAULT_DOWNLOAD_BASE_URL}"
 INSTALL_DIR="${LLM_WIKI_INSTALL_DIR:-$HOME/.local/bin}"
 TMP_DIR="$(mktemp -d)"
 
@@ -41,6 +42,24 @@ fetch_to_file() {
   else
     wget -qO "$output" "$url"
   fi
+}
+
+download_archive() {
+  primary_url="$1"
+  fallback_url="$2"
+  output="$3"
+
+  if fetch_to_file "$primary_url" "$output"; then
+    return 0
+  fi
+
+  if [ -n "$fallback_url" ] && [ "$fallback_url" != "$primary_url" ]; then
+    echo "primary download failed, falling back to ${fallback_url}" >&2
+    fetch_to_file "$fallback_url" "$output"
+    return 0
+  fi
+
+  return 1
 }
 
 fetch_text() {
@@ -121,14 +140,22 @@ fi
 
 if [ -n "$DOWNLOAD_BASE_URL" ]; then
   ARCHIVE_URL="${DOWNLOAD_BASE_URL%/}/${ARCHIVE}"
-elif [ "$TARGET_VERSION" = "latest" ]; then
-  ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/latest/download/${ARCHIVE}"
 else
-  ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/download/${TARGET_VERSION}/${ARCHIVE}"
+  ARCHIVE_URL=""
 fi
 
-echo "downloading ${ARCHIVE_URL}"
-fetch_to_file "$ARCHIVE_URL" "$TMP_DIR/$ARCHIVE"
+if [ "$TARGET_VERSION" = "latest" ]; then
+  GITHUB_ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/latest/download/${ARCHIVE}"
+else
+  GITHUB_ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/download/${TARGET_VERSION}/${ARCHIVE}"
+fi
+
+if [ -n "$ARCHIVE_URL" ]; then
+  echo "downloading ${ARCHIVE_URL}"
+else
+  echo "downloading ${GITHUB_ARCHIVE_URL}"
+fi
+download_archive "${ARCHIVE_URL:-$GITHUB_ARCHIVE_URL}" "$GITHUB_ARCHIVE_URL" "$TMP_DIR/$ARCHIVE"
 
 mkdir -p "$INSTALL_DIR"
 tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"
@@ -160,3 +187,11 @@ fi
 echo "installed lw alias to $ALIAS_TARGET"
 echo "run: $BIN_TARGET version"
 echo "or:  $ALIAS_TARGET version"
+
+case ":$PATH:" in
+  *":$INSTALL_DIR:"*) ;;
+  *)
+    echo "warning: $INSTALL_DIR is not in PATH" >&2
+    echo "run directly with: $BIN_TARGET" >&2
+    ;;
+esac

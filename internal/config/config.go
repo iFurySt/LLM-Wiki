@@ -13,6 +13,7 @@ type Config struct {
 	AutoMigrate bool
 	Server      ServerConfig
 	CLI         CLIConfig
+	Auth        AuthConfig
 	Install     InstallConfig
 	Postgres    PostgresConfig
 	Redis       RedisConfig
@@ -28,6 +29,12 @@ type ServerConfig struct {
 type CLIConfig struct {
 	BaseURL string
 	Timeout string
+}
+
+type AuthConfig struct {
+	BootstrapToken         string
+	BootstrapTenantID      string
+	BootstrapPrincipalName string
 }
 
 type InstallConfig struct {
@@ -86,6 +93,11 @@ func Load() (Config, error) {
 			BaseURL: v.GetString("cli.base_url"),
 			Timeout: v.GetString("cli.timeout"),
 		},
+		Auth: AuthConfig{
+			BootstrapToken:         v.GetString("auth.bootstrap_token"),
+			BootstrapTenantID:      v.GetString("auth.bootstrap_tenant_id"),
+			BootstrapPrincipalName: v.GetString("auth.bootstrap_principal_name"),
+		},
 		Install: InstallConfig{
 			BaseURL: v.GetString("install.base_url"),
 		},
@@ -135,6 +147,9 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.port", 8234)
 	v.SetDefault("cli.base_url", "http://127.0.0.1:8234")
 	v.SetDefault("cli.timeout", "10s")
+	v.SetDefault("auth.bootstrap_token", "dev-bootstrap-token")
+	v.SetDefault("auth.bootstrap_tenant_id", "default")
+	v.SetDefault("auth.bootstrap_principal_name", "bootstrap-admin")
 	v.SetDefault("install.base_url", "")
 
 	v.SetDefault("postgres.host", "127.0.0.1")

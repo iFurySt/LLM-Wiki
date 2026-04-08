@@ -46,7 +46,8 @@ func NewHandler(cfg config.Config, logger *zap.Logger, svc *service.Service) htt
 
 	registerRoutes(engine, cfg)
 	registerAPIRoutes(engine, svc)
-	registerMCPRoutes(engine, mcpManager)
+	registerAuthBrowserRoutes(engine, svc, cfg)
+	registerMCPRoutes(engine, svc, mcpManager)
 	registerInstallRoutes(engine, cfg)
 	registerUIRoutes(engine, svc, cfg)
 	return engine

@@ -53,6 +53,7 @@ func serveInstallMarkdown(c *gin.Context, cfg config.Config) {
 		"{{LLM_WIKI_BASE_URL}}", baseURL,
 		"{{LLM_WIKI_INSTALL_DOC_URL}}", baseURL+"/install/LLM-Wiki.md",
 		"{{LLM_WIKI_INSTALL_SCRIPT_URL}}", baseURL+"/install/install-cli.sh",
+		"{{LLM_WIKI_DOWNLOAD_BASE_URL}}", baseURL+"/install/releases",
 	)
 
 	c.Header("Content-Type", "text/markdown; charset=utf-8")
@@ -61,7 +62,8 @@ func serveInstallMarkdown(c *gin.Context, cfg config.Config) {
 
 func serveInstallFile(c *gin.Context, relativePath string, contentType string) {
 	target := resolveInstallPath(relativePath)
-	if _, err := os.Stat(target); err != nil {
+	body, err := os.ReadFile(target)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "install asset not found",
 			"path":  relativePath,
@@ -69,7 +71,11 @@ func serveInstallFile(c *gin.Context, relativePath string, contentType string) {
 		return
 	}
 	c.Header("Content-Type", contentType)
-	c.File(target)
+	baseURL := publicBaseURL(c)
+	replacer := strings.NewReplacer(
+		"{{LLM_WIKI_DOWNLOAD_BASE_URL}}", strings.TrimRight(baseURL, "/")+"/install/releases",
+	)
+	c.String(http.StatusOK, replacer.Replace(string(body)))
 }
 
 func resolveInstallPath(relativePath string) string {

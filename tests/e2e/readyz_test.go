@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ifuryst/llm-wiki/internal/api"
 	"github.com/ifuryst/llm-wiki/internal/db"
 	"github.com/ifuryst/llm-wiki/internal/httpserver"
 	"github.com/ifuryst/llm-wiki/internal/logging"
@@ -37,7 +38,16 @@ func TestReadyz(t *testing.T) {
 	}
 	defer func() { _ = logger.Sync() }()
 
-	server := httptest.NewServer(httpserver.NewHandler(cfg, logger, service.New(repository.New(pool))))
+	svc := service.New(repository.New(pool))
+	if _, err := svc.Initialize(ctx, api.InitializeRequest{
+		TenantID:    "default",
+		Username:    "admin",
+		DisplayName: "Admin",
+		Password:    "secret123",
+	}); err != nil {
+		t.Fatalf("initialize workspace: %v", err)
+	}
+	server := httptest.NewServer(httpserver.NewHandler(cfg, logger, svc))
 	defer server.Close()
 
 	resp, err := http.Get(server.URL + "/readyz")

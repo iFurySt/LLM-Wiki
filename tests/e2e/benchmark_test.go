@@ -36,10 +36,15 @@ func BenchmarkCreateAndGetDocument(b *testing.B) {
 	}
 	defer func() { _ = logger.Sync() }()
 
-	server := httptest.NewServer(httpserver.NewHandler(cfg, logger, service.New(repository.New(pool))))
+	svc := service.New(repository.New(pool))
+	token := "test-bench-token"
+	if err := bootstrapTestToken(ctx, svc, "tenant-bench", token); err != nil {
+		b.Fatalf("bootstrap token: %v", err)
+	}
+	server := httptest.NewServer(httpserver.NewHandler(cfg, logger, svc))
 	defer server.Close()
 
-	client := httpclient.New(server.URL, 10*time.Second, "tenant-bench")
+	client := httpclient.New(server.URL, 10*time.Second, token)
 	namespace, err := client.CreateNamespace(ctx, api.CreateNamespaceRequest{
 		Key:         "perf",
 		DisplayName: "Perf",

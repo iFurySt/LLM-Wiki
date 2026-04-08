@@ -13,27 +13,35 @@ Prefer this working loop:
 
 ```sh
 llm-wiki system info --base-url http://127.0.0.1:8234
-llm-wiki space list --base-url http://127.0.0.1:8234 --tenant default
-llm-wiki namespace list --base-url http://127.0.0.1:8234 --tenant default
-llm-wiki namespace create --base-url http://127.0.0.1:8234 --tenant default --key projects --display-name Projects --visibility tenant
-llm-wiki document list --base-url http://127.0.0.1:8234 --tenant default
-llm-wiki document get-by-slug --base-url http://127.0.0.1:8234 --tenant default 1 launch-plan
+llm-wiki namespace list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
+llm-wiki namespace create --base-url http://127.0.0.1:8234 --token dev-bootstrap-token --key projects --display-name Projects --visibility tenant
+llm-wiki document list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
+llm-wiki document get-by-slug --base-url http://127.0.0.1:8234 --token dev-bootstrap-token 1 launch-plan
 ```
 
 The CLI also installs a `lw` alias with the same arguments:
 
 ```sh
 lw system info --base-url http://127.0.0.1:8234
-lw namespace list --base-url http://127.0.0.1:8234 --tenant default
-lw document list --base-url http://127.0.0.1:8234 --tenant default
+lw namespace list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
+lw document list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
 ```
+
+Preferred longer-lived flow:
+
+```sh
+lw auth login --base-url http://127.0.0.1:8234
+lw auth status --base-url http://127.0.0.1:8234
+```
+
+`lw auth login --device-code` always prints the approval URL and code. On local machines it also tries to open the browser unless `--no-open` is passed. Base URL and tenant can live in `~/.llm-wiki/config.json`, with flags taking precedence.
 
 ## Create A Document
 
 ```sh
 llm-wiki document create \
   --base-url http://127.0.0.1:8234 \
-  --tenant default \
+  --token dev-bootstrap-token \
   --namespace-id 1 \
   --slug launch-plan \
   --title "Launch Plan" \
@@ -50,7 +58,7 @@ Use create when the knowledge does not already have a natural existing page.
 ```sh
 llm-wiki document update 1 \
   --base-url http://127.0.0.1:8234 \
-  --tenant default \
+  --token dev-bootstrap-token \
   --title "Launch Plan" \
   --content "# Launch Plan\n\nUpdated by LLM-Wiki skill." \
   --author-type agent \
@@ -65,12 +73,12 @@ Use update for the common case where the page already exists and the task adds n
 For normal agent work:
 
 ```sh
-llm-wiki namespace list --base-url http://127.0.0.1:8234 --tenant default
-llm-wiki document list --base-url http://127.0.0.1:8234 --tenant default --namespace-id 1
-llm-wiki document get-by-slug --base-url http://127.0.0.1:8234 --tenant default 1 launch-plan
+llm-wiki namespace list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
+llm-wiki document list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token --namespace-id 1
+llm-wiki document get-by-slug --base-url http://127.0.0.1:8234 --token dev-bootstrap-token 1 launch-plan
 llm-wiki document update 1 \
   --base-url http://127.0.0.1:8234 \
-  --tenant default \
+  --token dev-bootstrap-token \
   --title "Launch Plan" \
   --content "# Launch Plan\n\nRefined with latest implementation status." \
   --author-type agent \

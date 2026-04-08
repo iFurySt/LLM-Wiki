@@ -21,10 +21,10 @@ Legacy compatibility endpoint:
 http://127.0.0.1:8234/sse
 ```
 
-Send the tenant header when the client allows custom headers:
+Send a bearer token when the client allows custom headers:
 
 ```text
-X-LLM-Wiki-Tenant-ID: default
+Authorization: Bearer <llm-wiki-token>
 ```
 
 ## npx stdio MCP
@@ -32,7 +32,7 @@ X-LLM-Wiki-Tenant-ID: default
 Prefer this when the runtime expects a local process-spawned MCP server.
 
 ```sh
-npx -y @ifuryst/llm-wiki-mcp --base-url http://127.0.0.1:8234 --tenant default
+LLM_WIKI_TOKEN=<llm-wiki-token> npx -y @ifuryst/llm-wiki-mcp --base-url http://127.0.0.1:8234
 ```
 
 The package is a thin stdio bridge over the LLM-Wiki HTTP API and exposes the same LLM-Wiki-oriented tools and resources.

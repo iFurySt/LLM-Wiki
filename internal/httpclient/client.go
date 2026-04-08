@@ -13,9 +13,9 @@ import (
 )
 
 type Client struct {
-	baseURL    string
-	httpClient *http.Client
-	tenantID   string
+	baseURL     string
+	httpClient  *http.Client
+	accessToken string
 }
 
 type SystemInfo struct {
@@ -28,14 +28,18 @@ type SystemInfo struct {
 	} `json:"server"`
 }
 
-func New(baseURL string, timeout time.Duration, tenantID string) *Client {
+func New(baseURL string, timeout time.Duration, accessToken string) *Client {
 	return &Client{
 		baseURL: strings.TrimRight(baseURL, "/"),
 		httpClient: &http.Client{
 			Timeout: timeout,
 		},
-		tenantID: tenantID,
+		accessToken: strings.TrimSpace(accessToken),
 	}
+}
+
+func (c *Client) SetAccessToken(value string) {
+	c.accessToken = strings.TrimSpace(value)
 }
 
 func (c *Client) GetSystemInfo(ctx context.Context) (SystemInfo, error) {
@@ -61,6 +65,60 @@ func (c *Client) GetSystemInfo(ctx context.Context) (SystemInfo, error) {
 	}
 
 	return payload, nil
+}
+
+func (c *Client) WhoAmI(ctx context.Context) (api.WhoAmIResponse, error) {
+	var resp api.WhoAmIResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/auth/whoami", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) StartBrowserLogin(ctx context.Context, req api.StartBrowserLoginRequest) (api.StartBrowserLoginResponse, error) {
+	var resp api.StartBrowserLoginResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/browser/start", req, &resp)
+	return resp, err
+}
+
+func (c *Client) StartDeviceLogin(ctx context.Context, req api.StartDeviceLoginRequest) (api.StartDeviceLoginResponse, error) {
+	var resp api.StartDeviceLoginResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/device/start", req, &resp)
+	return resp, err
+}
+
+func (c *Client) ExchangeToken(ctx context.Context, req api.TokenExchangeRequest) (api.TokenExchangeResponse, error) {
+	var resp api.TokenExchangeResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/token", req, &resp)
+	return resp, err
+}
+
+func (c *Client) CreateServicePrincipal(ctx context.Context, req api.CreateServicePrincipalRequest) (api.ServicePrincipalResponse, error) {
+	var resp api.ServicePrincipalResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/service-principals", req, &resp)
+	return resp, err
+}
+
+func (c *Client) ListServicePrincipals(ctx context.Context) (api.ListServicePrincipalsResponse, error) {
+	var resp api.ListServicePrincipalsResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/auth/service-principals", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) IssueToken(ctx context.Context, req api.IssueTokenRequest) (api.TokenResponse, error) {
+	var resp api.TokenResponse
+	err := c.doJSON(ctx, http.MethodPost, "/v1/auth/tokens", req, &resp)
+	return resp, err
+}
+
+func (c *Client) ListTokens(ctx context.Context) (api.ListTokensResponse, error) {
+	var resp api.ListTokensResponse
+	err := c.doJSON(ctx, http.MethodGet, "/v1/auth/tokens", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) RevokeToken(ctx context.Context, tokenID int64) (api.TokenResponse, error) {
+	var resp api.TokenResponse
+	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/v1/auth/tokens/%d/revoke", tokenID), map[string]any{}, &resp)
+	return resp, err
 }
 
 func (c *Client) ListSpaces(ctx context.Context) (api.ListSpacesResponse, error) {
@@ -185,7 +243,7 @@ func (c *Client) doJSON(ctx context.Context, method string, path string, reqBody
 
 func (c *Client) applyHeaders(req *http.Request) {
 	req.Header.Set("Accept", "application/json")
-	if strings.TrimSpace(c.tenantID) != "" {
-		req.Header.Set("X-LLM-Wiki-Tenant-ID", c.tenantID)
+	if c.accessToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.accessToken)
 	}
 }

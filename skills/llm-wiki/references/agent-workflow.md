@@ -93,9 +93,9 @@ Only if they are still relevant after this session ends.
 Typical loop:
 
 ```sh
-llm-wiki namespace list --base-url http://127.0.0.1:8234 --tenant default
-llm-wiki document list --base-url http://127.0.0.1:8234 --tenant default --namespace-id 1
-llm-wiki document get-by-slug --base-url http://127.0.0.1:8234 --tenant default 1 launch-plan
+llm-wiki namespace list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
+llm-wiki document list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token --namespace-id 1
+llm-wiki document get-by-slug --base-url http://127.0.0.1:8234 --token dev-bootstrap-token 1 launch-plan
 ```
 
 If the page exists, update it by document id. If not, create it with a stable slug.

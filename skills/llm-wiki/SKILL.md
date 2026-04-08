@@ -39,8 +39,8 @@ If the CLI is already available:
 
 ```sh
 llm-wiki system info --base-url http://127.0.0.1:8234
-llm-wiki namespace list --base-url http://127.0.0.1:8234 --tenant default
-llm-wiki document list --base-url http://127.0.0.1:8234 --tenant default
+llm-wiki namespace list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
+llm-wiki document list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
 ```
 
 If the CLI is not installed yet, see [references/installation.md](references/installation.md).
