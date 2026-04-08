@@ -4,13 +4,32 @@ This repository builds `LLM-Wiki`, an agent-native knowledge service for shared 
 
 `AGENTS.md` is the table of contents, not the encyclopedia.
 
+Keep detailed collaboration rules in `docs/`; update those docs when stable behavior changes.
+
 ## Start Here
 
-- [docs/README.md](/Users/bytedance/projects/github/llm-wiki/docs/README.md): docs map and update rules
-- [docs/knowledge/product.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/product.md): product framing, scope, core concepts
-- [docs/knowledge/architecture.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/architecture.md): system model and resource boundaries
-- [docs/knowledge/repo-map.md](/Users/bytedance/projects/github/llm-wiki/docs/knowledge/repo-map.md): repo structure and implementation status
-- [docs/install/README.md](/Users/bytedance/projects/github/llm-wiki/docs/install/README.md): install and distribution entrypoint
+- [docs/README.md](docs/README.md): docs map and update rules
+- [docs/knowledge/product.md](docs/knowledge/product.md): product framing, scope, core concepts
+- [docs/knowledge/architecture.md](docs/knowledge/architecture.md): system model and resource boundaries
+- [docs/knowledge/repo-map.md](docs/knowledge/repo-map.md): repo structure and implementation status
+- [docs/install/README.md](docs/install/README.md): install and distribution entrypoint
+
+## Every Round
+
+- [docs/REPO_COLLAB_GUIDE.md](docs/REPO_COLLAB_GUIDE.md): repo-level collaboration rules, required read order, doc sync, skills usage, and pre-commit expectations
+
+## Before Commit
+
+- [docs/HISTORY_GUIDE.md](docs/HISTORY_GUIDE.md): when to update worklog, decisions, and durable test records before commit
+
+## Read By Task Type
+
+- [skills/llm-wiki/SKILL.md](skills/llm-wiki/SKILL.md): required when changing the official skill, hosted skill downloads, or agent guidance around durable shared knowledge
+- [skills/chrome-devtools-cli/SKILL.md](skills/chrome-devtools-cli/SKILL.md): required for browser automation, UI debugging, and browser-side acceptance work
+- [docs/UI_AGENT_GUIDE.md](docs/UI_AGENT_GUIDE.md): required for `/ui`, `/setup`, `/install/*`, `/admin/*`, browser login, and other user-visible web changes
+- [docs/install/README.md](docs/install/README.md): required for install, packaging, release, and hosted distribution changes
+- [docs/decisions/README.md](docs/decisions/README.md): required when making or reviewing significant product or technical decisions
+- [docs/test-results/README.md](docs/test-results/README.md): required when preserving durable validation outcomes
 
 ## Working Rules
 

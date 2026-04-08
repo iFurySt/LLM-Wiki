@@ -22,6 +22,7 @@ Layout:
 - `test-results/`: durable validation records
 - `references/`: distilled external notes
 - `install/`: install and release docs
+- `UI_AGENT_GUIDE.md`: browser/UI collaboration and acceptance rules
 - `REPO_COLLAB_GUIDE.md`: repo-level collaboration contract
 - `HISTORY_GUIDE.md`: commit-time durable history guidance
 

@@ -10,7 +10,7 @@ Top-level layout:
 - `docs/`: durable product and repo knowledge
 - `deploy/`: local and production deployment files
 - `install/`: hosted install assets
-- `skills/`: official LLM-Wiki skill
+- `skills/`: official LLM-Wiki and browser automation skills
 - `npm/`: stdio MCP bridge package
 - `apps/`: downstream adapters such as the Obsidian plugin
 - `scripts/`: test and release helpers

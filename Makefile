@@ -1,4 +1,4 @@
-.PHONY: dev down logs run-server run-cli build tidy fmt package-install
+.PHONY: dev down logs run-server run-cli build tidy fmt package-install browser-open browser-mcp
 
 dev:
 	docker compose -f deploy/dev/docker-compose.yml up --build --force-recreate -d
@@ -20,6 +20,12 @@ build:
 
 package-install:
 	./scripts/release/package-install.sh
+
+browser-open:
+	./scripts/browser/open-chrome-stable.sh
+
+browser-mcp:
+	./scripts/browser/chrome-devtools-mcp.sh
 
 tidy:
 	go mod tidy

@@ -28,6 +28,13 @@ Then open:
 - `http://127.0.0.1:8234/setup`
 - `http://127.0.0.1:8234/ui`
 
+For browser verification with the repo profile:
+
+```bash
+make browser-open
+make browser-mcp
+```
+
 ## Use
 
 Local CLI:
