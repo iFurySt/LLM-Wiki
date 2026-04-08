@@ -38,6 +38,17 @@ type Folder struct {
 	UpdatedAt   time.Time
 }
 
+type DocumentSource struct {
+	ID          string
+	Label       string
+	Category    string
+	InputMode   string
+	OriginalRef string
+	CapturedAt  *time.Time
+	ContentType string
+	Adapter     string
+}
+
 type Document struct {
 	ID                int64
 	NS                string
@@ -45,6 +56,7 @@ type Document struct {
 	Slug              string
 	Title             string
 	Content           string
+	Source            DocumentSource
 	Status            string
 	CurrentRevisionID int64
 	CurrentRevisionNo int32
@@ -58,6 +70,7 @@ type Revision struct {
 	RevisionNo    int32
 	Title         string
 	Content       string
+	Source        DocumentSource
 	AuthorType    string
 	AuthorID      string
 	ChangeSummary string
@@ -80,6 +93,7 @@ type CreateDocumentParams struct {
 	Slug          string
 	Title         string
 	Content       string
+	Source        DocumentSource
 	AuthorType    string
 	AuthorID      string
 	ChangeSummary string
@@ -303,8 +317,9 @@ func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentPa
 	var createdAt time.Time
 	if err = tx.QueryRow(ctx, `
 		INSERT INTO documents (
-			ns, folder_id, slug, title, content_md, status
-		) VALUES ($1, $2, $3, $4, $5, 'active')
+			ns, folder_id, slug, title, content_md, source_id, source_label, source_category,
+			source_input_mode, source_original_ref, source_captured_at, source_content_type, source_adapter, status
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'active')
 		RETURNING id, created_at
 	`,
 		params.NS,
@@ -312,11 +327,19 @@ func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentPa
 		params.Slug,
 		params.Title,
 		params.Content,
+		params.Source.ID,
+		params.Source.Label,
+		params.Source.Category,
+		params.Source.InputMode,
+		params.Source.OriginalRef,
+		params.Source.CapturedAt,
+		params.Source.ContentType,
+		params.Source.Adapter,
 	).Scan(&documentID, &createdAt); err != nil {
 		return Document{}, Revision{}, err
 	}
 
-	revision, err := insertRevision(ctx, tx, documentID, params.Title, params.Content, params.AuthorType, params.AuthorID, params.ChangeSummary, 1)
+	revision, err := insertRevision(ctx, tx, documentID, params.Title, params.Content, params.Source, params.AuthorType, params.AuthorID, params.ChangeSummary, 1)
 	if err != nil {
 		return Document{}, Revision{}, err
 	}
@@ -326,7 +349,10 @@ func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentPa
 		UPDATE documents
 		SET current_revision_id = $1, updated_at = NOW()
 		WHERE id = $2
-		RETURNING id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		RETURNING id, ns, folder_id, slug, title, content_md,
+		          source_id, source_label, source_category, source_input_mode, source_original_ref,
+		          source_captured_at, source_content_type, source_adapter,
+		          status, current_revision_id, created_at, updated_at
 	`, revision.ID, documentID).Scan(
 		&document.ID,
 		&document.NS,
@@ -334,6 +360,14 @@ func (r *Repository) CreateDocument(ctx context.Context, params CreateDocumentPa
 		&document.Slug,
 		&document.Title,
 		&document.Content,
+		&document.Source.ID,
+		&document.Source.Label,
+		&document.Source.Category,
+		&document.Source.InputMode,
+		&document.Source.OriginalRef,
+		&document.Source.CapturedAt,
+		&document.Source.ContentType,
+		&document.Source.Adapter,
 		&document.Status,
 		&document.CurrentRevisionID,
 		&document.CreatedAt,
@@ -362,7 +396,10 @@ func (r *Repository) UpdateDocument(ctx context.Context, params UpdateDocumentPa
 
 	var existing Document
 	err = tx.QueryRow(ctx, `
-		SELECT id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		SELECT id, ns, folder_id, slug, title, content_md,
+		       source_id, source_label, source_category, source_input_mode, source_original_ref,
+		       source_captured_at, source_content_type, source_adapter,
+		       status, current_revision_id, created_at, updated_at
 		FROM documents
 		WHERE ns = $1 AND id = $2
 	`, params.NS, params.DocumentID).Scan(
@@ -372,6 +409,14 @@ func (r *Repository) UpdateDocument(ctx context.Context, params UpdateDocumentPa
 		&existing.Slug,
 		&existing.Title,
 		&existing.Content,
+		&existing.Source.ID,
+		&existing.Source.Label,
+		&existing.Source.Category,
+		&existing.Source.InputMode,
+		&existing.Source.OriginalRef,
+		&existing.Source.CapturedAt,
+		&existing.Source.ContentType,
+		&existing.Source.Adapter,
 		&existing.Status,
 		&existing.CurrentRevisionID,
 		&existing.CreatedAt,
@@ -399,6 +444,7 @@ func (r *Repository) UpdateDocument(ctx context.Context, params UpdateDocumentPa
 		params.DocumentID,
 		params.Title,
 		params.Content,
+		existing.Source,
 		params.AuthorType,
 		params.AuthorID,
 		params.ChangeSummary,
@@ -413,7 +459,10 @@ func (r *Repository) UpdateDocument(ctx context.Context, params UpdateDocumentPa
 		UPDATE documents
 		SET title = $1, content_md = $2, current_revision_id = $3, updated_at = NOW()
 		WHERE ns = $4 AND id = $5
-		RETURNING id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		RETURNING id, ns, folder_id, slug, title, content_md,
+		          source_id, source_label, source_category, source_input_mode, source_original_ref,
+		          source_captured_at, source_content_type, source_adapter,
+		          status, current_revision_id, created_at, updated_at
 	`, params.Title, params.Content, revision.ID, params.NS, params.DocumentID).Scan(
 		&document.ID,
 		&document.NS,
@@ -421,6 +470,14 @@ func (r *Repository) UpdateDocument(ctx context.Context, params UpdateDocumentPa
 		&document.Slug,
 		&document.Title,
 		&document.Content,
+		&document.Source.ID,
+		&document.Source.Label,
+		&document.Source.Category,
+		&document.Source.InputMode,
+		&document.Source.OriginalRef,
+		&document.Source.CapturedAt,
+		&document.Source.ContentType,
+		&document.Source.Adapter,
 		&document.Status,
 		&document.CurrentRevisionID,
 		&document.CreatedAt,
@@ -446,6 +503,14 @@ func (r *Repository) GetDocument(ctx context.Context, tenantID string, documentI
 			d.slug,
 			d.title,
 			d.content_md,
+			d.source_id,
+			d.source_label,
+			d.source_category,
+			d.source_input_mode,
+			d.source_original_ref,
+			d.source_captured_at,
+			d.source_content_type,
+			d.source_adapter,
 			d.status,
 			d.current_revision_id,
 			COALESCE(r.revision_no, 0),
@@ -461,6 +526,14 @@ func (r *Repository) GetDocument(ctx context.Context, tenantID string, documentI
 		&document.Slug,
 		&document.Title,
 		&document.Content,
+		&document.Source.ID,
+		&document.Source.Label,
+		&document.Source.Category,
+		&document.Source.InputMode,
+		&document.Source.OriginalRef,
+		&document.Source.CapturedAt,
+		&document.Source.ContentType,
+		&document.Source.Adapter,
 		&document.Status,
 		&document.CurrentRevisionID,
 		&document.CurrentRevisionNo,
@@ -475,7 +548,10 @@ func (r *Repository) GetDocument(ctx context.Context, tenantID string, documentI
 	}
 
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, document_id, revision_no, title, content_md, author_type, author_id, change_summary, created_at
+		SELECT id, document_id, revision_no, title, content_md,
+		       source_id, source_label, source_category, source_input_mode, source_original_ref,
+		       source_captured_at, source_content_type, source_adapter,
+		       author_type, author_id, change_summary, created_at
 		FROM revisions
 		WHERE document_id = $1
 		ORDER BY revision_no DESC
@@ -494,6 +570,14 @@ func (r *Repository) GetDocument(ctx context.Context, tenantID string, documentI
 			&revision.RevisionNo,
 			&revision.Title,
 			&revision.Content,
+			&revision.Source.ID,
+			&revision.Source.Label,
+			&revision.Source.Category,
+			&revision.Source.InputMode,
+			&revision.Source.OriginalRef,
+			&revision.Source.CapturedAt,
+			&revision.Source.ContentType,
+			&revision.Source.Adapter,
 			&revision.AuthorType,
 			&revision.AuthorID,
 			&revision.ChangeSummary,
@@ -528,7 +612,10 @@ func (r *Repository) GetDocumentBySlug(ctx context.Context, tenantID string, nam
 
 func (r *Repository) ListDocuments(ctx context.Context, tenantID string, namespaceID *int64, status *string) ([]Document, error) {
 	query := `
-		SELECT d.id, d.ns, d.folder_id, d.slug, d.title, d.content_md, d.status, d.current_revision_id,
+		SELECT d.id, d.ns, d.folder_id, d.slug, d.title, d.content_md,
+		       d.source_id, d.source_label, d.source_category, d.source_input_mode, d.source_original_ref,
+		       d.source_captured_at, d.source_content_type, d.source_adapter,
+		       d.status, d.current_revision_id,
 		       COALESCE(r.revision_no, 0), d.created_at, d.updated_at
 		FROM documents d
 		LEFT JOIN revisions r ON r.id = d.current_revision_id
@@ -563,6 +650,14 @@ func (r *Repository) ListDocuments(ctx context.Context, tenantID string, namespa
 			&item.Slug,
 			&item.Title,
 			&item.Content,
+			&item.Source.ID,
+			&item.Source.Label,
+			&item.Source.Category,
+			&item.Source.InputMode,
+			&item.Source.OriginalRef,
+			&item.Source.CapturedAt,
+			&item.Source.ContentType,
+			&item.Source.Adapter,
 			&item.Status,
 			&item.CurrentRevisionID,
 			&item.CurrentRevisionNo,
@@ -589,7 +684,10 @@ func (r *Repository) ArchiveDocument(ctx context.Context, params ArchiveDocument
 
 	var current Document
 	err = tx.QueryRow(ctx, `
-		SELECT id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		SELECT id, ns, folder_id, slug, title, content_md,
+		       source_id, source_label, source_category, source_input_mode, source_original_ref,
+		       source_captured_at, source_content_type, source_adapter,
+		       status, current_revision_id, created_at, updated_at
 		FROM documents
 		WHERE ns = $1 AND id = $2
 	`, params.NS, params.DocumentID).Scan(
@@ -599,6 +697,14 @@ func (r *Repository) ArchiveDocument(ctx context.Context, params ArchiveDocument
 		&current.Slug,
 		&current.Title,
 		&current.Content,
+		&current.Source.ID,
+		&current.Source.Label,
+		&current.Source.Category,
+		&current.Source.InputMode,
+		&current.Source.OriginalRef,
+		&current.Source.CapturedAt,
+		&current.Source.ContentType,
+		&current.Source.Adapter,
 		&current.Status,
 		&current.CurrentRevisionID,
 		&current.CreatedAt,
@@ -626,6 +732,7 @@ func (r *Repository) ArchiveDocument(ctx context.Context, params ArchiveDocument
 		params.DocumentID,
 		current.Title,
 		current.Content,
+		current.Source,
 		params.AuthorType,
 		params.AuthorID,
 		params.ChangeSummary,
@@ -640,7 +747,10 @@ func (r *Repository) ArchiveDocument(ctx context.Context, params ArchiveDocument
 		UPDATE documents
 		SET status = 'archived', current_revision_id = $1, updated_at = NOW()
 		WHERE ns = $2 AND id = $3
-		RETURNING id, ns, folder_id, slug, title, content_md, status, current_revision_id, created_at, updated_at
+		RETURNING id, ns, folder_id, slug, title, content_md,
+		          source_id, source_label, source_category, source_input_mode, source_original_ref,
+		          source_captured_at, source_content_type, source_adapter,
+		          status, current_revision_id, created_at, updated_at
 	`, revision.ID, params.NS, params.DocumentID).Scan(
 		&document.ID,
 		&document.NS,
@@ -648,6 +758,14 @@ func (r *Repository) ArchiveDocument(ctx context.Context, params ArchiveDocument
 		&document.Slug,
 		&document.Title,
 		&document.Content,
+		&document.Source.ID,
+		&document.Source.Label,
+		&document.Source.Category,
+		&document.Source.InputMode,
+		&document.Source.OriginalRef,
+		&document.Source.CapturedAt,
+		&document.Source.ContentType,
+		&document.Source.Adapter,
 		&document.Status,
 		&document.CurrentRevisionID,
 		&document.CreatedAt,
@@ -669,6 +787,7 @@ func insertRevision(
 	documentID int64,
 	title string,
 	content string,
+	source DocumentSource,
 	authorType string,
 	authorID string,
 	changeSummary string,
@@ -677,15 +796,29 @@ func insertRevision(
 	var revision Revision
 	err := tx.QueryRow(ctx, `
 		INSERT INTO revisions (
-			document_id, revision_no, title, content_md, author_type, author_id, change_summary
-		) VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, document_id, revision_no, title, content_md, author_type, author_id, change_summary, created_at
-	`, documentID, revisionNo, title, content, authorType, authorID, changeSummary).Scan(
+			document_id, revision_no, title, content_md,
+			source_id, source_label, source_category, source_input_mode, source_original_ref,
+			source_captured_at, source_content_type, source_adapter,
+			author_type, author_id, change_summary
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		RETURNING id, document_id, revision_no, title, content_md,
+		          source_id, source_label, source_category, source_input_mode, source_original_ref,
+		          source_captured_at, source_content_type, source_adapter,
+		          author_type, author_id, change_summary, created_at
+	`, documentID, revisionNo, title, content, source.ID, source.Label, source.Category, source.InputMode, source.OriginalRef, source.CapturedAt, source.ContentType, source.Adapter, authorType, authorID, changeSummary).Scan(
 		&revision.ID,
 		&revision.DocumentID,
 		&revision.RevisionNo,
 		&revision.Title,
 		&revision.Content,
+		&revision.Source.ID,
+		&revision.Source.Label,
+		&revision.Source.Category,
+		&revision.Source.InputMode,
+		&revision.Source.OriginalRef,
+		&revision.Source.CapturedAt,
+		&revision.Source.ContentType,
+		&revision.Source.Adapter,
 		&revision.AuthorType,
 		&revision.AuthorID,
 		&revision.ChangeSummary,

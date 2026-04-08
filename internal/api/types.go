@@ -252,14 +252,26 @@ type ListFoldersResponse struct {
 	Items []FolderResponse `json:"items"`
 }
 
+type DocumentSource struct {
+	ID          string `json:"id,omitempty"`
+	Label       string `json:"label,omitempty"`
+	Category    string `json:"category,omitempty"`
+	InputMode   string `json:"input_mode,omitempty"`
+	OriginalRef string `json:"original_ref,omitempty"`
+	CapturedAt  string `json:"captured_at,omitempty"`
+	ContentType string `json:"content_type,omitempty"`
+	Adapter     string `json:"adapter,omitempty"`
+}
+
 type CreateDocumentRequest struct {
-	FolderID      int64  `json:"folder_id" binding:"required"`
-	Slug          string `json:"slug" binding:"required"`
-	Title         string `json:"title" binding:"required"`
-	Content       string `json:"content"`
-	AuthorType    string `json:"author_type"`
-	AuthorID      string `json:"author_id"`
-	ChangeSummary string `json:"change_summary"`
+	FolderID      int64           `json:"folder_id" binding:"required"`
+	Slug          string          `json:"slug" binding:"required"`
+	Title         string          `json:"title" binding:"required"`
+	Content       string          `json:"content"`
+	Source        *DocumentSource `json:"source,omitempty"`
+	AuthorType    string          `json:"author_type"`
+	AuthorID      string          `json:"author_id"`
+	ChangeSummary string          `json:"change_summary"`
 }
 
 type UpdateDocumentRequest struct {
@@ -277,6 +289,7 @@ type DocumentResponse struct {
 	Slug              string             `json:"slug"`
 	Title             string             `json:"title"`
 	Content           string             `json:"content"`
+	Source            *DocumentSource    `json:"source,omitempty"`
 	Status            string             `json:"status"`
 	CurrentRevisionID int64              `json:"current_revision_id"`
 	CurrentRevisionNo int32              `json:"current_revision_no"`
@@ -296,13 +309,14 @@ type ArchiveDocumentRequest struct {
 }
 
 type RevisionResponse struct {
-	ID            int64  `json:"id"`
-	DocumentID    int64  `json:"document_id"`
-	RevisionNo    int32  `json:"revision_no"`
-	Title         string `json:"title"`
-	Content       string `json:"content"`
-	AuthorType    string `json:"author_type"`
-	AuthorID      string `json:"author_id"`
-	ChangeSummary string `json:"change_summary"`
-	CreatedAt     string `json:"created_at"`
+	ID            int64           `json:"id"`
+	DocumentID    int64           `json:"document_id"`
+	RevisionNo    int32           `json:"revision_no"`
+	Title         string          `json:"title"`
+	Content       string          `json:"content"`
+	Source        *DocumentSource `json:"source,omitempty"`
+	AuthorType    string          `json:"author_type"`
+	AuthorID      string          `json:"author_id"`
+	ChangeSummary string          `json:"change_summary"`
+	CreatedAt     string          `json:"created_at"`
 }

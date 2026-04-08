@@ -20,6 +20,7 @@ Current implementation status:
 - PostgreSQL-backed service is working
 - folder and document CRUD exist
 - revisions exist
+- source-aware document create flows now exist for inline text, local files, and URL imports, with structured provenance stored on documents and revisions
 - HTTP API, CLI, MCP, and web UI all exist
 - auth, setup, and browser/device login exist
 - hosted install docs and CLI installer exist

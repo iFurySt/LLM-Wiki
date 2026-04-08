@@ -60,10 +60,20 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 	}
 
 	document, err := client.CreateDocument(ctx, api.CreateDocumentRequest{
-		FolderID:      folder.ID,
-		Slug:          "product-brief",
-		Title:         "Product Brief",
-		Content:       "# LLM-Wiki",
+		FolderID: folder.ID,
+		Slug:     "product-brief",
+		Title:    "Product Brief",
+		Content:  "# LLM-Wiki",
+		Source: &api.DocumentSource{
+			ID:          "web_article",
+			Label:       "web article",
+			Category:    "optional_adapter",
+			InputMode:   "url",
+			OriginalRef: "https://example.com/product-brief",
+			CapturedAt:  "2026-04-08T12:00:00Z",
+			ContentType: "text/html",
+			Adapter:     "generic_fetch",
+		},
 		AuthorType:    "agent",
 		AuthorID:      "bootstrap-agent",
 		ChangeSummary: "initial draft",
@@ -73,6 +83,9 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 	}
 	if document.CurrentRevisionNo != 1 {
 		t.Fatalf("expected revision 1, got %d", document.CurrentRevisionNo)
+	}
+	if document.Source == nil || document.Source.OriginalRef != "https://example.com/product-brief" {
+		t.Fatalf("expected source metadata to round-trip, got %#v", document.Source)
 	}
 
 	updated, err := client.UpdateDocument(ctx, document.ID, api.UpdateDocumentRequest{
@@ -98,6 +111,12 @@ func TestNamespaceAndDocumentCRUD(t *testing.T) {
 	}
 	if fetched.Title != "Product Brief v2" {
 		t.Fatalf("unexpected title: %q", fetched.Title)
+	}
+	if fetched.Source == nil || fetched.Source.ID != "web_article" {
+		t.Fatalf("expected fetched document source metadata, got %#v", fetched.Source)
+	}
+	if len(fetched.Revisions) == 0 || fetched.Revisions[0].Source == nil {
+		t.Fatalf("expected revisions to include source metadata")
 	}
 
 	bySlug, err := client.GetDocumentBySlug(ctx, folder.ID, "product-brief")

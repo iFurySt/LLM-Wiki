@@ -12,6 +12,7 @@ Current external model:
 - `folders`
 - `documents`
 - `revisions`
+- structured document `source` metadata for imported content
 
 Current storage note:
 
@@ -24,6 +25,7 @@ Assumptions:
 - one `ns` contains many folders
 - one folder contains many documents
 - revisions are immutable
+- imported content keeps its raw body while provenance lives in structured metadata instead of only inline markdown headers
 
 Access model:
 

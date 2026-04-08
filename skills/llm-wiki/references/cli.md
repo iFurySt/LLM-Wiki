@@ -76,7 +76,7 @@ llm-wiki document create url \
   --url https://example.com/launch-plan
 ```
 
-`document create file` and `document create url` keep the imported body in the document while adding a small front matter block that preserves source metadata such as the original ref and content type.
+`document create file` and `document create url` keep the imported body in the document and store provenance in structured `source` metadata on the document and each revision.
 
 For URL-specific routing, use:
 

@@ -111,13 +111,14 @@ type getDocumentBySlugInput struct {
 }
 
 type createDocumentInput struct {
-	FolderID      int64  `json:"folder_id" jsonschema:"folder ID"`
-	Slug          string `json:"slug" jsonschema:"document slug"`
-	Title         string `json:"title" jsonschema:"document title"`
-	Content       string `json:"content,omitempty" jsonschema:"markdown content"`
-	AuthorType    string `json:"author_type,omitempty" jsonschema:"user, agent, or system"`
-	AuthorID      string `json:"author_id,omitempty" jsonschema:"author identifier"`
-	ChangeSummary string `json:"change_summary,omitempty" jsonschema:"short reason for the change"`
+	FolderID      int64               `json:"folder_id" jsonschema:"folder ID"`
+	Slug          string              `json:"slug" jsonschema:"document slug"`
+	Title         string              `json:"title" jsonschema:"document title"`
+	Content       string              `json:"content,omitempty" jsonschema:"markdown content"`
+	Source        *api.DocumentSource `json:"source,omitempty" jsonschema:"optional document source metadata"`
+	AuthorType    string              `json:"author_type,omitempty" jsonschema:"user, agent, or system"`
+	AuthorID      string              `json:"author_id,omitempty" jsonschema:"author identifier"`
+	ChangeSummary string              `json:"change_summary,omitempty" jsonschema:"short reason for the change"`
 }
 
 type updateDocumentInput struct {
@@ -253,6 +254,7 @@ func (m *Manager) registerTools(server *mcp.Server, principal auth.Principal) {
 			Slug:          in.Slug,
 			Title:         in.Title,
 			Content:       in.Content,
+			Source:        in.Source,
 			AuthorType:    in.AuthorType,
 			AuthorID:      in.AuthorID,
 			ChangeSummary: in.ChangeSummary,

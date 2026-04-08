@@ -80,6 +80,32 @@ func renderObsidianMarkdown(item api.DocumentResponse, ns string, folderKey stri
 	b.WriteString("status: " + yamlScalar(item.Status) + "\n")
 	b.WriteString(fmt.Sprintf("current_revision_no: %d\n", item.CurrentRevisionNo))
 	b.WriteString("updated_at: " + yamlScalar(item.UpdatedAt) + "\n")
+	if item.Source != nil {
+		if item.Source.ID != "" {
+			b.WriteString("source_id: " + yamlScalar(item.Source.ID) + "\n")
+		}
+		if item.Source.Label != "" {
+			b.WriteString("source_label: " + yamlScalar(item.Source.Label) + "\n")
+		}
+		if item.Source.Category != "" {
+			b.WriteString("source_category: " + yamlScalar(item.Source.Category) + "\n")
+		}
+		if item.Source.InputMode != "" {
+			b.WriteString("source_input_mode: " + yamlScalar(item.Source.InputMode) + "\n")
+		}
+		if item.Source.OriginalRef != "" {
+			b.WriteString("source_original_ref: " + yamlScalar(item.Source.OriginalRef) + "\n")
+		}
+		if item.Source.CapturedAt != "" {
+			b.WriteString("source_captured_at: " + yamlScalar(item.Source.CapturedAt) + "\n")
+		}
+		if item.Source.ContentType != "" {
+			b.WriteString("source_content_type: " + yamlScalar(item.Source.ContentType) + "\n")
+		}
+		if item.Source.Adapter != "" {
+			b.WriteString("source_adapter: " + yamlScalar(item.Source.Adapter) + "\n")
+		}
+	}
 	b.WriteString("---\n\n")
 	if strings.TrimSpace(item.Title) != "" {
 		b.WriteString("# " + item.Title + "\n\n")

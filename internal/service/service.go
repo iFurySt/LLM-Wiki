@@ -88,6 +88,7 @@ func (s *Service) CreateDocument(ctx context.Context, ns string, req api.CreateD
 		Slug:          slug,
 		Title:         strings.TrimSpace(req.Title),
 		Content:       req.Content,
+		Source:        documentSourceFromAPI(req.Source),
 		AuthorType:    authorType,
 		AuthorID:      authorID,
 		ChangeSummary: strings.TrimSpace(req.ChangeSummary),
@@ -184,6 +185,7 @@ func toDocumentResponse(doc repository.Document, revisions []repository.Revision
 		Slug:              doc.Slug,
 		Title:             doc.Title,
 		Content:           doc.Content,
+		Source:            documentSourceToAPI(doc.Source),
 		Status:            doc.Status,
 		CurrentRevisionID: doc.CurrentRevisionID,
 		CurrentRevisionNo: doc.CurrentRevisionNo,
@@ -201,11 +203,60 @@ func toDocumentResponse(doc repository.Document, revisions []repository.Revision
 			RevisionNo:    item.RevisionNo,
 			Title:         item.Title,
 			Content:       item.Content,
+			Source:        documentSourceToAPI(item.Source),
 			AuthorType:    item.AuthorType,
 			AuthorID:      item.AuthorID,
 			ChangeSummary: item.ChangeSummary,
 			CreatedAt:     item.CreatedAt.Format(time.RFC3339),
 		})
+	}
+	return result
+}
+
+func documentSourceFromAPI(source *api.DocumentSource) repository.DocumentSource {
+	if source == nil {
+		return repository.DocumentSource{}
+	}
+	result := repository.DocumentSource{
+		ID:          strings.TrimSpace(source.ID),
+		Label:       strings.TrimSpace(source.Label),
+		Category:    strings.TrimSpace(source.Category),
+		InputMode:   strings.TrimSpace(source.InputMode),
+		OriginalRef: strings.TrimSpace(source.OriginalRef),
+		ContentType: strings.TrimSpace(source.ContentType),
+		Adapter:     strings.TrimSpace(source.Adapter),
+	}
+	if capturedAt := strings.TrimSpace(source.CapturedAt); capturedAt != "" {
+		if ts, err := time.Parse(time.RFC3339, capturedAt); err == nil {
+			result.CapturedAt = &ts
+		}
+	}
+	return result
+}
+
+func documentSourceToAPI(source repository.DocumentSource) *api.DocumentSource {
+	if strings.TrimSpace(source.ID) == "" &&
+		strings.TrimSpace(source.Label) == "" &&
+		strings.TrimSpace(source.Category) == "" &&
+		strings.TrimSpace(source.InputMode) == "" &&
+		strings.TrimSpace(source.OriginalRef) == "" &&
+		source.CapturedAt == nil &&
+		strings.TrimSpace(source.ContentType) == "" &&
+		strings.TrimSpace(source.Adapter) == "" {
+		return nil
+	}
+
+	result := &api.DocumentSource{
+		ID:          source.ID,
+		Label:       source.Label,
+		Category:    source.Category,
+		InputMode:   source.InputMode,
+		OriginalRef: source.OriginalRef,
+		ContentType: source.ContentType,
+		Adapter:     source.Adapter,
+	}
+	if source.CapturedAt != nil {
+		result.CapturedAt = source.CapturedAt.Format(time.RFC3339)
 	}
 	return result
 }
