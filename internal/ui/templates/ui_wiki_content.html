@@ -1,0 +1,100 @@
+<div class="shell">
+  <aside class="sidebar surface">
+    <div class="sidebar-head">
+      <h2>Files</h2>
+      <p>Browse folders as folders and documents as files.</p>
+
+      <div class="tree-search">
+        <input type="search" placeholder="Search" data-tree-search />
+      </div>
+
+      <div class="filter-row" style="margin-top: 12px;">
+        <a class="filter-pill {{ if eq .StatusFilter "all" }}active{{ end }}" href="/ui" data-ui-nav>All</a>
+        <a class="filter-pill {{ if eq .StatusFilter "active" }}active{{ end }}" href="/ui?status=active" data-ui-nav>Active</a>
+        <a class="filter-pill {{ if eq .StatusFilter "archived" }}active{{ end }}" href="/ui?status=archived" data-ui-nav>Archived</a>
+      </div>
+    </div>
+
+    <div class="sidebar-body">
+      <div class="tree-root">
+        <div class="tree-root-title">{{ .NS }}</div>
+      </div>
+
+      <div id="mui-tree-root" class="mui-tree-shell">
+        <div class="mui-tree-empty">Loading files...</div>
+      </div>
+      <script id="mui-tree-state" type="application/json">{{ .TreeStateJSON }}</script>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="ns-bar surface">
+      <div class="ns-copy">
+        <div class="ns-title">NS</div>
+        <div class="ns-note">Read documents on the right. Use the left tree to move through folders quickly.</div>
+      </div>
+
+      <div class="meta-row">
+        <span class="pill">NS {{ .NS }}</span>
+        <span class="pill">Folders {{ .NamespaceCount }}</span>
+        <span class="pill">Documents {{ .DocumentCount }}</span>
+        <span class="pill archived">Archived {{ .ArchivedCount }}</span>
+      </div>
+    </section>
+
+    <section class="reader surface">
+      {{ if .SelectedDocument }}
+      <div class="reader-head">
+        <div class="reader-header-grid">
+          <div>
+            <div class="eyebrow">Document</div>
+            <h1 class="doc-title">{{ .SelectedDocument.Title }}</h1>
+            <div class="doc-subtitle">{{ .SelectedDocument.Slug }} · folder {{ .SelectedDocument.FolderID }} · updated {{ .SelectedDocument.UpdatedAt }}</div>
+          </div>
+
+          <div class="doc-meta-row">
+            <span class="pill {{ .SelectedDocument.Status }}">{{ .SelectedDocument.Status }}</span>
+            <span class="pill">ID {{ .SelectedDocument.ID }}</span>
+            <span class="pill">Revision {{ .SelectedDocument.CurrentRevisionNo }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reader-body">
+        <div class="markdown-wrap">
+          <div class="markdown-body">{{ markdown .SelectedDocument.Content }}</div>
+        </div>
+
+        <section class="section" style="margin-top: 14px;">
+          <div class="section-head">
+            <div class="section-title">Revision History</div>
+            <div class="section-subtitle">Newest state is rendered above. This list shows the recorded changes behind it.</div>
+          </div>
+
+          <div class="reader-body">
+            <div class="revision-list">
+              {{ range .SelectedDocument.Revisions }}
+              <div class="revision-card">
+                <div class="revision-title">Revision {{ .RevisionNo }}</div>
+                <div class="revision-note">{{ .CreatedAt }} · {{ .AuthorType }} / {{ .AuthorID }}</div>
+                <div class="doc-subtitle">{{ snippet .ChangeSummary 180 }}</div>
+              </div>
+              {{ else }}
+              <div class="empty-state">No revisions found.</div>
+              {{ end }}
+            </div>
+          </div>
+        </section>
+      </div>
+      {{ else }}
+      <div class="reader-head">
+        <div class="reader-title">No document selected</div>
+        <div class="reader-subtitle">Choose a file from the left navigation tree to start reading.</div>
+      </div>
+      <div class="reader-body">
+        <div class="empty-state">The ns is ready. Pick a folder and open a document.</div>
+      </div>
+      {{ end }}
+    </section>
+  </main>
+</div>

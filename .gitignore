@@ -11,3 +11,4 @@ node_modules/
 npm/llm-wiki-mcp/package-lock.json
 !npm/llm-wiki-mcp/bin/
 !npm/llm-wiki-mcp/bin/llm-wiki-mcp.js
+.llmwiki

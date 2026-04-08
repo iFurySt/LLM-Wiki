@@ -1,0 +1,20 @@
+{
+  "name": "@ifuryst/llm-wiki-ui-tree",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/tree.tsx --bundle --format=iife --platform=browser --target=es2020 --outfile=../assets/llm-wiki-tree.js"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.4",
+    "@mui/x-tree-view": "^8.27.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.11",
+    "typescript": "^5.9.3"
+  }
+}
