@@ -115,6 +115,10 @@ jobs:
             mkdir -p /opt/docmesh
             cd /opt/docmesh
             test -f .env.docker
+            if command -v systemctl >/dev/null 2>&1; then
+              systemctl stop docmesh || true
+              systemctl disable docmesh || true
+            fi
             if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
               echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
             fi

@@ -21,9 +21,9 @@ The repository now provides:
 
 - image: `ghcr.io/ifuryst/docmesh:beta`
 - container name: `docmesh`
-- bind: `127.0.0.1:8234:8234`
+- host network mode so the container reuses the server's loopback and existing local dependencies
 
-That port binding assumes a reverse proxy or tunnel is already terminating TLS for `https://docmesh.ifuryst.com/`.
+That setup assumes a reverse proxy or tunnel is already terminating TLS for `https://docmesh.ifuryst.com/`.
 
 ## GitHub Secrets Needed
 

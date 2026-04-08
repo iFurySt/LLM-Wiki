@@ -3,9 +3,6 @@ services:
     image: ghcr.io/ifuryst/docmesh:beta
     container_name: docmesh
     restart: unless-stopped
+    network_mode: host
     env_file:
       - ${DOCMESH_ENV_FILE:-/opt/docmesh/.env.docker}
-    ports:
-      - "127.0.0.1:8234:8234"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
