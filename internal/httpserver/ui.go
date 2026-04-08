@@ -15,8 +15,10 @@ import (
 
 type uiSpaceCard struct {
 	ID          int64
+	NS          string
 	Key         string
 	DisplayName string
+	Role        string
 }
 
 type uiNamespaceCard struct {
@@ -55,6 +57,17 @@ type uiFlash struct {
 	Message string
 }
 
+type uiActivityItem struct {
+	ID             int64
+	Title          string
+	FolderID       int64
+	NamespaceLabel string
+	Status         string
+	UpdatedAt      string
+	ContentPreview string
+	Href           string
+}
+
 type uiIndexData struct {
 	CurrentPage         string
 	NS                  string
@@ -68,17 +81,24 @@ type uiIndexData struct {
 	NamespaceTree       []uiNamespaceTree
 	Documents           []uiDocumentCard
 	SelectedDocument    *api.DocumentResponse
+	SelectedRevision    *api.RevisionResponse
 	SelectedNamespaceID int64
 	StatusFilter        string
 	DocumentCount       int
 	ArchivedCount       int
 	NamespaceCount      int
+	CurrentSpaceName    string
+	ActivityItems       []uiActivityItem
+	NSSwitchStateJSON   template.JS
 	TreeStateJSON       template.JS
 	Flash               *uiFlash
 }
 
 func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Config) {
-	engine.GET("/", func(c *gin.Context) {
+	ui := engine.Group("")
+	ui.Use(attachOptionalWebSession(svc))
+
+	ui.GET("/", func(c *gin.Context) {
 		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
 		if err == nil && !status.Initialized {
 			c.Redirect(http.StatusTemporaryRedirect, "/setup")
@@ -87,7 +107,22 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		c.Redirect(http.StatusTemporaryRedirect, "/ui")
 	})
 
-	engine.GET("/ui", func(c *gin.Context) {
+	ui.POST("/ui/ns/switch", func(c *gin.Context) {
+		targetNS := strings.TrimSpace(c.PostForm("ns"))
+		if targetNS == "" {
+			c.Redirect(http.StatusSeeOther, "/ui?kind=error&message=missing+ns")
+			return
+		}
+		session, err := svc.SwitchWebSessionNS(c.Request.Context(), targetNS)
+		if err != nil {
+			c.Redirect(http.StatusSeeOther, "/ui?kind=error&message=unable+to+switch+ns")
+			return
+		}
+		setWebSessionCookie(c, session.ID)
+		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=switched+ns")
+	})
+
+	ui.GET("/ui", func(c *gin.Context) {
 		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
 		if err == nil && !status.Initialized {
 			c.Redirect(http.StatusTemporaryRedirect, "/setup")
@@ -96,7 +131,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		renderUIPage(c, svc, cfg, "wiki")
 	})
 
-	engine.GET("/ui/install", func(c *gin.Context) {
+	ui.GET("/ui/install", func(c *gin.Context) {
 		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
 		if err == nil && !status.Initialized {
 			c.Redirect(http.StatusTemporaryRedirect, "/setup")
@@ -105,15 +140,19 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		renderUIPage(c, svc, cfg, "install")
 	})
 
-	engine.GET("/ui/fragment/wiki", func(c *gin.Context) {
+	ui.GET("/ui/fragment/wiki", func(c *gin.Context) {
 		renderUIFragment(c, svc, cfg, "wiki", "ui_wiki_content.html")
 	})
 
-	engine.GET("/ui/fragment/install", func(c *gin.Context) {
+	ui.GET("/ui/fragment/install", func(c *gin.Context) {
 		renderUIFragment(c, svc, cfg, "install", "ui_install_content.html")
 	})
 
-	engine.POST("/ui/folders", func(c *gin.Context) {
+	ui.GET("/ui/fragment/reader", func(c *gin.Context) {
+		renderUIFragment(c, svc, cfg, "wiki", "ui_reader_content.html")
+	})
+
+	ui.POST("/ui/folders", func(c *gin.Context) {
 		req := api.CreateFolderRequest{
 			Key:         c.PostForm("key"),
 			DisplayName: c.PostForm("display_name"),
@@ -127,7 +166,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=folder+created")
 	})
 
-	engine.POST("/ui/folders/:id/archive", func(c *gin.Context) {
+	ui.POST("/ui/folders/:id/archive", func(c *gin.Context) {
 		namespaceID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -140,7 +179,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=folder+archived")
 	})
 
-	engine.POST("/ui/documents", func(c *gin.Context) {
+	ui.POST("/ui/documents", func(c *gin.Context) {
 		namespaceID, err := strconv.ParseInt(c.PostForm("folder_id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -162,7 +201,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+created")
 	})
 
-	engine.POST("/ui/documents/:id/update", func(c *gin.Context) {
+	ui.POST("/ui/documents/:id/update", func(c *gin.Context) {
 		documentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -182,7 +221,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+updated&document_id="+strconv.FormatInt(documentID, 10))
 	})
 
-	engine.POST("/ui/documents/:id/archive", func(c *gin.Context) {
+	ui.POST("/ui/documents/:id/archive", func(c *gin.Context) {
 		documentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -275,23 +314,39 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 			return uiIndexData{}, err
 		}
 		selectedDocument = &doc
-	} else if len(documents.Items) > 0 {
-		doc, err := svc.GetDocument(c.Request.Context(), tenantID, documents.Items[0].ID)
-		if err != nil {
-			return uiIndexData{}, err
-		}
-		selectedDocument = &doc
+	}
+
+	var selectedRevision *api.RevisionResponse
+	if selectedDocument != nil {
 		if selectedNamespaceID == 0 {
-			selectedNamespaceID = doc.FolderID
+			selectedNamespaceID = selectedDocument.FolderID
+		}
+		if raw := c.Query("revision_id"); raw != "" {
+			revisionID, err := strconv.ParseInt(raw, 10, 64)
+			if err != nil {
+				return uiIndexData{}, err
+			}
+			for index := range selectedDocument.Revisions {
+				if selectedDocument.Revisions[index].ID == revisionID {
+					selectedRevision = &selectedDocument.Revisions[index]
+					break
+				}
+			}
 		}
 	}
 
 	spaceCards := make([]uiSpaceCard, 0, len(ns.Items))
+	currentSpaceName := tenantID
 	for _, item := range ns.Items {
+		if item.NS == tenantID {
+			currentSpaceName = item.DisplayName
+		}
 		spaceCards = append(spaceCards, uiSpaceCard{
 			ID:          item.ID,
+			NS:          item.NS,
 			Key:         item.Key,
 			DisplayName: item.DisplayName,
+			Role:        item.Role,
 		})
 	}
 
@@ -317,6 +372,7 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 	}
 
 	documentCards := make([]uiDocumentCard, 0, len(documents.Items))
+	activityItems := make([]uiActivityItem, 0, minInt(len(documents.Items), 8))
 	archivedCount := 0
 	for _, item := range documents.Items {
 		if item.Status == "archived" {
@@ -334,6 +390,22 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 			UpdatedAt:         item.UpdatedAt,
 		}
 		documentCards = append(documentCards, card)
+		if len(activityItems) < 8 {
+			href := "/ui?document_id=" + strconv.FormatInt(item.ID, 10) + "&folder_id=" + strconv.FormatInt(item.FolderID, 10)
+			if statusRaw != "" && statusRaw != "all" {
+				href += "&status=" + statusRaw
+			}
+			activityItems = append(activityItems, uiActivityItem{
+				ID:             item.ID,
+				Title:          item.Title,
+				FolderID:       item.FolderID,
+				NamespaceLabel: namespaceNames[item.FolderID],
+				Status:         item.Status,
+				UpdatedAt:      item.UpdatedAt,
+				ContentPreview: item.Content,
+				Href:           href,
+			})
+		}
 		for index := range namespaceTree {
 			if namespaceTree[index].ID == item.FolderID {
 				namespaceTree[index].Documents = append(namespaceTree[index].Documents, card)
@@ -343,6 +415,10 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 	}
 
 	treeStateJSON, err := buildUITreeStateJSON(tenantID, c.DefaultQuery("status", "all"), selectedNamespaceID, selectedDocument, namespaceTree)
+	if err != nil {
+		return uiIndexData{}, err
+	}
+	nsSwitchStateJSON, err := buildUINSSwitchStateJSON(tenantID, spaceCards)
 	if err != nil {
 		return uiIndexData{}, err
 	}
@@ -367,11 +443,15 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		NamespaceTree:       namespaceTree,
 		Documents:           documentCards,
 		SelectedDocument:    selectedDocument,
+		SelectedRevision:    selectedRevision,
 		SelectedNamespaceID: selectedNamespaceID,
 		StatusFilter:        c.DefaultQuery("status", "all"),
 		DocumentCount:       len(documentCards),
 		ArchivedCount:       archivedCount,
 		NamespaceCount:      len(namespaceCards),
+		CurrentSpaceName:    currentSpaceName,
+		ActivityItems:       activityItems,
+		NSSwitchStateJSON:   nsSwitchStateJSON,
 		TreeStateJSON:       treeStateJSON,
 		Flash:               flash,
 	}, nil
@@ -431,4 +511,41 @@ func buildUITreeStateJSON(tenantID string, statusFilter string, selectedNamespac
 		return "", err
 	}
 	return template.JS(payload), nil
+}
+
+type uiNSSwitchState struct {
+	CurrentNS string          `json:"currentNS"`
+	Spaces    []uiNSSwitchRow `json:"spaces"`
+}
+
+type uiNSSwitchRow struct {
+	NS          string `json:"ns"`
+	DisplayName string `json:"displayName"`
+	Role        string `json:"role,omitempty"`
+}
+
+func buildUINSSwitchStateJSON(currentNS string, spaces []uiSpaceCard) (template.JS, error) {
+	state := uiNSSwitchState{
+		CurrentNS: currentNS,
+		Spaces:    make([]uiNSSwitchRow, 0, len(spaces)),
+	}
+	for _, space := range spaces {
+		state.Spaces = append(state.Spaces, uiNSSwitchRow{
+			NS:          space.NS,
+			DisplayName: space.DisplayName,
+			Role:        space.Role,
+		})
+	}
+	payload, err := json.Marshal(state)
+	if err != nil {
+		return "", err
+	}
+	return template.JS(payload), nil
+}
+
+func minInt(left int, right int) int {
+	if left < right {
+		return left
+	}
+	return right
 }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { CssBaseline } from "@mui/material";
+import { Box, CssBaseline, FormControl, MenuItem, Select } from "@mui/material";
 import { SimpleTreeView, TreeItem } from "@mui/x-tree-view";
 
 type TreeNode = {
@@ -24,10 +24,21 @@ type TreeController = {
   mountFromDOM: () => void;
 };
 
+type NSSpace = {
+  ns: string;
+  displayName: string;
+  role?: string;
+};
+
+type NSSwitchState = {
+  currentNS: string;
+  spaces: NSSpace[];
+};
+
 declare global {
   interface Window {
     LLMWikiUI?: {
-      navigate?: (href: string, options?: { pushHistory?: boolean }) => Promise<void> | void;
+      navigate?: (href: string, options?: { pushHistory?: boolean; scope?: "content" | "reader" }) => Promise<void> | void;
     };
     LLMWikiTree?: TreeController;
   }
@@ -40,6 +51,18 @@ function readTreeState(): TreeState | null {
   }
   try {
     return JSON.parse(payload.textContent || "") as TreeState;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function readNSSwitchState(): NSSwitchState | null {
+  const payload = document.getElementById("mui-ns-switch-state");
+  if (!payload) {
+    return null;
+  }
+  try {
+    return JSON.parse(payload.textContent || "") as NSSwitchState;
   } catch (_error) {
     return null;
   }
@@ -144,7 +167,7 @@ function TreeApp({ state }: { state: TreeState }) {
     setSelectedItemId(itemId);
     if (hrefMap[itemId]) {
       if (window.LLMWikiUI?.navigate) {
-        void window.LLMWikiUI.navigate(hrefMap[itemId]);
+        void window.LLMWikiUI.navigate(hrefMap[itemId], { scope: "reader" });
         return;
       }
       window.location.assign(hrefMap[itemId]);
@@ -159,6 +182,7 @@ function TreeApp({ state }: { state: TreeState }) {
           <div className="mui-tree-empty">No documents found.</div>
         ) : (
           <SimpleTreeView
+            expansionTrigger="iconContainer"
             expandedItems={expandedItems}
             selectedItems={selectedItemId}
             onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds as string[])}
@@ -168,25 +192,31 @@ function TreeApp({ state }: { state: TreeState }) {
               overflow: "hidden",
               "& .MuiTreeItem-root": {
                 margin: 0,
+                "& + .MuiTreeItem-root": {
+                  marginTop: "4px",
+                },
               },
               "& .MuiTreeItem-content": {
-                minHeight: 30,
-                borderRadius: "6px",
-                paddingInline: "6px",
-                paddingBlock: 0,
-                gap: "4px",
+                minHeight: 34,
+                borderRadius: "12px",
+                paddingLeft: "12px",
+                paddingRight: "8px",
+                paddingBlock: "2px",
+                gap: "6px",
+                transition: "160ms ease",
               },
               "& .MuiTreeItem-content:hover": {
-                backgroundColor: "rgba(255,255,255,0.04)",
+                backgroundColor: "var(--accent-soft)",
               },
               "& .MuiTreeItem-content.Mui-expanded": {
                 backgroundColor: "transparent",
               },
               "& .MuiTreeItem-content.Mui-selected": {
-                backgroundColor: "rgba(108,178,255,0.16)",
+                backgroundColor: "var(--accent-soft)",
+                boxShadow: "inset 0 0 0 1px rgba(166, 75, 42, 0.18)",
               },
               "& .MuiTreeItem-content.Mui-selected:hover": {
-                backgroundColor: "rgba(108,178,255,0.20)",
+                backgroundColor: "var(--accent-soft)",
               },
               "& .MuiTreeItem-iconContainer": {
                 width: 20,
@@ -198,13 +228,15 @@ function TreeApp({ state }: { state: TreeState }) {
               },
               "& .MuiTreeItem-label": {
                 padding: 0,
-                fontSize: 12,
-                fontWeight: 500,
+                fontSize: 13,
+                fontWeight: 600,
                 color: "var(--text)",
               },
               "& .MuiTreeItem-groupTransition": {
                 marginLeft: "18px",
-                borderLeft: "1px solid rgba(255,255,255,0.05)",
+                borderLeft: "1px solid var(--line)",
+                paddingLeft: "4px",
+                paddingTop: "4px",
               },
             }}
           >
@@ -216,12 +248,134 @@ function TreeApp({ state }: { state: TreeState }) {
   );
 }
 
+function postNSSwitch(nextNS: string) {
+  const form = document.createElement("form");
+  form.method = "post";
+  form.action = "/ui/ns/switch";
+
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "ns";
+  input.value = nextNS;
+
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function NSSwitchApp({ state }: { state: NSSwitchState }) {
+  const [mode, setMode] = React.useState<"light" | "dark">(currentMode());
+  const [value, setValue] = React.useState(state.currentNS);
+
+  React.useEffect(() => {
+    const observer = new MutationObserver(() => setMode(currentMode()));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: { mode },
+      }),
+    [mode],
+  );
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box className="workspace-switch-shell-inner">
+        <FormControl fullWidth size="small">
+          <Select
+            value={value}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              setValue(nextValue);
+              if (nextValue !== state.currentNS) {
+                postNSSwitch(nextValue);
+              }
+            }}
+            displayEmpty
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  borderRadius: "18px",
+                  border: "1px solid var(--line)",
+                  mt: 1,
+                  boxShadow: "0 18px 40px var(--shadow-strong)",
+                  background: "var(--panel-2)",
+                  backdropFilter: "blur(16px)",
+                },
+              },
+            }}
+            sx={{
+              height: 52,
+              borderRadius: "18px",
+              background: "linear-gradient(180deg, var(--panel-2), var(--panel))",
+              color: "var(--text)",
+              boxShadow: "inset 0 1px 0 var(--paper)",
+              "& .MuiSelect-select": {
+                display: "flex",
+                alignItems: "center",
+                minHeight: "unset",
+                padding: "14px 44px 14px 16px",
+                fontSize: 14,
+                fontWeight: 600,
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "var(--line)",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: "var(--line-strong)",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "var(--accent)",
+                borderWidth: "1px",
+              },
+              "& .MuiSvgIcon-root": {
+                color: "var(--muted)",
+              },
+            }}
+          >
+            {state.spaces.map((space) => (
+              <MenuItem
+                key={space.ns}
+                value={space.ns}
+                sx={{
+                  minHeight: 48,
+                  borderRadius: "12px",
+                  mx: 1,
+                  my: 0.5,
+                  color: "var(--text)",
+                  "&.Mui-selected": {
+                    backgroundColor: "var(--accent-soft)",
+                  },
+                  "&.Mui-selected:hover": {
+                    backgroundColor: "var(--accent-soft)",
+                  },
+                }}
+              >
+                {space.displayName}
+                {space.role ? ` · ${space.role}` : ""}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+    </ThemeProvider>
+  );
+}
+
 let mountedRoot: ReturnType<typeof createRoot> | null = null;
 let mountedNode: Element | null = null;
+let mountedNSRoot: ReturnType<typeof createRoot> | null = null;
+let mountedNSNode: Element | null = null;
 
 function mountFromDOM() {
   const mountNode = document.getElementById("mui-tree-root");
   const state = readTreeState();
+  const nsMountNode = document.getElementById("mui-ns-switch-root");
+  const nsState = readNSSwitchState();
 
   if (!mountNode || !state) {
     if (mountedRoot) {
@@ -229,18 +383,36 @@ function mountFromDOM() {
       mountedRoot = null;
       mountedNode = null;
     }
+  } else {
+    if (mountedNode !== mountNode) {
+      if (mountedRoot) {
+        mountedRoot.unmount();
+      }
+      mountedRoot = createRoot(mountNode);
+      mountedNode = mountNode;
+    }
+
+    mountedRoot.render(<TreeApp state={state} />);
+  }
+
+  if (!nsMountNode || !nsState) {
+    if (mountedNSRoot) {
+      mountedNSRoot.unmount();
+      mountedNSRoot = null;
+      mountedNSNode = null;
+    }
     return;
   }
 
-  if (mountedNode !== mountNode) {
-    if (mountedRoot) {
-      mountedRoot.unmount();
+  if (mountedNSNode !== nsMountNode) {
+    if (mountedNSRoot) {
+      mountedNSRoot.unmount();
     }
-    mountedRoot = createRoot(mountNode);
-    mountedNode = mountNode;
+    mountedNSRoot = createRoot(nsMountNode);
+    mountedNSNode = nsMountNode;
   }
 
-  mountedRoot.render(<TreeApp state={state} />);
+  mountedNSRoot.render(<NSSwitchApp state={nsState} />);
 }
 
 window.LLMWikiTree = {

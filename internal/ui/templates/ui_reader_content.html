@@ -1,0 +1,112 @@
+<div class="reader-layout" id="ui-reader">
+  <main class="content-column">
+    {{ if .SelectedDocument }}
+    <section class="reader surface">
+      <div class="reader-head">
+        <div class="reader-header-grid">
+          <div>
+            <div class="eyebrow">Document</div>
+            <h1 class="doc-title">{{ if .SelectedRevision }}{{ .SelectedRevision.Title }}{{ else }}{{ .SelectedDocument.Title }}{{ end }}</h1>
+            <div class="doc-subtitle">{{ .SelectedDocument.Slug }} · {{ .CurrentSpaceName }} / folder {{ .SelectedDocument.FolderID }} · updated {{ .SelectedDocument.UpdatedAt }}</div>
+          </div>
+
+          <div class="doc-meta-row">
+            <span class="pill status-{{ .SelectedDocument.Status }}">{{ .SelectedDocument.Status }}</span>
+            <span class="pill pill-outline">ID {{ .SelectedDocument.ID }}</span>
+            <span class="pill pill-strong">Revision {{ if .SelectedRevision }}{{ .SelectedRevision.RevisionNo }}{{ else }}{{ .SelectedDocument.CurrentRevisionNo }}{{ end }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reader-body">
+        <div class="markdown-wrap">
+          <div class="markdown-body">{{ if .SelectedRevision }}{{ markdown .SelectedRevision.Content }}{{ else }}{{ markdown .SelectedDocument.Content }}{{ end }}</div>
+        </div>
+      </div>
+    </section>
+    {{ else }}
+    <section class="hero-panel surface">
+      <div class="hero-head">
+        <h1 class="hero-title">Workspace Pulse</h1>
+      </div>
+    </section>
+
+    <section class="activity-panel surface">
+      <div class="section-head">
+        <div class="section-title">Recent Activity</div>
+      </div>
+
+      <div class="activity-feed">
+        {{ range .ActivityItems }}
+        <a class="activity-card" href="{{ .Href }}" data-ui-nav data-ui-scope="reader">
+          <div class="activity-meta">
+            <span class="pill pill-outline">{{ .NamespaceLabel }}</span>
+            <span class="pill status-{{ .Status }}">{{ .Status }}</span>
+            <span class="activity-time">{{ .UpdatedAt }}</span>
+          </div>
+          <div class="activity-title">{{ .Title }}</div>
+          <div class="activity-copy">{{ snippet .ContentPreview 220 }}</div>
+        </a>
+        {{ else }}
+        <div class="empty-state">No activity.</div>
+        {{ end }}
+      </div>
+    </section>
+    {{ end }}
+  </main>
+
+  <aside class="detail-column">
+    {{ if .SelectedDocument }}
+    <section class="side-panel surface">
+      <div class="section-head">
+        <div class="section-title">Version History</div>
+      </div>
+
+      <div class="revision-list side-list">
+        {{ range .SelectedDocument.Revisions }}
+        <a
+          class="revision-card revision-link{{ if $.SelectedRevision }}{{ if eq $.SelectedRevision.ID .ID }} active{{ end }}{{ else if eq $.SelectedDocument.CurrentRevisionID .ID }} active{{ end }}"
+          href="/ui?document_id={{ $.SelectedDocument.ID }}&folder_id={{ $.SelectedDocument.FolderID }}&revision_id={{ .ID }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}"
+          data-ui-nav
+          data-ui-scope="reader"
+        >
+          <div class="revision-title-row">
+            <div class="revision-title">Revision {{ .RevisionNo }}</div>
+            {{ if eq $.SelectedDocument.CurrentRevisionID .ID }}<span class="pill pill-strong">Current</span>{{ end }}
+          </div>
+          <div class="revision-note">{{ .CreatedAt }} · {{ .AuthorType }} / {{ .AuthorID }}</div>
+          <div class="doc-subtitle">{{ snippet .ChangeSummary 140 }}</div>
+        </a>
+        {{ else }}
+        <div class="empty-state">No revisions.</div>
+        {{ end }}
+      </div>
+    </section>
+    {{ else }}
+    <section class="side-panel surface">
+      <div class="section-head">
+        <div class="section-title">Workspace Stats</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">NS</div>
+          <div class="stat-value">{{ .CurrentSpaceName }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Folders</div>
+          <div class="stat-value">{{ .NamespaceCount }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Documents</div>
+          <div class="stat-value">{{ .DocumentCount }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Archived</div>
+          <div class="stat-value">{{ .ArchivedCount }}</div>
+        </div>
+      </div>
+    </section>
+    {{ end }}
+  </aside>
+</div>

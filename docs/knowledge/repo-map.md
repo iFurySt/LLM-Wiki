@@ -26,6 +26,9 @@ Current implementation status:
 - Obsidian mirror adapter exists
 - the hosted `/ui` page now uses a small embedded React island with `@mui/x-tree-view` for the left file tree while keeping the rest of the page server-rendered
 - the hosted `/ui` page now swaps wiki and install content through fragment fetches plus `history.pushState`, so document selection and filter changes do not require a full page reload
+- document selection inside the hosted `/ui` tree now updates the reader panel through a dedicated reader fragment, so the sidebar and outer wiki shell stay mounted during normal file browsing
+- the hosted `/ui` knowledge page now uses a three-column workspace layout: left rail for ns switching, search, and the existing tree; center column for recent activity or document content; right rail for workspace stats when idle and revision history when a document is open
+- revision selection in the hosted `/ui` now renders historical document bodies in the center reader without remounting the left tree shell
 
 Current boundaries:
 

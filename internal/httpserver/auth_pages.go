@@ -324,6 +324,26 @@ func requireAdminWebSession(svc *service.Service) gin.HandlerFunc {
 	}
 }
 
+func attachOptionalWebSession(svc *service.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sessionID, err := c.Cookie(webSessionCookie)
+		if err != nil {
+			c.Next()
+			return
+		}
+		_, _, principal, err := svc.GetWebSession(c.Request.Context(), sessionID)
+		if err != nil {
+			clearWebSessionCookie(c)
+			c.Next()
+			return
+		}
+		ctx := auth.WithPrincipal(c.Request.Context(), principal)
+		c.Request = c.Request.WithContext(ctx)
+		c.Set("principal", principal)
+		c.Next()
+	}
+}
+
 func setWebSessionCookie(c *gin.Context, sessionID string) {
 	c.SetCookie(webSessionCookie, sessionID, int(webSessionCookieTTL.Seconds()), "/", "", false, true)
 }

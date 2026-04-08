@@ -224,6 +224,27 @@ func (s *Service) SwitchNS(ctx context.Context, tenantID string) (api.TokenExcha
 	return api.TokenExchangeResponse{}, repository.ErrForbidden
 }
 
+func (s *Service) SwitchWebSessionNS(ctx context.Context, tenantID string) (repository.WebSessionRecord, error) {
+	principal, ok := auth.PrincipalFromContext(ctx)
+	if !ok {
+		return repository.WebSessionRecord{}, repository.ErrUnauthorized
+	}
+	account, err := s.repo.GetOAuthAccountByPrincipalID(ctx, principal.PrincipalID)
+	if err != nil {
+		return repository.WebSessionRecord{}, repository.ErrForbidden
+	}
+	accounts, err := s.repo.ListOAuthAccountsByIdentity(ctx, account.ProviderName, account.ExternalSubject)
+	if err != nil {
+		return repository.WebSessionRecord{}, err
+	}
+	for _, item := range accounts {
+		if item.NS == tenantID {
+			return s.repo.CreateWebSession(ctx, item.PrincipalID, tenantID, webSessionTTL)
+		}
+	}
+	return repository.WebSessionRecord{}, repository.ErrForbidden
+}
+
 func (s *Service) cloneOAuthIdentityIntoTenant(ctx context.Context, account repository.OAuthAccountRecord, tenantID string, displayName string, isAdmin bool) (repository.UserRecord, error) {
 	name := strings.TrimSpace(displayName)
 	if name == "" {
