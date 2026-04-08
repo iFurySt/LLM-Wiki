@@ -224,11 +224,27 @@
     }
 
     .sidebar {
-      padding: 16px;
+      padding: 0;
       position: sticky;
       top: 18px;
+    }
+
+    .explorer {
       display: grid;
-      gap: 16px;
+      min-height: 72vh;
+      grid-template-rows: auto 1fr;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08)), var(--panel-soft);
+    }
+
+    .explorer-head {
+      padding: 16px;
+      border-bottom: 3px solid var(--border);
+      background: linear-gradient(135deg, rgba(242, 201, 76, 0.12), rgba(255,255,255,0.02)), var(--panel-raised);
+    }
+
+    .explorer-body {
+      padding: 12px 10px 14px;
+      overflow: auto;
     }
 
     .panel {
@@ -261,12 +277,6 @@
       font-size: 14px;
     }
 
-    .tenant-chip {
-      padding: 12px;
-      border: 3px solid var(--border);
-      background: linear-gradient(135deg, rgba(242, 201, 76, 0.16), rgba(255,255,255,0.02)), var(--panel-raised);
-    }
-
     .name {
       font: 700 15px/1.35 var(--pixel);
       text-transform: uppercase;
@@ -274,30 +284,58 @@
 
     .tree {
       display: grid;
-      gap: 10px;
+      gap: 4px;
     }
 
     .tree-group {
-      border: 3px solid var(--border);
-      background: var(--panel-muted);
+      position: relative;
+      margin-left: 16px;
+    }
+
+    .tree-group::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: rgba(255,255,255,0.08);
     }
 
     .tree-group summary {
       list-style: none;
       cursor: pointer;
-      padding: 10px 12px;
+      padding: 0;
       display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
+      align-items: stretch;
     }
 
     .tree-group summary::-webkit-details-marker {
       display: none;
     }
 
-    .tree-group[open] summary {
-      border-bottom: 3px solid rgba(255,255,255,0.05);
+    .tree-row {
+      position: relative;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 10px 8px 14px;
+      border: 2px solid transparent;
+      background: transparent;
+    }
+
+    .tree-row::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 20px;
+      width: 10px;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
     }
 
     .tree-folder {
@@ -308,33 +346,62 @@
     }
 
     .tree-folder::before {
-      content: "▣";
+      content: "▾";
       color: var(--accent);
       flex: 0 0 auto;
+      width: 10px;
+      text-align: center;
+    }
+
+    .tree-group:not([open]) .tree-folder::before {
+      content: "▸";
     }
 
     .tree-docs {
-      padding: 8px 8px 10px 22px;
+      position: relative;
+      margin-left: 16px;
+      padding: 2px 0 4px;
       display: grid;
-      gap: 6px;
+      gap: 2px;
+    }
+
+    .tree-docs::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 0;
+      bottom: 8px;
+      width: 2px;
+      background: rgba(255,255,255,0.08);
     }
 
     .tree-link {
-      display: grid;
-      gap: 4px;
-      padding: 9px 10px 9px 16px;
-      border: 2px solid transparent;
       position: relative;
+      display: grid;
+      gap: 2px;
+      padding: 8px 10px 8px 26px;
+      border: 2px solid transparent;
       background: transparent;
+      min-height: 38px;
     }
 
     .tree-link::before {
-      content: "•";
+      content: "";
       position: absolute;
-      left: 4px;
-      top: 10px;
-      color: var(--accent);
-      font: 700 14px/1 var(--pixel);
+      left: -10px;
+      top: 18px;
+      width: 10px;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .tree-link::after {
+      content: "·";
+      position: absolute;
+      left: 14px;
+      top: 8px;
+      color: var(--accent-2);
+      font: 700 18px/1 var(--pixel);
     }
 
     .tree-link:hover {
@@ -346,6 +413,76 @@
       background: linear-gradient(135deg, rgba(242, 201, 76, 0.18), rgba(255,255,255,0.03)), var(--panel-soft);
       border-color: var(--accent);
       box-shadow: inset 4px 0 0 var(--accent);
+    }
+
+    .tree-row:hover {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.06);
+    }
+
+    .tree-root {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .tree-root-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 2px solid rgba(255,255,255,0.08);
+      background: linear-gradient(135deg, rgba(242, 201, 76, 0.12), rgba(255,255,255,0.02)), var(--panel-raised);
+    }
+
+    .tree-root-row::before {
+      content: "⌘";
+      color: var(--accent);
+      font: 700 14px/1 var(--pixel);
+      margin-right: 10px;
+    }
+
+    .tree-root-meta,
+    .tree-node-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .tree-node-title {
+      min-width: 0;
+    }
+
+    .tree-count {
+      color: var(--muted);
+      font: 700 11px/1.4 var(--pixel);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .tree-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 2px rgba(242, 201, 76, 0.15);
+    }
+
+    .tree-status.archived {
+      background: #ff7676;
+      box-shadow: 0 0 0 2px rgba(255, 118, 118, 0.15);
+    }
+
+    .tree-file-title {
+      color: var(--text);
+      font: 700 12px/1.4 var(--pixel);
+      text-transform: uppercase;
+      word-break: break-word;
     }
 
     .pill {
@@ -709,44 +846,47 @@
     {{ if eq .CurrentPage "wiki" }}
     <div class="shell">
       <aside class="sidebar frame">
-        <section class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Tenant</h2>
-              <div class="panel-kicker">Current workspace at the top-left, then the wiki tree.</div>
+        <div class="explorer">
+          <div class="explorer-head">
+            <h2>Explorer</h2>
+            <div class="panel-kicker">Workspace tree like an IDE sidebar. Collections are folders, documents are files.</div>
+          </div>
+          <div class="explorer-body">
+            <div class="tree-root">
+              <div class="tree-root-row">
+                <div>
+                  <div class="name">{{ .TenantID }}</div>
+                  <div class="sub">workspace root</div>
+                </div>
+                <div class="tree-root-meta">
+                  <span class="tree-count">{{ .NamespaceCount }} dirs</span>
+                  <span class="tree-count">{{ .DocumentCount }} files</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="tenant-chip">
-            <div class="name">{{ .TenantID }}</div>
-            <div class="sub">{{ .NamespaceCount }} collections · {{ .DocumentCount }} documents</div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Wiki Tree</h2>
-              <div class="panel-kicker">Click a document on the left. Read it on the right.</div>
-            </div>
-          </div>
 
           <div class="tree">
             {{ range .NamespaceTree }}
             <details class="tree-group" {{ if or (eq $.SelectedNamespaceID .ID) (and $.SelectedDocument (eq $.SelectedDocument.NamespaceID .ID)) }}open{{ end }}>
               <summary>
-                <div class="tree-folder">
-                  <div>
-                    <div class="name">{{ .DisplayName }}</div>
-                    <div class="tree-meta">{{ .Key }}</div>
+                <div class="tree-row">
+                  <div class="tree-folder">
+                    <div class="tree-node-title">
+                      <div class="name">{{ .DisplayName }}</div>
+                      <div class="tree-meta">{{ .Key }}</div>
+                    </div>
+                  </div>
+                  <div class="tree-node-meta">
+                    <span class="tree-count">{{ .DocumentCount }} files</span>
+                    <span class="tree-status {{ .Status }}"></span>
                   </div>
                 </div>
-                <span class="pill {{ .Status }}">{{ .Status }}</span>
               </summary>
 
               <div class="tree-docs">
                 {{ range .Documents }}
                 <a class="tree-link {{ if and $.SelectedDocument (eq $.SelectedDocument.ID .ID) }}selected{{ end }}" href="/ui?document_id={{ .ID }}&namespace_id={{ .NamespaceID }}">
-                  <div class="name">{{ .Title }}</div>
+                  <div class="tree-file-title">{{ .Title }}</div>
                   <div class="tree-meta">{{ .Slug }}</div>
                 </a>
                 {{ else }}
@@ -758,7 +898,8 @@
             <div class="empty-state">No collections yet.</div>
             {{ end }}
           </div>
-        </section>
+        </div>
+        <!-- explorer -->
       </aside>
 
       <main class="main">

@@ -44,6 +44,7 @@ type uiNamespaceTree struct {
 	Key         string
 	DisplayName string
 	Status      string
+	DocumentCount int
 	Documents   []uiDocumentCard
 }
 
@@ -284,12 +285,13 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 			Status:        item.Status,
 			DocumentCount: namespaceDocCount[item.ID],
 		})
-		namespaceTree = append(namespaceTree, uiNamespaceTree{
-			ID:          item.ID,
-			Key:         item.Key,
-			DisplayName: item.DisplayName,
-			Status:      item.Status,
-		})
+			namespaceTree = append(namespaceTree, uiNamespaceTree{
+				ID:            item.ID,
+				Key:           item.Key,
+				DisplayName:   item.DisplayName,
+				Status:        item.Status,
+				DocumentCount: namespaceDocCount[item.ID],
+			})
 	}
 
 	documentCards := make([]uiDocumentCard, 0, len(documents.Items))
