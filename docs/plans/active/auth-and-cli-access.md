@@ -302,7 +302,7 @@ Recommended commands:
 
 - `lw login`
 - `lw logout`
-- `lw auth status`
+- `lw auth whoami`
 - `lw auth token`
 - `lw auth profiles list`
 - `lw auth profiles use <name>`
@@ -312,7 +312,7 @@ Minimal first cut:
 
 - `lw login`
 - `lw logout`
-- `lw auth status`
+- `lw auth whoami`
 
 ## MCP And Remote Agent Alignment
 

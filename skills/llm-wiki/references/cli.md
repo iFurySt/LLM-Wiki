@@ -31,10 +31,10 @@ Preferred longer-lived flow:
 
 ```sh
 lw auth login --base-url http://127.0.0.1:8234
-lw auth status --base-url http://127.0.0.1:8234
+lw auth whoami --base-url http://127.0.0.1:8234
 ```
 
-`lw auth login --device-code` always prints the approval URL and code. On local machines it also tries to open the browser unless `--no-open` is passed. Base URL and `ns` can live in `~/.llm-wiki/config.json`, with flags taking precedence.
+`lw auth login --device-code` always prints the approval URL and code. On local machines it also tries to open the browser unless `--no-open` is passed. Base URL and profile state can live in `~/.llm-wiki/config.json`. Only `auth login` accepts `--ns`; other commands use the stored token context.
 
 ## Create A Document
 
@@ -52,6 +52,40 @@ llm-wiki document create \
 ```
 
 Use create when the knowledge does not already have a natural existing page.
+
+Source-aware create paths are also available:
+
+```sh
+llm-wiki document create text \
+  --base-url http://127.0.0.1:8234 \
+  --token dev-bootstrap-token \
+  --folder-id 1 \
+  --title "Launch Plan" \
+  --content "# Launch Plan\n\nInitial draft."
+
+llm-wiki document create file \
+  --base-url http://127.0.0.1:8234 \
+  --token dev-bootstrap-token \
+  --folder-id 1 \
+  --path ./notes/launch-plan.md
+
+llm-wiki document create url \
+  --base-url http://127.0.0.1:8234 \
+  --token dev-bootstrap-token \
+  --folder-id 1 \
+  --url https://example.com/launch-plan
+```
+
+`document create file` and `document create url` keep the imported body in the document while adding a small front matter block that preserves source metadata such as the original ref and content type.
+
+For URL-specific routing, use:
+
+```sh
+llm-wiki document create x --base-url http://127.0.0.1:8234 --token dev-bootstrap-token --folder-id 1 --url https://x.com/openai/status/1
+llm-wiki document create zhihu --base-url http://127.0.0.1:8234 --token dev-bootstrap-token --folder-id 1 --url https://www.zhihu.com/question/1
+```
+
+`document create xiaohongshu` is currently reserved as a manual-only path and will tell you to fall back to pasted text or a local file.
 
 ## Update A Document
 

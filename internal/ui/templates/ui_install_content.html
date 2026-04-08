@@ -32,7 +32,8 @@ curl -fsSL {{ .InstallScriptURL }} | sh
 
 After install:
 llm-wiki system info --base-url {{ .InstallBaseURL }}
-llm-wiki auth login --base-url {{ .InstallBaseURL }}</pre>
+llm-wiki auth login --base-url {{ .InstallBaseURL }}
+llm-wiki auth whoami --base-url {{ .InstallBaseURL }}</pre>
         </div>
 
         <div class="copy-block">
@@ -42,7 +43,8 @@ llm-wiki auth login --base-url {{ .InstallBaseURL }}</pre>
           </div>
           <pre id="cli-human" class="code-block">curl -fsSL {{ .InstallScriptURL }} | sh
 llm-wiki system info --base-url {{ .InstallBaseURL }}
-llm-wiki auth login --base-url {{ .InstallBaseURL }}</pre>
+llm-wiki auth login --base-url {{ .InstallBaseURL }}
+llm-wiki auth whoami --base-url {{ .InstallBaseURL }}</pre>
         </div>
         <div class="copy-feedback" data-copy-feedback></div>
       </div>

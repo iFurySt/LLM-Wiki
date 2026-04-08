@@ -18,6 +18,8 @@ After installation:
 ```sh
 llm-wiki version
 llm-wiki system info --base-url http://127.0.0.1:8234
+llm-wiki auth login --base-url http://127.0.0.1:8234
+llm-wiki auth whoami --base-url http://127.0.0.1:8234
 ```
 
 The installer also places a short alias:
@@ -25,6 +27,8 @@ The installer also places a short alias:
 ```sh
 lw version
 lw system info --base-url http://127.0.0.1:8234
+lw auth login --base-url http://127.0.0.1:8234
+lw auth whoami --base-url http://127.0.0.1:8234
 ```
 
 ## Skill Package

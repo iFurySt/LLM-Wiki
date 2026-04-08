@@ -28,7 +28,6 @@ func NewRootCommand() *cobra.Command {
 	var timeout time.Duration
 	var accessToken string
 	var tokenFile string
-	var ns string
 	var profileName string
 
 	root := &cobra.Command{
@@ -40,15 +39,14 @@ func NewRootCommand() *cobra.Command {
 	root.PersistentFlags().DurationVar(&timeout, "timeout", 10*time.Second, "HTTP timeout")
 	root.PersistentFlags().StringVar(&accessToken, "token", "", "Bearer token")
 	root.PersistentFlags().StringVar(&tokenFile, "token-file", "", "Path to a bearer token file")
-	root.PersistentFlags().StringVar(&ns, "ns", "", "NS used for auth/profile flows")
 	root.PersistentFlags().StringVar(&profileName, "profile", "", "CLI profile name under ~/.llm-wiki/config.json")
 
 	root.AddCommand(newVersionCommand())
-	root.AddCommand(newAuthCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
-	root.AddCommand(newNSCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
-	root.AddCommand(newSystemCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
-	root.AddCommand(newFolderCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
-	root.AddCommand(newDocumentCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
+	root.AddCommand(newAuthCommand(&baseURL, &timeout, &accessToken, &tokenFile, &profileName))
+	root.AddCommand(newNSCommand(&baseURL, &timeout, &accessToken, &tokenFile, &profileName))
+	root.AddCommand(newSystemCommand(&baseURL, &timeout, &accessToken, &tokenFile, &profileName))
+	root.AddCommand(newFolderCommand(&baseURL, &timeout, &accessToken, &tokenFile, &profileName))
+	root.AddCommand(newDocumentCommand(&baseURL, &timeout, &accessToken, &tokenFile, &profileName))
 
 	return root
 }
@@ -63,12 +61,13 @@ func newVersionCommand() *cobra.Command {
 	}
 }
 
-func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
+func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, profileName *string) *cobra.Command {
 	var useDeviceCode bool
 	var noOpen bool
 	var displayName string
 	var accessTokenToStore string
 	var provider string
+	var loginNS string
 
 	cmd := &cobra.Command{
 		Use:   "auth",
@@ -79,7 +78,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		Use:   "login",
 		Short: "Sign in with browser, device code, or store an existing token",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			options, err := resolvedRuntimeOptions(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			options, err := resolvedRuntimeOptions(*baseURL, *timeout, *accessToken, *tokenFile, loginNS, *profileName)
 			if err != nil {
 				return err
 			}
@@ -108,14 +107,15 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 	loginCmd.Flags().StringVar(&displayName, "name", "", "Preferred display name for the browser/device login")
 	loginCmd.Flags().StringVar(&provider, "provider", "", "OAuth provider to use for browser login")
 	loginCmd.Flags().StringVar(&accessTokenToStore, "access-token", "", "Store an existing bearer token into the active profile")
+	loginCmd.Flags().StringVar(&loginNS, "ns", "", "Target ns for the new login session")
 
 	cmd.AddCommand(loginCmd)
 	cmd.AddCommand(&cobra.Command{
-		Use:   "switch-ns <ns>",
+		Use:   "switch <ns>",
 		Short: "Switch the active profile to another ns you can access",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -127,10 +127,10 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		},
 	})
 	cmd.AddCommand(&cobra.Command{
-		Use:   "status",
-		Short: "Show the active auth status",
+		Use:   "whoami",
+		Short: "Show the current authenticated principal",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -154,7 +154,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		Use:   "logout",
 		Short: "Remove stored tokens from the active profile",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			options, err := resolvedRuntimeOptions(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			options, err := resolvedRuntimeOptions(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -171,7 +171,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		Use:   "create",
 		Short: "Create or get a service principal",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -189,7 +189,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		Use:   "list",
 		Short: "List service principals",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -214,7 +214,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		Use:   "issue",
 		Short: "Issue a service token",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -241,7 +241,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		Use:   "list",
 		Short: "List issued tokens",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -257,7 +257,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 		Short: "Revoke a token",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -277,7 +277,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 	return cmd
 }
 
-func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
+func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, profileName *string) *cobra.Command {
 	var nsDisplayName string
 	var nsKey string
 	var inviteEmail string
@@ -293,7 +293,7 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 		Use:   "list",
 		Short: "List ns scopes available to the current user",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -308,7 +308,7 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 		Use:   "create",
 		Short: "Create a new ns",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -327,11 +327,15 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 	_ = createCmd.MarkFlagRequired("display-name")
 	cmd.AddCommand(createCmd)
 
-	cmd.AddCommand(&cobra.Command{
-		Use:   "invite-list",
+	inviteCmd := &cobra.Command{
+		Use:   "invite",
+		Short: "Manage invitations for ns access",
+	}
+	inviteCmd.AddCommand(&cobra.Command{
+		Use:   "list",
 		Short: "List invitations for the current ns",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -342,11 +346,11 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 			return printJSON(cmd, resp)
 		},
 	})
-	inviteCmd := &cobra.Command{
-		Use:   "invite",
+	createInviteCmd := &cobra.Command{
+		Use:   "create",
 		Short: "Invite a user to the current ns",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -361,18 +365,17 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 			return printJSON(cmd, resp)
 		},
 	}
-	inviteCmd.Flags().StringVar(&inviteEmail, "email", "", "Invitee email")
-	inviteCmd.Flags().StringVar(&inviteRole, "role", "member", "Invite role")
-	inviteCmd.Flags().DurationVar(&inviteTTL, "expires-in", 72*time.Hour, "Invite lifetime")
-	_ = inviteCmd.MarkFlagRequired("email")
-	cmd.AddCommand(inviteCmd)
-
-	cmd.AddCommand(&cobra.Command{
-		Use:   "accept-invite <token>",
+	createInviteCmd.Flags().StringVar(&inviteEmail, "email", "", "Invitee email")
+	createInviteCmd.Flags().StringVar(&inviteRole, "role", "member", "Invite role")
+	createInviteCmd.Flags().DurationVar(&inviteTTL, "expires-in", 72*time.Hour, "Invite lifetime")
+	_ = createInviteCmd.MarkFlagRequired("email")
+	inviteCmd.AddCommand(createInviteCmd)
+	inviteCmd.AddCommand(&cobra.Command{
+		Use:   "accept <token>",
 		Short: "Accept an invite into another ns",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -383,11 +386,12 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 			return printJSON(cmd, resp)
 		},
 	})
+	cmd.AddCommand(inviteCmd)
 	exportCmd := &cobra.Command{
 		Use:   "export-obsidian",
 		Short: "Export the current ns into an Obsidian-compatible vault folder",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -415,7 +419,7 @@ func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, 
 	return cmd
 }
 
-func newSystemCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
+func newSystemCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, profileName *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "system",
 		Short: "Inspect LLM-Wiki system endpoints",
@@ -424,7 +428,7 @@ func newSystemCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 		Use:   "info",
 		Short: "Fetch system info from the LLM-Wiki server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			options, err := resolvedRuntimeOptions(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			options, err := resolvedRuntimeOptions(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -440,7 +444,7 @@ func newSystemCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 	return cmd
 }
 
-func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
+func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, profileName *string) *cobra.Command {
 	var key string
 	var displayName string
 	var description string
@@ -455,7 +459,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 		Use:   "create",
 		Short: "Create a folder",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -483,7 +487,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 		Short: "Get a folder by ID",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -503,7 +507,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 		Use:   "list",
 		Short: "List folders",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -520,7 +524,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 		Short: "Archive a folder",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -540,9 +544,7 @@ func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 	return cmd
 }
 
-func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
-	var folderID int64
-	var slug string
+func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, profileName *string) *cobra.Command {
 	var title string
 	var content string
 	var authorType string
@@ -555,47 +557,14 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 		Use:   "document",
 		Short: "Manage documents",
 	}
-
-	createCmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a document",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
-			if err != nil {
-				return err
-			}
-			resp, err := client.CreateDocument(context.Background(), api.CreateDocumentRequest{
-				FolderID:      folderID,
-				Slug:          slug,
-				Title:         title,
-				Content:       content,
-				AuthorType:    authorType,
-				AuthorID:      authorID,
-				ChangeSummary: changeSummary,
-			})
-			if err != nil {
-				return err
-			}
-			return printJSON(cmd, resp)
-		},
-	}
-	createCmd.Flags().Int64Var(&folderID, "folder-id", 0, "Folder ID")
-	createCmd.Flags().StringVar(&slug, "slug", "", "Document slug")
-	createCmd.Flags().StringVar(&title, "title", "", "Document title")
-	createCmd.Flags().StringVar(&content, "content", "", "Document content")
-	createCmd.Flags().StringVar(&authorType, "author-type", "", "Optional author type override")
-	createCmd.Flags().StringVar(&authorID, "author-id", "", "Optional author ID override")
-	createCmd.Flags().StringVar(&changeSummary, "change-summary", "", "Change summary")
-	_ = createCmd.MarkFlagRequired("folder-id")
-	_ = createCmd.MarkFlagRequired("slug")
-	_ = createCmd.MarkFlagRequired("title")
+	createCmd := newDocumentCreateCommand(baseURL, timeout, accessToken, tokenFile, profileName)
 
 	getCmd := &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get a document by ID",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -616,7 +585,7 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 		Short: "Get a document by folder and slug",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -636,7 +605,7 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 		Use:   "list",
 		Short: "List documents",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -663,7 +632,7 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 		Short: "Update a document and create a new revision",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}
@@ -696,7 +665,7 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 		Short: "Archive a document",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, "", *profileName)
 			if err != nil {
 				return err
 			}

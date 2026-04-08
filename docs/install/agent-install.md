@@ -15,14 +15,19 @@ Check:
 ```sh
 lw version
 lw auth login --base-url https://your-llm-wiki-host
+lw auth whoami --base-url https://your-llm-wiki-host
 lw ns list --base-url https://your-llm-wiki-host
 lw folder list --base-url https://your-llm-wiki-host
+lw document create text --base-url https://your-llm-wiki-host --folder-id 1 --title "Hello" --content "First note"
 ```
 
 Notes:
 
 - first boot is `https://your-llm-wiki-host/setup`
 - CLI state lives in `~/.llm-wiki/config.json`
+- `lw auth login --ns <target>` chooses the login target `ns`; other commands use the token's bound `ns`
+- switch between accessible spaces with `lw auth switch <ns>`
+- manage invites with `lw ns invite list|create|accept`
 - hosted install links should resolve from `LLM_WIKI_INSTALL_BASE_URL`
 
 ## Docker

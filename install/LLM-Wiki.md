@@ -36,7 +36,17 @@ Check:
 ```sh
 lw version
 lw auth login --base-url https://llm-wiki.ifuryst.com
+lw auth whoami --base-url https://llm-wiki.ifuryst.com
 lw folder list --base-url https://llm-wiki.ifuryst.com
+```
+
+Useful auth and collaboration commands:
+
+```sh
+lw auth switch team-space
+lw ns invite list
+lw ns invite create --email teammate@example.com
+lw ns invite accept <token>
 ```
 
 ## Run npx MCP

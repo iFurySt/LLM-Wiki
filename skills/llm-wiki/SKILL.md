@@ -62,7 +62,7 @@ Follow this loop unless the user asks for something narrower:
 For a normal hosted setup, prefer this sequence:
 
 ```sh
-llm-wiki auth status
+llm-wiki auth whoami
 llm-wiki ns list
 llm-wiki document list
 ```
