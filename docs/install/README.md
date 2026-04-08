@@ -2,9 +2,9 @@
 
 Install docs are split by purpose:
 
-1. [agent-install.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/agent-install.md)
-2. [release-distribution.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/release-distribution.md)
-3. [amoylab-beta-deploy.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/amoylab-beta-deploy.md)
+1. [agent-install.md](agent-install.md)
+2. [release-distribution.md](release-distribution.md)
+3. [amoylab-beta-deploy.md](amoylab-beta-deploy.md)
 
 Use:
 

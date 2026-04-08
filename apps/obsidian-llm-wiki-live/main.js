@@ -184,18 +184,18 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     await this.ensureFolder(MIRROR_ROOT_FOLDER);
     await this.ensureFolder(rootPath);
 
-    const namespaceByID = new Map();
+    const folderByID = new Map();
     for (const folder of snapshot.folders) {
-      namespaceByID.set(folder.id, folder);
+      folderByID.set(folder.id, folder);
       await this.ensureFolder(`${rootPath}/${sanitizePathSegment(folder.key || folder.display_name, `folder-${folder.id}`)}`);
     }
 
     let changedCount = 0;
     for (const document of snapshot.documents) {
-      const folder = namespaceByID.get(document.folder_id);
-      const namespaceSegment = sanitizePathSegment(folder ? (folder.key || folder.display_name) : "", `folder-${document.folder_id}`);
+      const folder = folderByID.get(document.folder_id);
+      const folderSegment = sanitizePathSegment(folder ? (folder.key || folder.display_name) : "", `folder-${document.folder_id}`);
       const fileName = sanitizePathSegment(document.slug || document.title, `document-${document.id}`) + ".md";
-      const filePath = `${rootPath}/${namespaceSegment}/${fileName}`;
+      const filePath = `${rootPath}/${folderSegment}/${fileName}`;
       const content = renderMirroredMarkdown(snapshot.whoami.ns, folder, document);
       const changed = await this.upsertFile(filePath, content);
       if (changed) {
@@ -204,7 +204,7 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     }
 
     const indexPath = `${rootPath}/_llm-wiki-index.md`;
-    if (await this.upsertFile(indexPath, renderTenantIndexMarkdown(snapshot))) {
+    if (await this.upsertFile(indexPath, renderNSIndexMarkdown(snapshot))) {
       changedCount += 1;
     }
 
@@ -301,7 +301,7 @@ function renderMirroredMarkdown(ns, folder, document) {
   return `${frontmatter}\n${body}`;
 }
 
-function renderTenantIndexMarkdown(snapshot) {
+function renderNSIndexMarkdown(snapshot) {
   const lines = [
     "---",
     "llm_wiki_index: true",

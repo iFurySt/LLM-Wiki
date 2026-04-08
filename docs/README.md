@@ -4,12 +4,13 @@
 
 Read in this order:
 
-1. `knowledge/product.md`
-2. `knowledge/architecture.md`
-3. `knowledge/repo-map.md`
-4. `plans/active/`
-5. `todos/`
-6. `install/`
+1. `REPO_COLLAB_GUIDE.md`
+2. `knowledge/product.md`
+3. `knowledge/architecture.md`
+4. `knowledge/repo-map.md`
+5. `plans/active/`
+6. `todos/`
+7. `install/`
 
 Layout:
 
@@ -21,6 +22,8 @@ Layout:
 - `test-results/`: durable validation records
 - `references/`: distilled external notes
 - `install/`: install and release docs
+- `REPO_COLLAB_GUIDE.md`: repo-level collaboration contract
+- `HISTORY_GUIDE.md`: commit-time durable history guidance
 
 Update rules:
 

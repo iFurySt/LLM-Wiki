@@ -57,12 +57,12 @@ lw version
 
 ## Repo Map
 
-- [AGENTS.md](/Users/bytedance/projects/github/LLM-Wiki/AGENTS.md)
-- [docs/README.md](/Users/bytedance/projects/github/LLM-Wiki/docs/README.md)
-- [docs/knowledge/product.md](/Users/bytedance/projects/github/LLM-Wiki/docs/knowledge/product.md)
-- [docs/knowledge/architecture.md](/Users/bytedance/projects/github/LLM-Wiki/docs/knowledge/architecture.md)
-- [docs/knowledge/repo-map.md](/Users/bytedance/projects/github/LLM-Wiki/docs/knowledge/repo-map.md)
-- [docs/install/README.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/README.md)
+- [AGENTS.md](AGENTS.md)
+- [docs/README.md](docs/README.md)
+- [docs/knowledge/product.md](docs/knowledge/product.md)
+- [docs/knowledge/architecture.md](docs/knowledge/architecture.md)
+- [docs/knowledge/repo-map.md](docs/knowledge/repo-map.md)
+- [docs/install/README.md](docs/install/README.md)
 
 ## Notes
 

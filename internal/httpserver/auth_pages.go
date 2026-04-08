@@ -430,20 +430,20 @@ const authShellHTML = `<!doctype html>
 
 const setupFormHTML = `<form method="post" action="{{action}}">
   <div class="error">{{error}}</div>
-  <label>Tenant</label>
+  <label>NS</label>
   <input name="ns" value="{{ns}}" placeholder="default" required>
   <label>Username</label>
   <input name="username" placeholder="admin" required>
   <label>Display Name</label>
-  <input name="display_name" placeholder="Workspace Admin" required>
+  <input name="display_name" placeholder="NS Admin" required>
   <label>Password</label>
   <input type="password" name="password" placeholder="Choose a strong password" required>
-  <button type="submit">Initialize Workspace</button>
+  <button type="submit">Initialize NS</button>
 </form>`
 
 const loginFormHTML = `<form method="post" action="{{action}}">
   <div class="error">{{error}}</div>
-  <label>Tenant</label>
+  <label>NS</label>
   <input name="ns" value="{{ns}}" placeholder="default" required>
   <label>Username</label>
   <input name="username" placeholder="admin" required>
@@ -455,7 +455,7 @@ const loginFormHTML = `<form method="post" action="{{action}}">
 const oauthApproveFormHTML = `{{provider_html}}<form method="post" action="{{action}}">
   <div class="error">{{error}}</div>
   <input type="hidden" name="request_id" value="{{request_id}}">
-  <label>Tenant</label>
+  <label>NS</label>
   <input name="ns" value="{{ns}}" readonly>
   <label>Username</label>
   <input name="username" placeholder="admin" required>
@@ -500,7 +500,7 @@ const adminUsersHTML = `<!doctype html>
       <div class="top">
         <div>
           <h1>LLM-Wiki Admin</h1>
-          <div class="muted">Tenant: %s · Signed in as %s</div>
+          <div class="muted">NS: %s · Signed in as %s</div>
         </div>
         <form method="post" action="/admin/logout"><button type="submit">Log Out</button></form>
       </div>
@@ -552,7 +552,7 @@ const adminUsersHTML = `<!doctype html>
           </table>
           <br>
           <table>
-            <thead><tr><th>Provider</th><th>Display Name</th><th>Enabled</th><th>Auto Users</th><th>Auto Tenants</th></tr></thead>
+            <thead><tr><th>Provider</th><th>Display Name</th><th>Enabled</th><th>Auto Users</th><th>Auto NS</th></tr></thead>
             <tbody>%s</tbody>
           </table>
         </div>

@@ -8,9 +8,9 @@
 
 ## Result Files
 
-- Unit: [20260407-144107-unit.txt](/Users/ifuryst/projects/github/LLM-Wiki/docs/test-results/unit/20260407-144107-unit.txt)
-- E2E: [20260407-144135-e2e.txt](/Users/ifuryst/projects/github/LLM-Wiki/docs/test-results/e2e/20260407-144135-e2e.txt)
-- Perf: [20260407-144135-perf.txt](/Users/ifuryst/projects/github/LLM-Wiki/docs/test-results/perf/20260407-144135-perf.txt)
+- Unit: [20260407-144107-unit.txt](unit/20260407-144107-unit.txt)
+- E2E: [20260407-144135-e2e.txt](e2e/20260407-144135-e2e.txt)
+- Perf: [20260407-144135-perf.txt](perf/20260407-144135-perf.txt)
 
 ## Summary
 
