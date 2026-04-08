@@ -1,67 +1,33 @@
 # Repo Map
 
-## Current Status
+The repo is still in an early service-first stage.
 
-The repository is in bootstrap phase.
+Top-level layout:
 
-## Top-Level Layout
+- `cmd/`: server and CLI entrypoints
+- `internal/`: service, HTTP, CLI, config, repo, auth, UI
+- `internal/db/migrations/`: schema migrations
+- `docs/`: durable product and repo knowledge
+- `deploy/`: local and production deployment files
+- `install/`: hosted install assets
+- `skills/`: official LLM-Wiki skill
+- `npm/`: stdio MCP bridge package
+- `apps/`: downstream adapters such as the Obsidian plugin
+- `scripts/`: test and release helpers
 
-- `AGENTS.md`: short table of contents for agent operation
-- `cmd/`: entrypoints for the HTTP service and the thin CLI wrapper
-- `internal/`: private Go packages for app wiring, config, logging, HTTP server, CLI, and client code
-- `deploy/dev/`: local development infrastructure definitions
-- `Dockerfile`: production-oriented container build for the main LLM-Wiki service
-- `.github/workflows/`: CI and release automation
-- `docs/`: durable repository knowledge and execution artifacts
-- `install/`: hosted install docs and scripts served from `:8234/install/*`
-- `skills/`: official LLM-Wiki agent skill source files
-- `npm/`: publishable npm packages maintained in-repo
-- `apps/`: desktop-client or plugin adapters maintained in-repo
-- `scripts/`: helper scripts for testing and release packaging
-- `README.md`: quickstart and local setup notes
-- `.env.example`: environment variable template
-- `Makefile`: common development commands
+Current implementation status:
 
-## Docs Layout
+- PostgreSQL-backed service is working
+- folder and document CRUD exist
+- revisions exist
+- HTTP API, CLI, MCP, and web UI all exist
+- auth, setup, and browser/device login exist
+- hosted install docs and CLI installer exist
+- Obsidian mirror adapter exists
+- the hosted `/ui` page now uses a small embedded React island with `@mui/x-tree-view` for the left file tree while keeping the rest of the page server-rendered
 
-- `docs/knowledge/`: long-lived product, architecture, and repo docs
-- `docs/plans/active/`: current execution plans
-- `docs/plans/completed/`: closed execution plans
-- `docs/todos/`: near-term backlog
-- `docs/decisions/`: major decisions
-- `docs/test-results/`: durable validation and benchmark records
-- `docs/worklog/`: chronological milestones
-- `docs/references/`: distilled external references
-- `docs/install/`: durable install and release-distribution references
+Current boundaries:
 
-## Planned Layout
-
-Expected directories as implementation grows:
-
-- `pkg/`: reusable public packages if needed
-- `configs/`: local or example configuration
-- `test/` or `tests/`: integration and end-to-end tests
-- `internal/db/migrations/`: embedded SQL migrations used at startup
-
-## Implementation Status
-
-- naming: settled on `LLM-Wiki`
-- docs system: initialized and structured
-- Go service scaffold: initialized
-- thin HTTP CLI scaffold: initialized
-- test-result tracking structure: initialized
-- database schema: initial v0 migration implemented
-- HTTP API: readiness, structured error responses, space list, namespace CRUD/list/archive, document CRUD/list/filter, slug lookup, and archive
-- auth: bearer token middleware, service principals, service-token issuance and revocation, browser/device login flows, first-boot setup, web admin sessions, bootstrap admin token support, admin-managed OAuth provider config, and OAuth-backed auto-provisioning of first-login users and personal tenants
-- MCP: streamable HTTP and legacy SSE endpoints with bearer-token auth and scoped LLM-Wiki tools and resources
-- CLI: system, auth, workspace, space, namespace, and document commands implemented, including browser/device login with localhost callback, token-file support, local profiles, provider selection, token admin flows, workspace invites and switching, and an initial Obsidian export command
-- Obsidian adapter: a desktop-only plugin under `apps/obsidian-llm-wiki-live/` reads LLM-Wiki over HTTP, reuses `~/.llm-wiki/config.json`, and continuously mirrors the current tenant into vault files under `LLM-Wiki/<tenant>/...`
-- skill: bundled `llm-wiki` skill exists, but still needs a stronger hosted-service-first and out-of-box workflow shape
-- UI: retro wiki-style Gin-served HTML page for browsing, creating, editing, archiving, install flows, first-run setup, and a pixel-style admin user console
-- infra manifests: local development compose initialized
-- dockerized dev entrypoint: `make dev` with containerized hot reload for the app service
-- install surfaces: hosted markdown guide, shell installer, and skill package download endpoints implemented
-- release packaging: multi-platform CLI archives and packaged skill assets generated into `dist/install/`
-- GitHub release automation: pushed tags publish CLI and install assets to GitHub Releases, push the main service image to Docker Hub and GHCR, and publish `@ifuryst/llm-wiki-mcp` to npm
-- main-branch beta automation: pushes to `main` publish `ghcr.io/ifuryst/llm-wiki:beta` and can SSH-deploy that image to amoylab
-- npm stdio bridge: `@ifuryst/llm-wiki-mcp` package source added for `npx`-style MCP usage
+- source of truth is LLM-Wiki
+- runtime dependency is PostgreSQL
+- user-facing terminology is `ns` and `folder`

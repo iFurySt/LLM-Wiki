@@ -28,28 +28,37 @@ func NewRootCommand() *cobra.Command {
 	var timeout time.Duration
 	var accessToken string
 	var tokenFile string
-	var tenantID string
+	var ns string
 	var profileName string
 
 	root := &cobra.Command{
 		Use:   "llm-wiki",
 		Short: "LLM-Wiki CLI",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if strings.TrimSpace(ns) == "" {
+				if value, err := cmd.Flags().GetString("tenant"); err == nil && strings.TrimSpace(value) != "" {
+					ns = value
+				}
+			}
+			return nil
+		},
 	}
 
 	root.PersistentFlags().StringVar(&baseURL, "base-url", "", "LLM-Wiki server base URL")
 	root.PersistentFlags().DurationVar(&timeout, "timeout", 10*time.Second, "HTTP timeout")
 	root.PersistentFlags().StringVar(&accessToken, "token", "", "Bearer token")
 	root.PersistentFlags().StringVar(&tokenFile, "token-file", "", "Path to a bearer token file")
-	root.PersistentFlags().StringVar(&tenantID, "tenant", "", "Tenant ID used for login/bootstrap flows")
+	root.PersistentFlags().StringVar(&ns, "ns", "", "Namespace scope used for auth/profile flows")
 	root.PersistentFlags().StringVar(&profileName, "profile", "", "CLI profile name under ~/.llm-wiki/config.json")
+	root.PersistentFlags().String("tenant", "", "Deprecated alias for --ns")
+	_ = root.PersistentFlags().MarkHidden("tenant")
 
 	root.AddCommand(newVersionCommand())
-	root.AddCommand(newAuthCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
-	root.AddCommand(newWorkspaceCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
-	root.AddCommand(newSystemCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
-	root.AddCommand(newSpaceCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
-	root.AddCommand(newNamespaceCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
-	root.AddCommand(newDocumentCommand(&baseURL, &timeout, &accessToken, &tokenFile, &tenantID, &profileName))
+	root.AddCommand(newAuthCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
+	root.AddCommand(newNSCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
+	root.AddCommand(newSystemCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
+	root.AddCommand(newFolderCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
+	root.AddCommand(newDocumentCommand(&baseURL, &timeout, &accessToken, &tokenFile, &ns, &profileName))
 
 	return root
 }
@@ -92,6 +101,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 				}
 				return persistProfile(options.ProfileName, storedProfile{
 					BaseURL:     options.BaseURL,
+					NS:          whoami.TenantID,
 					TenantID:    whoami.TenantID,
 					AccessToken: accessTokenToStore,
 					PrincipalID: whoami.PrincipalID,
@@ -112,9 +122,26 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 
 	cmd.AddCommand(loginCmd)
 	cmd.AddCommand(&cobra.Command{
-		Use:   "switch-tenant <tenant-id>",
-		Short: "Switch the active profile to another workspace or tenant you can access",
+		Use:   "switch-ns <ns>",
+		Short: "Switch the active profile to another ns you can access",
 		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
+			if err != nil {
+				return err
+			}
+			resp, err := client.SwitchTenant(context.Background(), args[0])
+			if err != nil {
+				return err
+			}
+			return persistLoginProfile(options, resp, "")
+		},
+	})
+	cmd.AddCommand(&cobra.Command{
+		Use:    "switch-tenant <tenant-id>",
+		Short:  "Deprecated alias for switch-ns",
+		Hidden: true,
+		Args:   cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
@@ -142,7 +169,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 			payload := map[string]any{
 				"profile":        options.ProfileName,
 				"base_url":       options.BaseURL,
-				"tenant_id":      whoami.TenantID,
+				"ns":             whoami.TenantID,
 				"principal_id":   whoami.PrincipalID,
 				"principal_type": whoami.PrincipalType,
 				"display_name":   whoami.DisplayName,
@@ -205,7 +232,7 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 
 	tokenCmd := &cobra.Command{
 		Use:   "token",
-		Short: "Manage tenant-scoped service tokens",
+		Short: "Manage ns-scoped service tokens",
 	}
 	var principalID string
 	var tokenDisplayName string
@@ -278,21 +305,21 @@ func newAuthCommand(baseURL *string, timeout *time.Duration, accessToken *string
 	return cmd
 }
 
-func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
-	var workspaceDisplayName string
-	var workspaceTenantID string
+func newNSCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
+	var nsDisplayName string
+	var nsKey string
 	var inviteEmail string
 	var inviteRole string
 	var inviteTTL time.Duration
 	var exportOutputDir string
 
 	cmd := &cobra.Command{
-		Use:   "workspace",
-		Short: "Manage workspaces and invitations",
+		Use:   "ns",
+		Short: "Manage ns scopes and invitations",
 	}
 	cmd.AddCommand(&cobra.Command{
 		Use:   "list",
-		Short: "List workspaces available to the current user",
+		Short: "List ns scopes available to the current user",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
@@ -307,15 +334,15 @@ func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 	})
 	createCmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new workspace",
+		Short: "Create a new ns",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
 				return err
 			}
 			resp, err := client.CreateWorkspace(context.Background(), api.CreateWorkspaceRequest{
-				TenantID:    workspaceTenantID,
-				DisplayName: workspaceDisplayName,
+				TenantID:    nsKey,
+				DisplayName: nsDisplayName,
 			})
 			if err != nil {
 				return err
@@ -323,14 +350,14 @@ func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 			return printJSON(cmd, resp)
 		},
 	}
-	createCmd.Flags().StringVar(&workspaceDisplayName, "display-name", "", "Workspace display name")
-	createCmd.Flags().StringVar(&workspaceTenantID, "tenant-id", "", "Optional tenant/workspace key")
+	createCmd.Flags().StringVar(&nsDisplayName, "display-name", "", "NS display name")
+	createCmd.Flags().StringVar(&nsKey, "key", "", "Optional ns key")
 	_ = createCmd.MarkFlagRequired("display-name")
 	cmd.AddCommand(createCmd)
 
 	cmd.AddCommand(&cobra.Command{
 		Use:   "invite-list",
-		Short: "List invitations for the current workspace",
+		Short: "List invitations for the current ns",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
@@ -345,7 +372,7 @@ func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 	})
 	inviteCmd := &cobra.Command{
 		Use:   "invite",
-		Short: "Invite a user to the current workspace",
+		Short: "Invite a user to the current ns",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
@@ -370,7 +397,7 @@ func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 
 	cmd.AddCommand(&cobra.Command{
 		Use:   "accept-invite <token>",
-		Short: "Accept an invite into another workspace",
+		Short: "Accept an invite into another ns",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
@@ -386,7 +413,7 @@ func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 	})
 	exportCmd := &cobra.Command{
 		Use:   "export-obsidian",
-		Short: "Export the current workspace into an Obsidian-compatible vault folder",
+		Short: "Export the current ns into an Obsidian-compatible vault folder",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, options, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
@@ -402,9 +429,9 @@ func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 			}
 			outputDir := strings.TrimSpace(exportOutputDir)
 			if outputDir == "" {
-				outputDir = fmt.Sprintf("llm-wiki-%s-obsidian", options.TenantID)
+				outputDir = fmt.Sprintf("llm-wiki-%s-obsidian", options.NS)
 			}
-			if err := exportWorkspaceToObsidian(outputDir, options.TenantID, namespacesResp.Items, documentsResp.Items); err != nil {
+			if err := exportNSToObsidian(outputDir, options.NS, namespacesResp.Items, documentsResp.Items); err != nil {
 				return err
 			}
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "exported %d documents to %s\n", len(documentsResp.Items), outputDir)
@@ -413,29 +440,6 @@ func newWorkspaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 	}
 	exportCmd.Flags().StringVar(&exportOutputDir, "output", "", "Output directory for the Obsidian vault export")
 	cmd.AddCommand(exportCmd)
-	return cmd
-}
-
-func newSpaceCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "space",
-		Short: "Inspect spaces",
-	}
-	cmd.AddCommand(&cobra.Command{
-		Use:   "list",
-		Short: "List spaces",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
-			if err != nil {
-				return err
-			}
-			resp, err := client.ListSpaces(context.Background())
-			if err != nil {
-				return err
-			}
-			return printJSON(cmd, resp)
-		},
-	})
 	return cmd
 }
 
@@ -464,20 +468,20 @@ func newSystemCommand(baseURL *string, timeout *time.Duration, accessToken *stri
 	return cmd
 }
 
-func newNamespaceCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
+func newFolderCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
 	var key string
 	var displayName string
 	var description string
 	var visibility string
 
 	cmd := &cobra.Command{
-		Use:   "namespace",
-		Short: "Manage namespaces",
+		Use:   "folder",
+		Short: "Manage folders inside the current ns",
 	}
 
 	createCmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a namespace",
+		Short: "Create a folder",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
@@ -495,16 +499,16 @@ func newNamespaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 			return printJSON(cmd, resp)
 		},
 	}
-	createCmd.Flags().StringVar(&key, "key", "", "Namespace key")
-	createCmd.Flags().StringVar(&displayName, "display-name", "", "Namespace display name")
-	createCmd.Flags().StringVar(&description, "description", "", "Namespace description")
-	createCmd.Flags().StringVar(&visibility, "visibility", "private", "Namespace visibility")
+	createCmd.Flags().StringVar(&key, "key", "", "Folder key")
+	createCmd.Flags().StringVar(&displayName, "display-name", "", "Folder display name")
+	createCmd.Flags().StringVar(&description, "description", "", "Folder description")
+	createCmd.Flags().StringVar(&visibility, "visibility", "private", "Folder visibility")
 	_ = createCmd.MarkFlagRequired("key")
 	_ = createCmd.MarkFlagRequired("display-name")
 
 	getCmd := &cobra.Command{
 		Use:   "get <id>",
-		Short: "Get a namespace by ID",
+		Short: "Get a folder by ID",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
@@ -525,7 +529,7 @@ func newNamespaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 
 	listCmd := &cobra.Command{
 		Use:   "list",
-		Short: "List namespaces",
+		Short: "List folders",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
@@ -541,7 +545,7 @@ func newNamespaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 
 	archiveCmd := &cobra.Command{
 		Use:   "archive <id>",
-		Short: "Archive a namespace",
+		Short: "Archive a folder",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
@@ -565,14 +569,14 @@ func newNamespaceCommand(baseURL *string, timeout *time.Duration, accessToken *s
 }
 
 func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *string, tokenFile *string, tenantID *string, profileName *string) *cobra.Command {
-	var namespaceID int64
+	var folderID int64
 	var slug string
 	var title string
 	var content string
 	var authorType string
 	var authorID string
 	var changeSummary string
-	var namespaceIDForList int64
+	var folderIDForList int64
 	var statusForList string
 
 	cmd := &cobra.Command{
@@ -589,7 +593,7 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 				return err
 			}
 			resp, err := client.CreateDocument(context.Background(), api.CreateDocumentRequest{
-				NamespaceID:   namespaceID,
+				NamespaceID:   folderID,
 				Slug:          slug,
 				Title:         title,
 				Content:       content,
@@ -603,14 +607,14 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 			return printJSON(cmd, resp)
 		},
 	}
-	createCmd.Flags().Int64Var(&namespaceID, "namespace-id", 0, "Namespace ID")
+	createCmd.Flags().Int64Var(&folderID, "folder-id", 0, "Folder ID")
 	createCmd.Flags().StringVar(&slug, "slug", "", "Document slug")
 	createCmd.Flags().StringVar(&title, "title", "", "Document title")
 	createCmd.Flags().StringVar(&content, "content", "", "Document content")
 	createCmd.Flags().StringVar(&authorType, "author-type", "", "Optional author type override")
 	createCmd.Flags().StringVar(&authorID, "author-id", "", "Optional author ID override")
 	createCmd.Flags().StringVar(&changeSummary, "change-summary", "", "Change summary")
-	_ = createCmd.MarkFlagRequired("namespace-id")
+	_ = createCmd.MarkFlagRequired("folder-id")
 	_ = createCmd.MarkFlagRequired("slug")
 	_ = createCmd.MarkFlagRequired("title")
 
@@ -636,19 +640,19 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 	}
 
 	getBySlugCmd := &cobra.Command{
-		Use:   "get-by-slug <namespace-id> <slug>",
-		Short: "Get a document by namespace and slug",
+		Use:   "get-by-slug <folder-id> <slug>",
+		Short: "Get a document by folder and slug",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, _, err := authorizedClient(*baseURL, *timeout, *accessToken, *tokenFile, *tenantID, *profileName)
 			if err != nil {
 				return err
 			}
-			namespaceID, err := parseInt64Arg(args[0])
+			folderID, err := parseInt64Arg(args[0])
 			if err != nil {
 				return err
 			}
-			resp, err := client.GetDocumentBySlug(context.Background(), namespaceID, args[1])
+			resp, err := client.GetDocumentBySlug(context.Background(), folderID, args[1])
 			if err != nil {
 				return err
 			}
@@ -664,22 +668,22 @@ func newDocumentCommand(baseURL *string, timeout *time.Duration, accessToken *st
 			if err != nil {
 				return err
 			}
-			var namespaceFilter *int64
-			if namespaceIDForList > 0 {
-				namespaceFilter = &namespaceIDForList
+			var folderFilter *int64
+			if folderIDForList > 0 {
+				folderFilter = &folderIDForList
 			}
 			var status *string
 			if statusForList != "" {
 				status = &statusForList
 			}
-			resp, err := client.ListDocuments(context.Background(), namespaceFilter, status)
+			resp, err := client.ListDocuments(context.Background(), folderFilter, status)
 			if err != nil {
 				return err
 			}
 			return printJSON(cmd, resp)
 		},
 	}
-	listCmd.Flags().Int64Var(&namespaceIDForList, "namespace-id", 0, "Optional namespace ID filter")
+	listCmd.Flags().Int64Var(&folderIDForList, "folder-id", 0, "Optional folder ID filter")
 	listCmd.Flags().StringVar(&statusForList, "status", "", "Optional status filter")
 
 	updateCmd := &cobra.Command{
@@ -789,6 +793,7 @@ func authorizedClient(baseURL string, timeout time.Duration, accessToken string,
 			options.ExpiresAt = expiresAt
 			_ = persistProfile(options.ProfileName, storedProfile{
 				BaseURL:      options.BaseURL,
+				NS:           resp.TenantID,
 				TenantID:     resp.TenantID,
 				AccessToken:  resp.AccessToken,
 				RefreshToken: resp.RefreshToken,
@@ -924,6 +929,7 @@ func persistLoginProfile(options runtimeOptions, tokenResp api.TokenExchangeResp
 	}
 	return persistProfile(options.ProfileName, storedProfile{
 		BaseURL:      options.BaseURL,
+		NS:           tokenResp.TenantID,
 		TenantID:     tokenResp.TenantID,
 		AccessToken:  tokenResp.AccessToken,
 		RefreshToken: tokenResp.RefreshToken,

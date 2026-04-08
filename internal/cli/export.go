@@ -13,11 +13,11 @@ import (
 
 type obsidianManifest struct {
 	ExportedAt string `json:"exported_at"`
-	TenantID   string `json:"tenant_id"`
+	NS         string `json:"ns"`
 	DocCount   int    `json:"doc_count"`
 }
 
-func exportWorkspaceToObsidian(outputDir string, tenantID string, namespaces []api.NamespaceResponse, documents []api.DocumentResponse) error {
+func exportNSToObsidian(outputDir string, ns string, namespaces []api.NamespaceResponse, documents []api.DocumentResponse) error {
 	root := strings.TrimSpace(outputDir)
 	if root == "" {
 		return fmt.Errorf("output directory is required")
@@ -46,7 +46,7 @@ func exportWorkspaceToObsidian(outputDir string, tenantID string, namespaces []a
 		if filename == "" {
 			filename = fmt.Sprintf("document-%d", item.ID)
 		}
-		body := renderObsidianMarkdown(item, tenantID, nsKey, namespaceNames[item.NamespaceID])
+		body := renderObsidianMarkdown(item, ns, nsKey, namespaceNames[item.NamespaceID])
 		if err := os.WriteFile(filepath.Join(dir, filename+".md"), []byte(body), 0o644); err != nil {
 			return err
 		}
@@ -54,7 +54,7 @@ func exportWorkspaceToObsidian(outputDir string, tenantID string, namespaces []a
 
 	manifest := obsidianManifest{
 		ExportedAt: time.Now().Format(time.RFC3339),
-		TenantID:   tenantID,
+		NS:         ns,
 		DocCount:   len(documents),
 	}
 	payload, err := json.MarshalIndent(manifest, "", "  ")
@@ -64,17 +64,17 @@ func exportWorkspaceToObsidian(outputDir string, tenantID string, namespaces []a
 	return os.WriteFile(filepath.Join(root, ".llm-wiki-export.json"), payload, 0o644)
 }
 
-func renderObsidianMarkdown(item api.DocumentResponse, tenantID string, namespaceKey string, namespaceName string) string {
+func renderObsidianMarkdown(item api.DocumentResponse, ns string, folderKey string, folderName string) string {
 	var b strings.Builder
 	b.WriteString("---\n")
 	b.WriteString("llm_wiki: true\n")
-	b.WriteString("tenant_id: " + yamlScalar(tenantID) + "\n")
-	b.WriteString("namespace_key: " + yamlScalar(namespaceKey) + "\n")
-	if strings.TrimSpace(namespaceName) != "" {
-		b.WriteString("namespace_name: " + yamlScalar(namespaceName) + "\n")
+	b.WriteString("ns: " + yamlScalar(ns) + "\n")
+	b.WriteString("folder_key: " + yamlScalar(folderKey) + "\n")
+	if strings.TrimSpace(folderName) != "" {
+		b.WriteString("folder_name: " + yamlScalar(folderName) + "\n")
 	}
 	b.WriteString(fmt.Sprintf("document_id: %d\n", item.ID))
-	b.WriteString(fmt.Sprintf("namespace_id: %d\n", item.NamespaceID))
+	b.WriteString(fmt.Sprintf("folder_id: %d\n", item.NamespaceID))
 	b.WriteString("slug: " + yamlScalar(item.Slug) + "\n")
 	b.WriteString("title: " + yamlScalar(item.Title) + "\n")
 	b.WriteString("status: " + yamlScalar(item.Status) + "\n")

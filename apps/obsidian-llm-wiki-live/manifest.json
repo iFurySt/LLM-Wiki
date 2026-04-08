@@ -3,7 +3,7 @@
   "name": "LLM-Wiki Live",
   "version": "0.1.0",
   "minAppVersion": "1.7.2",
-  "description": "Continuously sync the current LLM-Wiki tenant into Obsidian Files under LLM-Wiki/<tenant>/.",
+  "description": "Continuously sync the current LLM-Wiki ns into Obsidian Files under LLM-Wiki/<ns>/.",
   "author": "LLM-Wiki",
   "isDesktopOnly": true
 }

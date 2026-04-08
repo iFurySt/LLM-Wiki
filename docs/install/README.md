@@ -1,24 +1,13 @@
 # Install
 
-This directory is the durable install and distribution reference for LLM-Wiki.
+Install docs are split by purpose:
 
-Use it when you need to answer:
+1. [agent-install.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/agent-install.md)
+2. [release-distribution.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/release-distribution.md)
+3. [amoylab-beta-deploy.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/amoylab-beta-deploy.md)
 
-- how humans should install and run LLM-Wiki
-- how AI agents should connect through CLI, MCP, or hosted skill docs
-- how release artifacts are distributed across GitHub Releases, Docker registries, and npm
+Use:
 
-## Reading Order
-
-1. `agent-install.md`
-2. `release-distribution.md`
-3. `amoylab-beta-deploy.md`
-
-## Scope
-
-- `agent-install.md`
-  Canonical install and connection paths for CLI, Docker, MCP, skills, and `npx`.
-- `release-distribution.md`
-  What gets published on tags and which credentials and registries are involved.
-- `amoylab-beta-deploy.md`
-  Production-oriented beta deployment flow for the amoylab host using GHCR and Docker Compose.
+- `agent-install.md` for CLI, Docker, MCP, and hosted skill access
+- `release-distribution.md` for what gets published and where
+- `amoylab-beta-deploy.md` for the current beta host deployment flow

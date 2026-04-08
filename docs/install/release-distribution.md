@@ -1,93 +1,31 @@
 # Release Distribution
 
-This document records what happens on two release paths:
+Two release paths exist:
 
-- pushes to `main`
-- pushed tags such as `v0.1.0`
+- `main` pushes
+- version tags like `v0.1.0`
 
-## Main Trigger
+`main` publishes:
 
-The beta workflow triggers on:
+- `ghcr.io/ifuryst/llm-wiki:beta`
+- optional beta deploy to amoylab
 
-```text
-refs/heads/main
-```
+Version tags publish:
 
-Published outputs:
+- GitHub Release assets
+- Docker images to Docker Hub and GHCR
+- npm package `@ifuryst/llm-wiki-mcp`
 
-- GHCR image: `ghcr.io/ifuryst/llm-wiki:beta`
-- optional SSH deploy to amoylab when the required secrets are configured
+GitHub Release assets include:
 
-The beta workflow does not publish GitHub Release assets, Docker Hub tags, or npm packages.
-
-## Tag Trigger
-
-The release workflow triggers on:
-
-```text
-refs/tags/v*
-```
-
-## Published Outputs
-
-### GitHub Releases
-
-Published by `softprops/action-gh-release`:
-
-- CLI archives from `dist/install/releases/*`
-- skill archives from `dist/install/skills/*`
-- `dist/install/checksums.txt`
-- `dist/install/version.txt`
+- CLI archives
+- skill archives
+- checksums and version files
 - `install/install-cli.sh`
 - `install/LLM-Wiki.md`
 
-### Docker Registries
+Notes:
 
-Published multi-arch service image:
-
-- `docker.io/ifuryst/llm-wiki`
-- `ghcr.io/ifuryst/llm-wiki`
-
-Tag shapes:
-
-- exact version, for example `0.1.0`
-- minor line, for example `0.1`
-- major line, for example `0`
-- `latest`
-
-### npm
-
-Published package:
-
-- `@ifuryst/llm-wiki-mcp`
-
-The dedicated npm workflow rewrites `npm/llm-wiki-mcp/package.json` from `0.1.0-dev` to the pushed git tag version before publish.
-
-## Required GitHub Secrets
-
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
-- `AMOYLAB_HOST`
-- `AMOYLAB_USER`
-- `AMOYLAB_SSH_KEY`
-
-## Permission Model
-
-- GitHub Releases uses `contents: write`
-- GHCR publish uses `packages: write` with `GITHUB_TOKEN`
-- Docker Hub publish uses `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
-- npm publish uses GitHub OIDC trusted publishing with `id-token: write`
-- npm package policy can stay on the strictest setting because trusted publishers do not rely on long-lived npm tokens
-- amoylab deploy uses SSH credentials stored as repository secrets
-
-## Notes
-
-- The Docker image only packages the LLM-Wiki main service.
-- PostgreSQL and Redis remain external dependencies supplied by the operator.
-- main-branch beta images are pushed only to GHCR, under the fixed `beta` tag plus a commit `sha-*` tag.
-- The installer script downloads CLI archives from GitHub Releases instead of from the running LLM-Wiki service.
-- npm trusted publisher configuration must match:
-  - repository: `iFurySt/LLM-Wiki`
-  - workflow: `publish-npm.yml`
-  - environment: empty
-- npm trusted publishing currently requires a modern runtime in CI; keep the publish workflow on Node 24 and npm 11+.
+- the Docker image only contains the main LLM-Wiki service
+- PostgreSQL is still the operator-managed dependency
+- the installer downloads CLI binaries from GitHub Releases

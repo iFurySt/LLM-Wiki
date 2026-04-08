@@ -9,9 +9,6 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-      - redis
-      - minio
-      - opensearch
     environment:
       LLM_WIKI_ENVIRONMENT: development
       LLM_WIKI_LOG_LEVEL: debug
@@ -26,15 +23,6 @@ services:
       LLM_WIKI_POSTGRES_PASSWORD: llmwiki
       LLM_WIKI_POSTGRES_DATABASE: llmwiki
       LLM_WIKI_POSTGRES_SSLMODE: disable
-      LLM_WIKI_REDIS_ADDR: redis:6379
-      LLM_WIKI_REDIS_PASSWORD: ""
-      LLM_WIKI_REDIS_DB: 0
-      LLM_WIKI_MINIO_ENDPOINT: minio:9000
-      LLM_WIKI_MINIO_ACCESS_KEY: minioadmin
-      LLM_WIKI_MINIO_SECRET_KEY: minioadmin
-      LLM_WIKI_MINIO_BUCKET: llm-wiki
-      LLM_WIKI_MINIO_USE_SSL: "false"
-      LLM_WIKI_OPENSEARCH_URL: http://opensearch:9200
     ports:
       - "8234:8234"
     volumes:
@@ -55,44 +43,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  redis:
-    image: redis:8
-    container_name: llm-wiki-redis
-    restart: unless-stopped
-    ports:
-      - "16379:6379"
-
-  minio:
-    image: minio/minio:latest
-    container_name: llm-wiki-minio
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data --console-address ":9001"
-    ports:
-      - "19000:9000"
-      - "19001:9001"
-    volumes:
-      - minio_data:/data
-
-  opensearch:
-    image: opensearchproject/opensearch:2
-    container_name: llm-wiki-opensearch
-    restart: unless-stopped
-    environment:
-      discovery.type: single-node
-      plugins.security.disabled: "true"
-      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Docmesh123!"
-    ports:
-      - "19200:9200"
-      - "19600:9600"
-    volumes:
-      - opensearch_data:/usr/share/opensearch/data
-
 volumes:
   postgres_data:
-  minio_data:
-  opensearch_data:
   go_mod_cache:
   go_build_cache:

@@ -72,10 +72,7 @@ func MustBaseConfig(pg config.PostgresConfig) config.Config {
 			BaseURL: "http://127.0.0.1:0",
 			Timeout: "10s",
 		},
-		Postgres:   pg,
-		Redis:      config.RedisConfig{Addr: "127.0.0.1:6379"},
-		MinIO:      config.MinIOConfig{Endpoint: "127.0.0.1:9000", Bucket: "llm-wiki"},
-		OpenSearch: config.OpenSearchConfig{URL: "http://127.0.0.1:9200"},
+		Postgres: pg,
 	}
 }
 

@@ -21,13 +21,13 @@ func TestRenderObsidianMarkdownIncludesFrontmatterAndBody(t *testing.T) {
 		UpdatedAt:         "2026-04-08T10:00:00Z",
 	}
 
-	got := renderObsidianMarkdown(doc, "tenant-alpha", "product-docs", "Product Docs")
+	got := renderObsidianMarkdown(doc, "team-alpha", "product-docs", "Product Docs")
 
 	for _, want := range []string{
 		"llm_wiki: true",
-		`tenant_id: "tenant-alpha"`,
-		`namespace_key: "product-docs"`,
-		`namespace_name: "Product Docs"`,
+		`ns: "team-alpha"`,
+		`folder_key: "product-docs"`,
+		`folder_name: "Product Docs"`,
 		"document_id: 42",
 		`slug: "hello-world"`,
 		"# Hello World",
@@ -39,7 +39,7 @@ func TestRenderObsidianMarkdownIncludesFrontmatterAndBody(t *testing.T) {
 	}
 }
 
-func TestExportWorkspaceToObsidianWritesNamespaceFoldersAndManifest(t *testing.T) {
+func TestExportNSToObsidianWritesFolderTreeAndManifest(t *testing.T) {
 	dir := t.TempDir()
 	namespaces := []api.NamespaceResponse{
 		{ID: 1, Key: "Product Docs", DisplayName: "Product Docs"},
@@ -50,8 +50,8 @@ func TestExportWorkspaceToObsidianWritesNamespaceFoldersAndManifest(t *testing.T
 		{ID: 11, NamespaceID: 2, Slug: "API:v1", Title: "API", Content: "Protocol", Status: "active", CurrentRevisionNo: 2, UpdatedAt: "2026-04-08T11:00:00Z"},
 	}
 
-	if err := exportWorkspaceToObsidian(dir, "tenant-alpha", namespaces, documents); err != nil {
-		t.Fatalf("exportWorkspaceToObsidian returned error: %v", err)
+	if err := exportNSToObsidian(dir, "team-alpha", namespaces, documents); err != nil {
+		t.Fatalf("exportNSToObsidian returned error: %v", err)
 	}
 
 	visionPath := filepath.Join(dir, "product-docs", "vision-doc.md")
@@ -73,7 +73,7 @@ func TestExportWorkspaceToObsidianWritesNamespaceFoldersAndManifest(t *testing.T
 	if err != nil {
 		t.Fatalf("read manifest: %v", err)
 	}
-	for _, want := range []string{`"tenant_id": "tenant-alpha"`, `"doc_count": 2`} {
+	for _, want := range []string{`"ns": "team-alpha"`, `"doc_count": 2`} {
 		if !strings.Contains(string(manifest), want) {
 			t.Fatalf("expected manifest to contain %q, got:\n%s", want, string(manifest))
 		}

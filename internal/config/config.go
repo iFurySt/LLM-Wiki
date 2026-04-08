@@ -16,9 +16,6 @@ type Config struct {
 	Auth        AuthConfig
 	Install     InstallConfig
 	Postgres    PostgresConfig
-	Redis       RedisConfig
-	MinIO       MinIOConfig
-	OpenSearch  OpenSearchConfig
 }
 
 type ServerConfig struct {
@@ -48,24 +45,6 @@ type PostgresConfig struct {
 	Password string
 	Database string
 	SSLMode  string
-}
-
-type RedisConfig struct {
-	Addr     string
-	Password string
-	DB       int
-}
-
-type MinIOConfig struct {
-	Endpoint  string
-	AccessKey string
-	SecretKey string
-	Bucket    string
-	UseSSL    bool
-}
-
-type OpenSearchConfig struct {
-	URL string
 }
 
 func Load() (Config, error) {
@@ -109,21 +88,6 @@ func Load() (Config, error) {
 			Database: v.GetString("postgres.database"),
 			SSLMode:  v.GetString("postgres.sslmode"),
 		},
-		Redis: RedisConfig{
-			Addr:     v.GetString("redis.addr"),
-			Password: v.GetString("redis.password"),
-			DB:       v.GetInt("redis.db"),
-		},
-		MinIO: MinIOConfig{
-			Endpoint:  v.GetString("minio.endpoint"),
-			AccessKey: v.GetString("minio.access_key"),
-			SecretKey: v.GetString("minio.secret_key"),
-			Bucket:    v.GetString("minio.bucket"),
-			UseSSL:    v.GetBool("minio.use_ssl"),
-		},
-		OpenSearch: OpenSearchConfig{
-			URL: v.GetString("opensearch.url"),
-		},
 	}
 
 	if cfg.Server.Port <= 0 {
@@ -158,16 +122,4 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("postgres.password", "llmwiki")
 	v.SetDefault("postgres.database", "llmwiki")
 	v.SetDefault("postgres.sslmode", "disable")
-
-	v.SetDefault("redis.addr", "127.0.0.1:16379")
-	v.SetDefault("redis.password", "")
-	v.SetDefault("redis.db", 0)
-
-	v.SetDefault("minio.endpoint", "127.0.0.1:19000")
-	v.SetDefault("minio.access_key", "minioadmin")
-	v.SetDefault("minio.secret_key", "minioadmin")
-	v.SetDefault("minio.bucket", "llm-wiki")
-	v.SetDefault("minio.use_ssl", false)
-
-	v.SetDefault("opensearch.url", "http://127.0.0.1:19200")
 }

@@ -10,14 +10,14 @@ Every request should send a bearer token:
 Authorization: Bearer <llm-wiki-token>
 ```
 
-## List Namespaces
+## List Folders
 
 ```sh
 curl -s http://127.0.0.1:8234/v1/namespaces \
   -H 'Authorization: Bearer <llm-wiki-token>'
 ```
 
-## Create Namespace
+## Create Folder
 
 ```sh
 curl -s http://127.0.0.1:8234/v1/namespaces \
@@ -27,7 +27,7 @@ curl -s http://127.0.0.1:8234/v1/namespaces \
     "key": "projects",
     "display_name": "Projects",
     "description": "shared project knowledge",
-    "visibility": "tenant"
+    "visibility": "private"
   }'
 ```
 

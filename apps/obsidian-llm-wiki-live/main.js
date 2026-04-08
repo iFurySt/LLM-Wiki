@@ -23,7 +23,7 @@ class LLMWikiSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Update interval seconds")
-      .setDesc("How often the plugin syncs the current CLI tenant into Files. Set to 0 to disable background sync.")
+      .setDesc("How often the plugin syncs the current CLI ns into Files. Set to 0 to disable background sync.")
       .addText((text) =>
         text
           .setPlaceholder("15")
@@ -48,8 +48,8 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     this.setStatus("LLM-Wiki: syncing");
 
     this.addCommand({
-      id: "sync-current-tenant-into-vault",
-      name: "Sync current tenant into vault",
+      id: "sync-current-ns-into-vault",
+      name: "Sync current ns into vault",
       callback: async () => {
         await this.syncNow(true);
       }
@@ -96,8 +96,8 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
   async syncNow(notify) {
     try {
       this.setStatus("LLM-Wiki: syncing");
-      const result = await this.mirrorCurrentTenantToVault();
-      this.setStatus(`LLM-Wiki: ${result.tenantID} ${result.changedCount}/${result.documentCount}`);
+      const result = await this.mirrorCurrentNSToVault();
+      this.setStatus(`LLM-Wiki: ${result.ns} ${result.changedCount}/${result.documentCount}`);
       if (notify) {
         new Notice(`LLM-Wiki synced ${result.changedCount} files in ${result.rootPath}`);
       }
@@ -128,17 +128,17 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     const profile = this.loadCurrentCLIProfile();
     const baseURL = String(profile.base_url || "").trim().replace(/\/+$/, "");
     const accessToken = String(profile.access_token || "").trim();
-    const tenantID = String(profile.tenant_id || "").trim();
+    const ns = String(profile.ns || profile.tenant_id || "").trim();
     if (!baseURL) {
       throw new Error("LLM-Wiki base URL is missing from ~/.llm-wiki/config.json.");
     }
     if (!accessToken) {
       throw new Error("LLM-Wiki access token is missing from ~/.llm-wiki/config.json.");
     }
-    if (!tenantID) {
-      throw new Error("LLM-Wiki tenant is missing from ~/.llm-wiki/config.json.");
+    if (!ns) {
+      throw new Error("LLM-Wiki ns is missing from ~/.llm-wiki/config.json.");
     }
-    return { baseURL, accessToken, tenantID };
+    return { baseURL, accessToken, ns };
   }
 
   async requestJSON(method, endpoint, body) {
@@ -176,10 +176,10 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     };
   }
 
-  async mirrorCurrentTenantToVault() {
+  async mirrorCurrentNSToVault() {
     const snapshot = await this.fetchSnapshot();
-    const tenantFolder = sanitizePathSegment(snapshot.whoami.tenant_id, "tenant");
-    const rootPath = `${MIRROR_ROOT_FOLDER}/${tenantFolder}`;
+    const nsFolder = sanitizePathSegment(snapshot.whoami.tenant_id, "ns");
+    const rootPath = `${MIRROR_ROOT_FOLDER}/${nsFolder}`;
 
     await this.ensureFolder(MIRROR_ROOT_FOLDER);
     await this.ensureFolder(rootPath);
@@ -211,7 +211,7 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     this.settings.lastMirrorAt = new Date().toISOString();
     await this.saveData(this.settings);
     return {
-      tenantID: snapshot.whoami.tenant_id,
+      ns: snapshot.whoami.tenant_id,
       rootPath,
       documentCount: snapshot.documents.length,
       changedCount
@@ -270,17 +270,17 @@ function yamlScalar(value) {
   return `"${trimmed.replace(/"/g, '\\"')}"`;
 }
 
-function renderMirroredMarkdown(tenantID, namespace, document) {
-  const namespaceKey = namespace ? (namespace.key || namespace.display_name) : "";
-  const namespaceName = namespace ? namespace.display_name || namespace.key : "";
+function renderMirroredMarkdown(ns, namespace, document) {
+  const folderKey = namespace ? (namespace.key || namespace.display_name) : "";
+  const folderName = namespace ? namespace.display_name || namespace.key : "";
   const title = document.title || document.slug || `Document ${document.id}`;
   const frontmatter = [
     "---",
     "llm_wiki: true",
-    `tenant_id: ${yamlScalar(tenantID)}`,
-    `namespace_id: ${document.namespace_id}`,
-    `namespace_key: ${yamlScalar(namespaceKey)}`,
-    `namespace_name: ${yamlScalar(namespaceName)}`,
+    `ns: ${yamlScalar(ns)}`,
+    `folder_id: ${document.namespace_id}`,
+    `folder_key: ${yamlScalar(folderKey)}`,
+    `folder_name: ${yamlScalar(folderName)}`,
     `document_id: ${document.id}`,
     `slug: ${yamlScalar(document.slug)}`,
     `title: ${yamlScalar(document.title)}`,
@@ -305,14 +305,14 @@ function renderTenantIndexMarkdown(snapshot) {
   const lines = [
     "---",
     "llm_wiki_index: true",
-    `tenant_id: ${yamlScalar(snapshot.whoami.tenant_id)}`,
+    `ns: ${yamlScalar(snapshot.whoami.tenant_id)}`,
     `base_url: ${yamlScalar(snapshot.connection.baseURL)}`,
     `mirrored_at: ${yamlScalar(new Date().toISOString())}`,
     "---",
     "",
     `# ${snapshot.whoami.tenant_id}`,
     "",
-    `- Namespaces mirrored: ${snapshot.namespaces.length}`,
+    `- Folders mirrored: ${snapshot.namespaces.length}`,
     `- Documents mirrored: ${snapshot.documents.length}`,
     ""
   ];

@@ -1,256 +1,71 @@
 # LLM-Wiki
 
-Agent-native knowledge service for multi-tenant document CRUD, revisions, grounding, and shared collaboration over HTTP, CLI, and web, inspired by Karpathy's LLM Wiki gist.
+LLM-Wiki is a shared knowledge service for agents.
 
-## For Humans
+It gives agents one durable backend for:
 
-LLM-Wiki is a standalone service for letting AI agents collaborate around shared documents instead of treating every chat as disposable context.
+- documents
+- revisions
+- scoped access by `ns`
+- access over HTTP, CLI, MCP, and web UI
 
-Current stack:
+Current stage:
 
-- Go
-- Gin
-- Cobra
-- PostgreSQL
-- Redis
-- MinIO
-- OpenSearch
+- single service
+- PostgreSQL as the only runtime dependency
+- top boundary: `ns`
+- content grouping: `folder`
+- source of truth: LLM-Wiki itself, not downstream sync targets
 
-Quick start:
+## Run
 
 ```bash
 make dev
 ```
 
-`make dev` now starts the local stack with containerized hot reload for the Go service and hosted install assets. Most Go, HTML, install, skill, and script edits should rebuild automatically without rerunning `make dev`.
-
 Then open:
 
+- `http://127.0.0.1:8234/setup`
 - `http://127.0.0.1:8234/ui`
-- `http://127.0.0.1:8234/setup` on first boot to create the initial admin and default tenant
 
-If you want hosted install links and UI install prompts to point at a different public host, set:
+## Use
 
-```bash
-LLM_WIKI_INSTALL_BASE_URL=https://your-llm-wiki-host
-```
-
-Install and distribution docs:
-
-- [docs/install/README.md](/Users/bytedance/projects/github/llm-wiki/docs/install/README.md)
-- [docs/install/agent-install.md](/Users/bytedance/projects/github/llm-wiki/docs/install/agent-install.md)
-- [docs/install/release-distribution.md](/Users/bytedance/projects/github/llm-wiki/docs/install/release-distribution.md)
-
-Useful local endpoints:
-
-- `GET /healthz`
-- `GET /readyz`
-- `GET /v1/spaces`
-- `GET /v1/namespaces`
-- `GET /v1/documents`
-- `ANY /mcp`
-- `ANY /sse`
-- `GET /install/LLM-Wiki.md`
-- `GET /install/install-cli.sh`
-
-Useful local commands:
+Local CLI:
 
 ```bash
 go run ./cmd/cli system info
 go run ./cmd/cli auth login --base-url http://127.0.0.1:8234 --device-code
-go run ./cmd/cli auth status --base-url http://127.0.0.1:8234
-go run ./cmd/cli namespace list --base-url http://127.0.0.1:8234 --token dev-bootstrap-token
+go run ./cmd/cli ns list --base-url http://127.0.0.1:8234
+go run ./cmd/cli folder list --base-url http://127.0.0.1:8234
+go run ./cmd/cli document list --base-url http://127.0.0.1:8234
 ```
 
 Install the CLI:
 
 ```bash
 curl -fsSL http://127.0.0.1:8234/install/install-cli.sh | sh
-llm-wiki version
 lw version
-llm-wiki system info --base-url http://127.0.0.1:8234
 ```
 
-Auth model:
+## Surfaces
 
-- API, CLI, and MCP use `Authorization: Bearer <token>`
-- CLI supports `--token`, `--token-file`, `LLM_WIKI_TOKEN`, and `~/.llm-wiki/config.json`
-- CLI resolves base URL and tenant from flags, env, stored profile, then built-in defaults
-- `lw auth login` supports browser and device-code sign-in, opens a browser locally by default, and still prints the approval URL
-- first boot is driven by `/setup`, which creates the initial tenant and admin account
-- `/admin/login` and `/admin/users` provide a simple pixel-style user admin console
-- service principals and fine-grained service tokens can be issued through authenticated auth commands
-- development bootstrap token defaults to `dev-bootstrap-token` for tenant `default`
+- web UI: `/ui`
+- HTTP API: `/v1/*`
+- MCP: `/mcp`
+- legacy SSE: `/sse`
+- hosted install guide: `/install/LLM-Wiki.md`
 
-Release model:
+## Repo Map
 
-- pushes to `main` publish `ghcr.io/ifuryst/llm-wiki:beta`
-- CLI binaries are published to GitHub Releases on pushed tags like `v0.1.0`
-- the installer script downloads the matching archive from GitHub Releases
-- the main service image is published to Docker Hub and GHCR
-- the `@ifuryst/llm-wiki-mcp` stdio bridge is published to npm through GitHub OIDC trusted publishing
-- local `/install/install-cli.sh` is the hosted delivery surface for the installer script itself
+- [AGENTS.md](/Users/bytedance/projects/github/LLM-Wiki/AGENTS.md)
+- [docs/README.md](/Users/bytedance/projects/github/LLM-Wiki/docs/README.md)
+- [docs/knowledge/product.md](/Users/bytedance/projects/github/LLM-Wiki/docs/knowledge/product.md)
+- [docs/knowledge/architecture.md](/Users/bytedance/projects/github/LLM-Wiki/docs/knowledge/architecture.md)
+- [docs/knowledge/repo-map.md](/Users/bytedance/projects/github/LLM-Wiki/docs/knowledge/repo-map.md)
+- [docs/install/README.md](/Users/bytedance/projects/github/LLM-Wiki/docs/install/README.md)
 
-## For AI
+## Notes
 
-Start here:
-
-- Read `AGENTS.md` first.
-- Treat `docs/` as the durable source of truth for repo knowledge, plans, todos, decisions, and test results.
-
-When bootstrapping locally:
-
-```bash
-make dev
-```
-
-To watch rebuilds and restart logs while editing:
-
-```bash
-make logs
-```
-
-When validating:
-
-```bash
-./scripts/release/package-install.sh
-./scripts/test/run_unit.sh
-./scripts/test/run_e2e.sh
-./scripts/test/run_perf.sh
-```
-
-Expected behavior:
-
-- If `.env` is missing, the repo should still work with development defaults.
-- The main service should be reachable at `http://127.0.0.1:8234`.
-- The simple operator UI should be reachable at `http://127.0.0.1:8234/ui`.
-
-Working style:
-
-- Keep `AGENTS.md` short and use it as a directory.
-- Write durable repository knowledge back into `docs/`.
-- Prefer boring, inspectable implementations over premature complexity.
-
-MCP surfaces:
-
-- Remote MCP endpoint: `/mcp` on your configured LLM-Wiki host
-- Legacy SSE endpoint: `/sse` on your configured LLM-Wiki host
-- `npx` stdio package source: `npm/llm-wiki-mcp/`
-
-## Integration
-
-### Remote MCP
-
-Copy this for MCP clients that support remote HTTP transport:
-
-```json
-{
-  "llm-wiki": {
-    "type": "http",
-    "url": "https://your-llm-wiki-host/mcp",
-    "headers": {
-      "Authorization": "Bearer <llm-wiki-token>"
-    }
-  }
-}
-```
-
-If a client only supports the older SSE transport, switch the URL to `https://your-llm-wiki-host/sse`.
-
-### npx Stdio MCP
-
-For a published npm package, copy this for local process-spawned MCP setups:
-
-```json
-{
-  "llm-wiki": {
-    "command": "npx",
-    "args": [
-      "-y",
-      "@ifuryst/llm-wiki-mcp",
-      "--base-url",
-      "https://your-llm-wiki-host"
-    ],
-    "env": {
-      "LLM_WIKI_TOKEN": "<llm-wiki-token>"
-    }
-  }
-}
-```
-
-Before npm publish, use the in-repo package directly:
-
-```bash
-npm install --prefix npm/llm-wiki-mcp --package-lock=false
-LLM_WIKI_TOKEN=dev-bootstrap-token npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url http://127.0.0.1:8234
-```
-
-### Skill Install
-
-Official LLM-Wiki skill artifacts:
-
-- Markdown guide: `/install/LLM-Wiki.md` on your configured LLM-Wiki host
-- Skill package: `/install/skills/LLM-Wiki.skill` on your configured LLM-Wiki host
-- Zip package: `/install/skills/LLM-Wiki.zip` on your configured LLM-Wiki host
-- In-repo skill source: `skills/llm-wiki/`
-
-### Give An AI Agent Direct Instructions
-
-If an agent can read a hosted markdown guide, point it here:
-
-```text
-Read and follow https://your-llm-wiki-host/install/LLM-Wiki.md
-```
-
-If an agent is terminal-native, these are the shortest useful starting points:
-
-```bash
-lw auth login --base-url https://your-llm-wiki-host
-lw namespace list --base-url https://your-llm-wiki-host
-lw document list --base-url https://your-llm-wiki-host
-
-llm-wiki auth login --base-url https://your-llm-wiki-host
-llm-wiki namespace list --base-url https://your-llm-wiki-host
-llm-wiki document list --base-url https://your-llm-wiki-host
-```
-
-### Docker Images
-
-Published service image:
-
-```text
-docker.io/ifuryst/llm-wiki
-ghcr.io/ifuryst/llm-wiki
-```
-
-### Release Downloads
-
-GitHub release assets live under:
-
-```text
-https://github.com/iFurySt/LLM-Wiki/releases
-```
-
-Asset naming:
-
-- `llm-wiki_darwin_amd64.tar.gz`
-- `llm-wiki_darwin_arm64.tar.gz`
-- `llm-wiki_linux_amd64.tar.gz`
-- `llm-wiki_linux_arm64.tar.gz`
-- `llm-wiki_windows_amd64.zip`
-
-### npm Package
-
-Published stdio MCP bridge:
-
-```text
-https://www.npmjs.com/package/@ifuryst/llm-wiki-mcp
-```
-
-CI publishing now uses npm trusted publishing over GitHub OIDC instead of a long-lived `NPM_TOKEN`.
-
-## Credits
-
-Core idea inspiration:
-
-- Karpathy, "LLM Wiki": https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+- first boot happens at `/setup`
+- local default bootstrap token is `dev-bootstrap-token`
+- CLI profile state lives in `~/.llm-wiki/config.json`

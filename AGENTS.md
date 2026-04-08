@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This repository builds `LLM-Wiki`, an agent-native knowledge service for multi-tenant document collaboration.
+This repository builds `LLM-Wiki`, an agent-native knowledge service for shared document collaboration across multiple `ns` scopes.
 
 `AGENTS.md` is the table of contents, not the encyclopedia.
 
