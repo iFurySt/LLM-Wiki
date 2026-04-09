@@ -418,7 +418,7 @@
     .reader-head,
     .section-head,
     .install-head {
-      padding: 14px 0 10px;
+      padding: 14px 12px 10px;
       border-bottom: 1px solid var(--line);
     }
 
@@ -1160,9 +1160,7 @@
       padding: 12px;
       border-radius: 14px;
       border: 1px solid var(--line);
-      background:
-        linear-gradient(135deg, var(--accent-soft), rgba(255,255,255,0.06)),
-        var(--panel-2);
+      background: var(--panel-2);
     }
 
     .summary-row {
@@ -1536,8 +1534,8 @@
 
       <div class="topbar-nav">
         <nav class="nav-switch" aria-label="Top tabs">
-          <a class="tab {{ if eq .CurrentPage "wiki" }}active{{ end }}" href="/dashboard" data-ui-nav data-ui-tab="wiki">~/ workspace</a>
-          <a class="tab {{ if eq .CurrentPage "install" }}active{{ end }}" href="/dashboard/install" data-ui-nav data-ui-tab="install">man install</a>
+          <a class="tab {{ if eq .CurrentPage "wiki" }}active{{ end }}" href="/dashboard" data-ui-nav data-ui-tab="wiki">Home</a>
+          <a class="tab {{ if eq .CurrentPage "install" }}active{{ end }}" href="/dashboard/install" data-ui-nav data-ui-tab="install">Install</a>
         </nav>
       </div>
 
