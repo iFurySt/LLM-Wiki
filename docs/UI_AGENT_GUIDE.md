@@ -6,7 +6,7 @@ This document defines the browser-side collaboration rules for `LLM-Wiki` UI wor
 
 - any change under the hosted web UI
 - browser login and auth flows
-- `/setup`, `/ui`, `/install/*`, `/admin/*`, and related user-visible behavior
+- `/setup`, `/dashboard`, `/install/*`, `/admin/*`, and related user-visible behavior
 - manual verification, debugging, and UI acceptance
 
 ## Browser Verification
@@ -47,6 +47,6 @@ This document defines the browser-side collaboration rules for `LLM-Wiki` UI wor
 ## Default Targets
 
 - setup: `http://127.0.0.1:8234/setup`
-- wiki UI: `http://127.0.0.1:8234/ui`
-- install UI: `http://127.0.0.1:8234/install/LLM-Wiki.md`
+- wiki UI: `http://127.0.0.1:8234/dashboard`
+- install UI: `http://127.0.0.1:8234/dashboard/install`
 - admin login: `http://127.0.0.1:8234/admin/login`

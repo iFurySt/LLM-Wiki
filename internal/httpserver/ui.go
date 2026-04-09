@@ -106,25 +106,29 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 			c.Redirect(http.StatusTemporaryRedirect, "/setup")
 			return
 		}
-		c.Redirect(http.StatusTemporaryRedirect, "/ui")
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard", c.Request.URL.RawQuery))
 	})
 
-	ui.POST("/ui/ns/switch", func(c *gin.Context) {
+	ui.POST("/dashboard/ns/switch", func(c *gin.Context) {
 		targetNS := strings.TrimSpace(c.PostForm("ns"))
 		if targetNS == "" {
-			c.Redirect(http.StatusSeeOther, "/ui?kind=error&message=missing+ns")
+			c.Redirect(http.StatusSeeOther, "/dashboard?kind=error&message=missing+ns")
 			return
 		}
 		session, err := svc.SwitchWebSessionNS(c.Request.Context(), targetNS)
 		if err != nil {
-			c.Redirect(http.StatusSeeOther, "/ui?kind=error&message=unable+to+switch+ns")
+			c.Redirect(http.StatusSeeOther, "/dashboard?kind=error&message=unable+to+switch+ns")
 			return
 		}
 		setWebSessionCookie(c, session.ID)
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=switched+ns")
+		c.Redirect(http.StatusSeeOther, "/dashboard?kind=success&message=switched+ns")
 	})
 
-	ui.GET("/ui", func(c *gin.Context) {
+	ui.POST("/ui/ns/switch", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard/ns/switch", c.Request.URL.RawQuery))
+	})
+
+	ui.GET("/dashboard", func(c *gin.Context) {
 		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
 		if err == nil && !status.Initialized {
 			c.Redirect(http.StatusTemporaryRedirect, "/setup")
@@ -133,13 +137,33 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		renderUIPage(c, svc, cfg, "wiki")
 	})
 
-	ui.GET("/ui/install", func(c *gin.Context) {
+	ui.GET("/dashboard/install", func(c *gin.Context) {
 		status, err := svc.SetupStatus(c.Request.Context(), cfg.Auth.BootstrapTenantID)
 		if err == nil && !status.Initialized {
 			c.Redirect(http.StatusTemporaryRedirect, "/setup")
 			return
 		}
 		renderUIPage(c, svc, cfg, "install")
+	})
+
+	ui.GET("/dashboard/fragment/wiki", func(c *gin.Context) {
+		renderUIFragment(c, svc, cfg, "wiki", "ui_wiki_content.html")
+	})
+
+	ui.GET("/dashboard/fragment/install", func(c *gin.Context) {
+		renderUIFragment(c, svc, cfg, "install", "ui_install_content.html")
+	})
+
+	ui.GET("/dashboard/fragment/reader", func(c *gin.Context) {
+		renderUIFragment(c, svc, cfg, "wiki", "ui_reader_content.html")
+	})
+
+	ui.GET("/ui", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard", c.Request.URL.RawQuery))
+	})
+
+	ui.GET("/ui/install", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard/install", c.Request.URL.RawQuery))
 	})
 
 	ui.GET("/ui/fragment/wiki", func(c *gin.Context) {
@@ -154,7 +178,7 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 		renderUIFragment(c, svc, cfg, "wiki", "ui_reader_content.html")
 	})
 
-	ui.POST("/ui/folders", func(c *gin.Context) {
+	ui.POST("/dashboard/folders", func(c *gin.Context) {
 		req := api.CreateFolderRequest{
 			Key:         c.PostForm("key"),
 			DisplayName: c.PostForm("display_name"),
@@ -165,10 +189,10 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=folder+created")
+		c.Redirect(http.StatusSeeOther, "/dashboard?kind=success&message=folder+created")
 	})
 
-	ui.POST("/ui/folders/:id/archive", func(c *gin.Context) {
+	ui.POST("/dashboard/folders/:id/archive", func(c *gin.Context) {
 		namespaceID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -178,10 +202,10 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=folder+archived")
+		c.Redirect(http.StatusSeeOther, "/dashboard?kind=success&message=folder+archived")
 	})
 
-	ui.POST("/ui/documents", func(c *gin.Context) {
+	ui.POST("/dashboard/documents", func(c *gin.Context) {
 		namespaceID, err := strconv.ParseInt(c.PostForm("folder_id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -200,10 +224,10 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+created")
+		c.Redirect(http.StatusSeeOther, "/dashboard?kind=success&message=document+created")
 	})
 
-	ui.POST("/ui/documents/:id/update", func(c *gin.Context) {
+	ui.POST("/dashboard/documents/:id/update", func(c *gin.Context) {
 		documentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -220,10 +244,10 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+updated&document_id="+strconv.FormatInt(documentID, 10))
+		c.Redirect(http.StatusSeeOther, "/dashboard?kind=success&message=document+updated&document_id="+strconv.FormatInt(documentID, 10))
 	})
 
-	ui.POST("/ui/documents/:id/archive", func(c *gin.Context) {
+	ui.POST("/dashboard/documents/:id/archive", func(c *gin.Context) {
 		documentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
 			badRequest(c, err)
@@ -238,8 +262,35 @@ func registerUIRoutes(engine *gin.Engine, svc *service.Service, cfg config.Confi
 			handleError(c, err)
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/ui?kind=success&message=document+archived&document_id="+strconv.FormatInt(documentID, 10))
+		c.Redirect(http.StatusSeeOther, "/dashboard?kind=success&message=document+archived&document_id="+strconv.FormatInt(documentID, 10))
 	})
+
+	ui.POST("/ui/folders", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard/folders", c.Request.URL.RawQuery))
+	})
+
+	ui.POST("/ui/folders/:id/archive", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard/folders/"+c.Param("id")+"/archive", c.Request.URL.RawQuery))
+	})
+
+	ui.POST("/ui/documents", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard/documents", c.Request.URL.RawQuery))
+	})
+
+	ui.POST("/ui/documents/:id/update", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard/documents/"+c.Param("id")+"/update", c.Request.URL.RawQuery))
+	})
+
+	ui.POST("/ui/documents/:id/archive", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, dashboardURL("/dashboard/documents/"+c.Param("id")+"/archive", c.Request.URL.RawQuery))
+	})
+}
+
+func dashboardURL(path string, rawQuery string) string {
+	if rawQuery == "" {
+		return path
+	}
+	return path + "?" + rawQuery
 }
 
 func renderUIPage(c *gin.Context, svc *service.Service, cfg config.Config, currentPage string) {
@@ -399,7 +450,7 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		}
 		documentCards = append(documentCards, card)
 		if len(activityItems) < 8 {
-			href := "/ui?document_id=" + strconv.FormatInt(item.ID, 10) + "&folder_id=" + strconv.FormatInt(item.FolderID, 10)
+			href := "/dashboard?document_id=" + strconv.FormatInt(item.ID, 10) + "&folder_id=" + strconv.FormatInt(item.FolderID, 10)
 			if statusRaw != "" && statusRaw != "all" {
 				href += "&status=" + statusRaw
 			}
@@ -503,7 +554,7 @@ func buildUITreeStateJSON(tenantID string, statusFilter string, selectedNamespac
 			Children: make([]uiTreeNode, 0, len(folder.Documents)),
 		}
 		for _, document := range folder.Documents {
-			href := "/ui?document_id=" + strconv.FormatInt(document.ID, 10) + "&folder_id=" + strconv.FormatInt(document.FolderID, 10)
+			href := "/dashboard?document_id=" + strconv.FormatInt(document.ID, 10) + "&folder_id=" + strconv.FormatInt(document.FolderID, 10)
 			if statusFilter != "" && statusFilter != "all" {
 				href += "&status=" + statusFilter
 			}

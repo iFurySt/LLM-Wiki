@@ -38,12 +38,13 @@ Main surfaces:
 - HTTP API
 - `llm-wiki` / `lw` CLI
 - MCP at `/mcp`
-- web UI at `/ui`
+- web UI at `/dashboard`
 
 Human flows:
 
 - `/setup` initializes the instance
 - `/admin/login` and `/admin/users` support basic browser-side administration
+- legacy `/ui` URLs redirect to `/dashboard`
 - CLI login stores state in `~/.llm-wiki/config.json`
 
 Adapter direction:

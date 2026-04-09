@@ -442,7 +442,6 @@
     .install-subtitle,
     .doc-subtitle,
     .revision-note,
-    .copy-feedback,
     .install-copy,
     .empty {
       margin: 6px 0 0;
@@ -1237,42 +1236,225 @@
       box-shadow: 0 16px 40px var(--shadow);
     }
 
+    .install-main {
+      padding: 18px;
+      overflow: visible;
+    }
+
+    .install-grid.install-grid-stack {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .install-grid.install-grid-stack > article {
+      display: grid;
+      grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+      gap: 24px;
+      padding: 22px 24px;
+      border-radius: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.12), transparent 34%),
+        var(--panel);
+      box-shadow: none;
+    }
+
+    .install-grid.install-grid-stack .install-head {
+      padding: 0;
+      border-bottom: 0;
+      border-right: 1px solid var(--line);
+      padding-right: 24px;
+    }
+
+    .install-grid.install-grid-stack .install-title {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 4vw, 38px);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+    }
+
+    .install-grid.install-grid-stack .install-subtitle {
+      margin-top: 10px;
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 26ch;
+    }
+
     .install-body {
       display: grid;
-      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
     }
 
     .copy-block {
       display: grid;
-      gap: 8px;
-    }
-
-    .copy-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      align-items: center;
+      gap: 10px;
     }
 
     .install-label {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
+    }
+
+    .code-shell {
+      position: relative;
     }
 
     .code-block {
       margin: 0;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: #0d1117;
-      color: #d2e5ff;
-      font-size: 12px;
-      line-height: 1.65;
+      padding: 16px 18px;
+      border-radius: 0;
+      border: 1px solid rgba(87, 67, 45, 0.14);
+      background: #f3eadc;
+      color: #2e241c;
+      font-size: 13px;
+      line-height: 1.75;
       white-space: pre-wrap;
       word-break: break-word;
       font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.42);
+    }
+
+    .code-block code {
+      font: inherit;
+      color: inherit;
+    }
+
+    .code-comment {
+      color: #8a7767;
+    }
+
+    .code-command {
+      color: #b24c42;
+      font-weight: 600;
+    }
+
+    .code-flag {
+      color: #0b6f8a;
+    }
+
+    .code-url {
+      color: #245f99;
+    }
+
+    .code-env {
+      color: #8b5f16;
+    }
+
+    .code-key {
+      color: #9d4f36;
+    }
+
+    .code-value {
+      color: #0b6f8a;
+    }
+
+    .code-path {
+      color: #2f7a52;
+    }
+
+    .code-placeholder {
+      color: #a33f68;
+    }
+
+    .install-grid.install-grid-stack .copy-button {
+      border-radius: 0;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .install-grid.install-grid-stack .copy-button-inline {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 1;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(87, 67, 45, 0.05);
+      border-color: rgba(87, 67, 45, 0.14);
+      color: #5b4a3d;
+      box-shadow: none;
+    }
+
+    .install-grid.install-grid-stack .copy-button-inline:hover {
+      border-color: rgba(87, 67, 45, 0.22);
+      background: rgba(87, 67, 45, 0.10);
+      transform: none;
+    }
+
+    :root[data-theme="dark"] .code-block {
+      border: 1px solid rgba(124, 160, 201, 0.22);
+      background: #0f1722;
+      color: #dce8f6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    :root[data-theme="dark"] .code-comment { color: #7f93ab; }
+    :root[data-theme="dark"] .code-command { color: #ffb86c; }
+    :root[data-theme="dark"] .code-flag { color: #8be9fd; }
+    :root[data-theme="dark"] .code-url { color: #7cc7ff; }
+    :root[data-theme="dark"] .code-env { color: #f1c46a; }
+    :root[data-theme="dark"] .code-key { color: #ff9e7a; }
+    :root[data-theme="dark"] .code-value { color: #8be9fd; }
+    :root[data-theme="dark"] .code-path { color: #a8e6a1; }
+    :root[data-theme="dark"] .code-placeholder { color: #f59fb4; }
+
+    :root[data-theme="dark"] .install-grid.install-grid-stack .copy-button-inline {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(124, 160, 201, 0.24);
+      color: #dce8f6;
+    }
+
+    :root[data-theme="dark"] .install-grid.install-grid-stack .copy-button-inline:hover {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .copy-icon {
+      width: 15px;
+      height: 15px;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .install-grid.install-grid-stack .copy-button-inline.is-copied {
+      color: #2b7752;
+      border-color: rgba(127, 211, 157, 0.48);
+      background: rgba(127, 211, 157, 0.14);
+    }
+
+    .install-grid.install-grid-stack .copy-button-inline.is-error {
+      color: #ffd4ce;
+      border-color: rgba(225, 136, 120, 0.48);
+      background: rgba(225, 136, 120, 0.14);
+    }
+
+    .install-page {
+      overflow: auto;
+    }
+
+    .install-page .topbar,
+    .install-page .surface,
+    .install-page .flash {
+      border-radius: 0;
+    }
+
+    .install-page #ui-content {
+      padding-bottom: 28px;
     }
 
     #ui-content {
@@ -1294,6 +1476,17 @@
       .sidebar {
         position: static;
       }
+
+      .install-grid.install-grid-stack > article {
+        grid-template-columns: 1fr;
+      }
+
+      .install-grid.install-grid-stack .install-head {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        padding-right: 0;
+        padding-bottom: 18px;
+      }
     }
 
     @media (max-width: 900px) {
@@ -1313,11 +1506,25 @@
       .focus-banner {
         grid-template-columns: 1fr;
       }
+
+      .install-main {
+        padding: 14px;
+      }
+
+      .install-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .install-grid.install-grid-stack > article {
+        padding: 18px 16px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="page">
+  <div class="page{{ if eq .CurrentPage "install" }} install-page{{ end }}">
     <header class="topbar surface">
       <div class="brand">
         <div class="brand-mark">LW</div>
@@ -1329,8 +1536,8 @@
 
       <div class="topbar-nav">
         <nav class="nav-switch" aria-label="Top tabs">
-          <a class="tab {{ if eq .CurrentPage "wiki" }}active{{ end }}" href="/ui" data-ui-nav data-ui-tab="wiki">~/ workspace</a>
-          <a class="tab {{ if eq .CurrentPage "install" }}active{{ end }}" href="/ui/install" data-ui-nav data-ui-tab="install">man install</a>
+          <a class="tab {{ if eq .CurrentPage "wiki" }}active{{ end }}" href="/dashboard" data-ui-nav data-ui-tab="wiki">~/ workspace</a>
+          <a class="tab {{ if eq .CurrentPage "install" }}active{{ end }}" href="/dashboard/install" data-ui-nav data-ui-tab="install">man install</a>
         </nav>
       </div>
 
@@ -1372,7 +1579,7 @@
     </div>
   </div>
 
-  <script src="/ui/assets/llm-wiki-tree.js" defer></script>
+  <script src="/dashboard/assets/llm-wiki-tree.js" defer></script>
   <script>
     (function() {
       var root = document.documentElement;
@@ -1391,19 +1598,19 @@
       }
 
       function pageForLocation(location) {
-        return location.pathname === "/ui/install" ? "install" : "wiki";
+        return location.pathname === "/dashboard/install" ? "install" : "wiki";
       }
 
       function fragmentURL(targetURL, scope) {
         var url = new URL(targetURL, window.location.origin);
-        if (scope === "reader" && url.pathname === "/ui") {
-          return "/ui/fragment/reader" + url.search;
+        if (scope === "reader" && url.pathname === "/dashboard") {
+          return "/dashboard/fragment/reader" + url.search;
         }
-        if (url.pathname === "/ui") {
-          return "/ui/fragment/wiki" + url.search;
+        if (url.pathname === "/dashboard") {
+          return "/dashboard/fragment/wiki" + url.search;
         }
-        if (url.pathname === "/ui/install") {
-          return "/ui/fragment/install" + url.search;
+        if (url.pathname === "/dashboard/install") {
+          return "/dashboard/fragment/install" + url.search;
         }
         return "";
       }
@@ -1533,18 +1740,26 @@
         if (!target) {
           return;
         }
+        var defaultLabel = button.getAttribute("data-copy-label") || button.textContent;
+        if (button._copyResetTimer) {
+          clearTimeout(button._copyResetTimer);
+        }
         navigator.clipboard.writeText(target.textContent).then(function() {
-          var card = button.closest("article");
-          var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
-          if (feedback) {
-            feedback.textContent = "Copied.";
-          }
+          button.innerHTML = "✓";
+          button.classList.remove("is-error");
+          button.classList.add("is-copied");
+          button._copyResetTimer = window.setTimeout(function() {
+            button.innerHTML = defaultLabel;
+            button.classList.remove("is-copied");
+          }, 1400);
         }).catch(function() {
-          var card = button.closest("article");
-          var feedback = card ? card.querySelector("[data-copy-feedback]") : null;
-          if (feedback) {
-            feedback.textContent = "Copy failed.";
-          }
+          button.innerHTML = "!";
+          button.classList.remove("is-copied");
+          button.classList.add("is-error");
+          button._copyResetTimer = window.setTimeout(function() {
+            button.innerHTML = defaultLabel;
+            button.classList.remove("is-error");
+          }, 1400);
         });
       });
 

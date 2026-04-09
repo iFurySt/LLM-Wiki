@@ -1,117 +1,132 @@
-<main class="main">
-  <section class="ns-bar surface">
-    <div class="ns-copy">
-      <div class="ns-title">Install LLM-Wiki</div>
-      <div class="ns-note">Three entry points, one backend: CLI, skill, and MCP.</div>
-    </div>
-
-    <div class="install-links">
-      <span class="pill">Host {{ .InstallBaseURL }}</span>
-      <span class="pill">Guide {{ .InstallDocURL }}</span>
-    </div>
-  </section>
-
-  <section class="install-grid">
+<main class="main install-main">
+  <section class="install-grid install-grid-stack">
     <article>
       <div class="install-head">
         <div class="eyebrow">CLI</div>
-        <div class="install-title">Command-line access</div>
-        <div class="install-subtitle">Install once, then log in and use the hosted service directly.</div>
+        <div class="install-title">Install CLI</div>
+        <div class="install-subtitle">Install once, log in, then use the hosted service directly.</div>
       </div>
       <div class="install-body">
         <div class="copy-block">
-          <div class="copy-head">
-            <div class="install-label">For Agents</div>
-            <button type="button" class="copy-button" data-copy-target="cli-agent">Copy</button>
+          <div class="install-label">For Agents</div>
+          <div class="code-shell">
+            <button type="button" class="copy-button copy-button-inline" data-copy-target="cli-agent" data-copy-label="copy" aria-label="Copy CLI agent command">
+              <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10"></rect>
+                <path d="M7 15H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1"></path>
+              </svg>
+            </button>
+            <pre id="cli-agent" class="code-block code-block-shell"><code><span class="code-comment"># Read</span>
+<span class="code-url">{{ .InstallDocURL }}</span>
+
+<span class="code-comment"># Then run</span>
+<span class="code-command">curl</span> <span class="code-flag">-fsSL</span> <span class="code-url">{{ .InstallScriptURL }}</span> | <span class="code-command">sh</span>
+
+<span class="code-comment"># After install</span>
+<span class="code-command">llm-wiki</span> system info <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span>
+<span class="code-command">llm-wiki</span> auth login <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span>
+<span class="code-command">llm-wiki</span> auth whoami <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span></code></pre>
           </div>
-          <pre id="cli-agent" class="code-block">Read:
-{{ .InstallDocURL }}
-
-Then run:
-curl -fsSL {{ .InstallScriptURL }} | sh
-
-After install:
-llm-wiki system info --base-url {{ .InstallBaseURL }}
-llm-wiki auth login --base-url {{ .InstallBaseURL }}
-llm-wiki auth whoami --base-url {{ .InstallBaseURL }}</pre>
         </div>
 
         <div class="copy-block">
-          <div class="copy-head">
-            <div class="install-label">For Humans</div>
-            <button type="button" class="copy-button" data-copy-target="cli-human">Copy</button>
+          <div class="install-label">For Humans</div>
+          <div class="code-shell">
+            <button type="button" class="copy-button copy-button-inline" data-copy-target="cli-human" data-copy-label="copy" aria-label="Copy CLI human command">
+              <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10"></rect>
+                <path d="M7 15H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1"></path>
+              </svg>
+            </button>
+            <pre id="cli-human" class="code-block code-block-shell"><code><span class="code-command">curl</span> <span class="code-flag">-fsSL</span> <span class="code-url">{{ .InstallScriptURL }}</span> | <span class="code-command">sh</span>
+<span class="code-command">llm-wiki</span> system info <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span>
+<span class="code-command">llm-wiki</span> auth login <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span>
+<span class="code-command">llm-wiki</span> auth whoami <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span></code></pre>
           </div>
-          <pre id="cli-human" class="code-block">curl -fsSL {{ .InstallScriptURL }} | sh
-llm-wiki system info --base-url {{ .InstallBaseURL }}
-llm-wiki auth login --base-url {{ .InstallBaseURL }}
-llm-wiki auth whoami --base-url {{ .InstallBaseURL }}</pre>
         </div>
-        <div class="copy-feedback" data-copy-feedback></div>
       </div>
     </article>
 
     <article>
       <div class="install-head">
         <div class="eyebrow">Skill</div>
-        <div class="install-title">Agent-native install</div>
-        <div class="install-subtitle">Point the runtime at the official guide or packaged skill.</div>
+        <div class="install-title">Install Skill</div>
+        <div class="install-subtitle">Point the runtime at the hosted guide or install the packaged skill directly.</div>
       </div>
       <div class="install-body">
         <div class="copy-block">
-          <div class="copy-head">
-            <div class="install-label">For Agents</div>
-            <button type="button" class="copy-button" data-copy-target="skill-agent">Copy</button>
-          </div>
-          <pre id="skill-agent" class="code-block">Read and follow:
-{{ .InstallDocURL }}
+          <div class="install-label">For Agents</div>
+          <div class="code-shell">
+            <button type="button" class="copy-button copy-button-inline" data-copy-target="skill-agent" data-copy-label="copy" aria-label="Copy skill agent command">
+              <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10"></rect>
+                <path d="M7 15H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1"></path>
+              </svg>
+            </button>
+            <pre id="skill-agent" class="code-block code-block-shell"><code><span class="code-comment"># Read and follow</span>
+<span class="code-url">{{ .InstallDocURL }}</span>
 
-If skill packages are supported, install:
-{{ .InstallSkillURL }}</pre>
+<span class="code-comment"># If skill packages are supported, install</span>
+<span class="code-url">{{ .InstallSkillURL }}</span></code></pre>
+          </div>
         </div>
 
         <div class="copy-block">
-          <div class="copy-head">
-            <div class="install-label">For Humans</div>
-            <button type="button" class="copy-button" data-copy-target="skill-human">Copy</button>
+          <div class="install-label">For Humans</div>
+          <div class="code-shell">
+            <button type="button" class="copy-button copy-button-inline" data-copy-target="skill-human" data-copy-label="copy" aria-label="Copy skill human command">
+              <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10"></rect>
+                <path d="M7 15H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1"></path>
+              </svg>
+            </button>
+            <pre id="skill-human" class="code-block code-block-shell"><code><span class="code-command">open</span> <span class="code-url">{{ .InstallDocURL }}</span>
+<span class="code-command">curl</span> <span class="code-flag">-O</span> <span class="code-url">{{ .InstallSkillURL }}</span></code></pre>
           </div>
-          <pre id="skill-human" class="code-block">open {{ .InstallDocURL }}
-curl -O {{ .InstallSkillURL }}</pre>
         </div>
-        <div class="copy-feedback" data-copy-feedback></div>
       </div>
     </article>
 
     <article>
       <div class="install-head">
         <div class="eyebrow">MCP</div>
-        <div class="install-title">Protocol access</div>
-        <div class="install-subtitle">Use remote MCP or the local stdio bridge with a bearer token.</div>
+        <div class="install-title">Install MCP</div>
+        <div class="install-subtitle">Use the remote MCP endpoint or the local stdio bridge with a bearer token.</div>
       </div>
       <div class="install-body">
         <div class="copy-block">
-          <div class="copy-head">
-            <div class="install-label">For Agents</div>
-            <button type="button" class="copy-button" data-copy-target="mcp-agent">Copy</button>
+          <div class="install-label">For Agents</div>
+          <div class="code-shell">
+            <button type="button" class="copy-button copy-button-inline" data-copy-target="mcp-agent" data-copy-label="copy" aria-label="Copy MCP agent command">
+              <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10"></rect>
+                <path d="M7 15H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1"></path>
+              </svg>
+            </button>
+            <pre id="mcp-agent" class="code-block code-block-shell"><code><span class="code-comment"># Remote MCP endpoint</span>
+<span class="code-url">{{ .MCPURL }}</span>
+
+<span class="code-comment"># Auth header</span>
+<span class="code-key">Authorization:</span> <span class="code-value">Bearer</span> <span class="code-placeholder">&lt;llm-wiki-token&gt;</span>
+
+<span class="code-comment"># Local stdio bridge</span>
+<span class="code-env">LLM_WIKI_TOKEN</span>=<span class="code-placeholder">&lt;llm-wiki-token&gt;</span> <span class="code-command">npx</span> <span class="code-flag">--prefix</span> <span class="code-path">npm/llm-wiki-mcp</span> <span class="code-command">llm-wiki-mcp</span> <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span></code></pre>
           </div>
-          <pre id="mcp-agent" class="code-block">Remote MCP endpoint:
-{{ .MCPURL }}
-
-Auth header:
-Authorization: Bearer &lt;llm-wiki-token&gt;
-
-Local stdio bridge:
-LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }}</pre>
         </div>
 
         <div class="copy-block">
-          <div class="copy-head">
-            <div class="install-label">For Humans</div>
-            <button type="button" class="copy-button" data-copy-target="mcp-human">Copy</button>
+          <div class="install-label">For Humans</div>
+          <div class="code-shell">
+            <button type="button" class="copy-button copy-button-inline" data-copy-target="mcp-human" data-copy-label="copy" aria-label="Copy MCP human command">
+              <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10"></rect>
+                <path d="M7 15H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1"></path>
+              </svg>
+            </button>
+            <pre id="mcp-human" class="code-block code-block-shell"><code><span class="code-command">npm</span> <span class="code-command">install</span> <span class="code-flag">--prefix</span> <span class="code-path">npm/llm-wiki-mcp</span> <span class="code-flag">--package-lock=false</span>
+<span class="code-env">LLM_WIKI_TOKEN</span>=<span class="code-placeholder">&lt;llm-wiki-token&gt;</span> <span class="code-command">npx</span> <span class="code-flag">--prefix</span> <span class="code-path">npm/llm-wiki-mcp</span> <span class="code-command">llm-wiki-mcp</span> <span class="code-flag">--base-url</span> <span class="code-url">{{ .InstallBaseURL }}</span></code></pre>
           </div>
-          <pre id="mcp-human" class="code-block">npm install --prefix npm/llm-wiki-mcp --package-lock=false
-LLM_WIKI_TOKEN=&lt;llm-wiki-token&gt; npx --prefix npm/llm-wiki-mcp llm-wiki-mcp --base-url {{ .InstallBaseURL }}</pre>
         </div>
-        <div class="copy-feedback" data-copy-feedback></div>
       </div>
     </article>
   </section>

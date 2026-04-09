@@ -44,6 +44,7 @@ func NewHandler(cfg config.Config, logger *zap.Logger, svc *service.Service) htt
 	}
 	if assetFS, err := ui.AssetFS(); err == nil {
 		engine.StaticFS("/ui/assets", assetFS)
+		engine.StaticFS("/dashboard/assets", assetFS)
 	}
 	mcpManager := mcpserver.NewManager(svc)
 

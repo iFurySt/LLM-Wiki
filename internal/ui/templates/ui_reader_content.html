@@ -96,7 +96,7 @@
         {{ range .SelectedDocument.Revisions }}
         <a
           class="revision-card revision-link{{ if $.SelectedRevision }}{{ if eq $.SelectedRevision.ID .ID }} active{{ end }}{{ else if eq $.SelectedDocument.CurrentRevisionID .ID }} active{{ end }}"
-          href="/ui?document_id={{ $.SelectedDocument.ID }}&folder_id={{ $.SelectedDocument.FolderID }}&revision_id={{ .ID }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}"
+          href="/dashboard?document_id={{ $.SelectedDocument.ID }}&folder_id={{ $.SelectedDocument.FolderID }}&revision_id={{ .ID }}{{ if ne $.StatusFilter "all" }}&status={{ $.StatusFilter }}{{ end }}"
           data-ui-nav
           data-ui-scope="reader"
         >
