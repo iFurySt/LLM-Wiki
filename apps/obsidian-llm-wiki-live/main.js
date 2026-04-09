@@ -128,17 +128,13 @@ module.exports = class LLMWikiLivePlugin extends Plugin {
     const profile = this.loadCurrentCLIProfile();
     const baseURL = String(profile.base_url || "").trim().replace(/\/+$/, "");
     const accessToken = String(profile.access_token || "").trim();
-    const ns = String(profile.ns || profile.ns || "").trim();
     if (!baseURL) {
       throw new Error("LLM-Wiki base URL is missing from ~/.llm-wiki/config.json.");
     }
     if (!accessToken) {
       throw new Error("LLM-Wiki access token is missing from ~/.llm-wiki/config.json.");
     }
-    if (!ns) {
-      throw new Error("LLM-Wiki ns is missing from ~/.llm-wiki/config.json.");
-    }
-    return { baseURL, accessToken, ns };
+    return { baseURL, accessToken };
   }
 
   async requestJSON(method, endpoint, body) {

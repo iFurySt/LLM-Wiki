@@ -4,7 +4,8 @@ This plugin continuously mirrors the current LLM-Wiki `ns` into the active Obsid
 
 Current behavior:
 
-- reads base URL, `ns`, and bearer token from `~/.llm-wiki/config.json`
+- reads base URL and bearer token from `~/.llm-wiki/config.json`
+- resolves the active `ns` from `GET /v1/auth/whoami` instead of trusting a local config field
 - mirrors the current `ns` into `LLM-Wiki/<ns>/...` inside the vault
 - writes folders as folders and documents as markdown files
 - overwrites mirrored files when remote content changes
