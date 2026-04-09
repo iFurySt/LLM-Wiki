@@ -82,6 +82,8 @@ type uiIndexData struct {
 	Documents           []uiDocumentCard
 	SelectedDocument    *api.DocumentResponse
 	SelectedRevision    *api.RevisionResponse
+	SelectedFolderKey   string
+	SelectedFolderName  string
 	SelectedNamespaceID int64
 	StatusFilter        string
 	DocumentCount       int
@@ -317,6 +319,8 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 	}
 
 	var selectedRevision *api.RevisionResponse
+	selectedFolderKey := ""
+	selectedFolderName := ""
 	if selectedDocument != nil {
 		if selectedNamespaceID == 0 {
 			selectedNamespaceID = selectedDocument.FolderID
@@ -353,6 +357,10 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 	namespaceCards := make([]uiNamespaceCard, 0, len(folders.Items))
 	namespaceTree := make([]uiNamespaceTree, 0, len(folders.Items))
 	for _, item := range folders.Items {
+		if selectedDocument != nil && item.ID == selectedDocument.FolderID {
+			selectedFolderKey = item.Key
+			selectedFolderName = item.DisplayName
+		}
 		namespaceCards = append(namespaceCards, uiNamespaceCard{
 			ID:            item.ID,
 			Key:           item.Key,
@@ -444,6 +452,8 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 		Documents:           documentCards,
 		SelectedDocument:    selectedDocument,
 		SelectedRevision:    selectedRevision,
+		SelectedFolderKey:   selectedFolderKey,
+		SelectedFolderName:  selectedFolderName,
 		SelectedNamespaceID: selectedNamespaceID,
 		StatusFilter:        c.DefaultQuery("status", "all"),
 		DocumentCount:       len(documentCards),

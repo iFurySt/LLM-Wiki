@@ -1,13 +1,13 @@
 <div class="reader-layout" id="ui-reader">
   <main class="content-column">
     {{ if .SelectedDocument }}
-    <section class="reader surface">
+    <section class="reader">
       <div class="reader-head">
         <div class="reader-header-grid">
           <div>
             <div class="eyebrow">Document</div>
             <h1 class="doc-title">{{ if .SelectedRevision }}{{ .SelectedRevision.Title }}{{ else }}{{ .SelectedDocument.Title }}{{ end }}</h1>
-            <div class="doc-subtitle">{{ .SelectedDocument.Slug }} · {{ .CurrentSpaceName }} / folder {{ .SelectedDocument.FolderID }} · updated {{ .SelectedDocument.UpdatedAt }}</div>
+            <div class="doc-subtitle">{{ .SelectedDocument.Slug }} · {{ .CurrentSpaceName }} / {{ .SelectedFolderName }} · updated {{ if .SelectedRevision }}{{ .SelectedRevision.CreatedAt }}{{ else }}{{ .SelectedDocument.UpdatedAt }}{{ end }}</div>
           </div>
 
           <div class="doc-meta-row">
@@ -57,7 +57,37 @@
 
   <aside class="detail-column">
     {{ if .SelectedDocument }}
-    <section class="side-panel surface">
+    <details class="meta-panel side-panel">
+      <summary class="meta-summary">
+        <span class="meta-summary-title">Properties</span>
+        <span class="meta-summary-copy">Document metadata{{ if .SelectedRevision }} and selected revision details{{ end }}</span>
+      </summary>
+
+      <div class="meta-grid">
+        <div class="meta-item"><span class="meta-label">ns</span><span class="meta-value">{{ .SelectedDocument.NS }}</span></div>
+        <div class="meta-item"><span class="meta-label">folder_id</span><span class="meta-value">{{ .SelectedDocument.FolderID }}</span></div>
+        <div class="meta-item"><span class="meta-label">folder_key</span><span class="meta-value">{{ .SelectedFolderKey }}</span></div>
+        <div class="meta-item"><span class="meta-label">folder_name</span><span class="meta-value">{{ .SelectedFolderName }}</span></div>
+        <div class="meta-item"><span class="meta-label">document_id</span><span class="meta-value">{{ .SelectedDocument.ID }}</span></div>
+        <div class="meta-item"><span class="meta-label">slug</span><span class="meta-value">{{ .SelectedDocument.Slug }}</span></div>
+        <div class="meta-item"><span class="meta-label">title</span><span class="meta-value">{{ if .SelectedRevision }}{{ .SelectedRevision.Title }}{{ else }}{{ .SelectedDocument.Title }}{{ end }}</span></div>
+        <div class="meta-item"><span class="meta-label">status</span><span class="meta-value">{{ .SelectedDocument.Status }}</span></div>
+        <div class="meta-item"><span class="meta-label">current_revision_id</span><span class="meta-value">{{ .SelectedDocument.CurrentRevisionID }}</span></div>
+        <div class="meta-item"><span class="meta-label">current_revision_no</span><span class="meta-value">{{ .SelectedDocument.CurrentRevisionNo }}</span></div>
+        <div class="meta-item"><span class="meta-label">created_at</span><span class="meta-value">{{ .SelectedDocument.CreatedAt }}</span></div>
+        <div class="meta-item"><span class="meta-label">updated_at</span><span class="meta-value">{{ .SelectedDocument.UpdatedAt }}</span></div>
+        {{ if .SelectedRevision }}
+        <div class="meta-item"><span class="meta-label">revision_id</span><span class="meta-value">{{ .SelectedRevision.ID }}</span></div>
+        <div class="meta-item"><span class="meta-label">revision_no</span><span class="meta-value">{{ .SelectedRevision.RevisionNo }}</span></div>
+        <div class="meta-item"><span class="meta-label">author_type</span><span class="meta-value">{{ .SelectedRevision.AuthorType }}</span></div>
+        <div class="meta-item"><span class="meta-label">author_id</span><span class="meta-value">{{ .SelectedRevision.AuthorID }}</span></div>
+        <div class="meta-item meta-item-wide"><span class="meta-label">change_summary</span><span class="meta-value">{{ .SelectedRevision.ChangeSummary }}</span></div>
+        <div class="meta-item meta-item-wide"><span class="meta-label">revision_created_at</span><span class="meta-value">{{ .SelectedRevision.CreatedAt }}</span></div>
+        {{ end }}
+      </div>
+    </details>
+
+    <section class="side-panel">
       <div class="section-head">
         <div class="section-title">Version History</div>
       </div>
@@ -83,7 +113,7 @@
       </div>
     </section>
     {{ else }}
-    <section class="side-panel surface">
+    <section class="side-panel">
       <div class="section-head">
         <div class="section-title">Workspace Stats</div>
       </div>
