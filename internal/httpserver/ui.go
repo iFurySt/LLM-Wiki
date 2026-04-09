@@ -266,14 +266,12 @@ func renderUIFragment(c *gin.Context, svc *service.Service, cfg config.Config, c
 func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (uiIndexData, error) {
 	tenantID := tenantIDFromRequest(c)
 	baseURL := strings.TrimRight(cfg.Install.BaseURL, "/")
-	var namespaceFilter *int64
 	var selectedNamespaceID int64
 	if raw := c.Query("folder_id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil {
 			return uiIndexData{}, err
 		}
-		namespaceFilter = &parsed
 		selectedNamespaceID = parsed
 	}
 
@@ -291,7 +289,9 @@ func buildUIIndexData(c *gin.Context, svc *service.Service, cfg config.Config) (
 	if err != nil {
 		return uiIndexData{}, err
 	}
-	documents, err := svc.ListDocuments(c.Request.Context(), tenantID, namespaceFilter, statusFilter)
+	// Keep the left tree fully populated on refresh. `folder_id` is a UI selection
+	// hint, not a content filter for the overall document list.
+	documents, err := svc.ListDocuments(c.Request.Context(), tenantID, nil, statusFilter)
 	if err != nil {
 		return uiIndexData{}, err
 	}
