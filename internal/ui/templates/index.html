@@ -363,6 +363,7 @@
 
     .shell {
       display: grid;
+      grid-template-rows: minmax(0, 1fr);
       gap: 0;
       align-items: stretch;
       height: calc(100vh - 61px);
@@ -371,19 +372,22 @@
 
     .wiki-shell {
       grid-template-columns: 312px minmax(0, 1fr) 320px;
+      grid-template-rows: minmax(0, 1fr);
       gap: 0;
-      min-height: calc(100vh - 61px);
-      height: 100%;
+      min-height: 0;
+      height: calc(100vh - 61px);
+      align-items: stretch;
     }
 
     .sidebar {
       position: sticky;
       top: 0;
       overflow: auto;
+      overscroll-behavior: contain;
       padding: 0 18px 0 18px;
       border-right: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
       background: color-mix(in srgb, var(--panel) 96%, transparent);
-      min-height: 100%;
+      min-height: 0;
       height: 100%;
     }
 
@@ -778,8 +782,10 @@
 
     .content-column {
       min-width: 0;
+      min-height: 0;
       padding: 8px 18px 24px 12px;
       overflow: auto;
+      overscroll-behavior: contain;
       height: 100%;
       align-content: start;
       grid-auto-rows: max-content;
@@ -787,13 +793,30 @@
 
     .detail-column {
       min-width: 0;
-      padding: 8px 0 24px 14px;
+      min-height: 0;
+      padding: 8px 14px 24px 14px;
       border-left: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
       background: color-mix(in srgb, var(--panel) 94%, transparent);
       overflow: auto;
+      overscroll-behavior: contain;
       height: 100%;
       align-content: start;
       grid-auto-rows: max-content;
+    }
+
+    .sidebar,
+    .content-column,
+    .detail-column {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .sidebar::-webkit-scrollbar,
+    .content-column::-webkit-scrollbar,
+    .detail-column::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
     }
 
     .ns-bar,
