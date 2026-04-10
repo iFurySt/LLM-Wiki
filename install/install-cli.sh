@@ -62,6 +62,19 @@ download_archive() {
   return 1
 }
 
+legacy_archive_name() {
+  archive="$1"
+  case "$archive" in
+    llm-wiki_*)
+      suffix="${archive#llm-wiki_}"
+      printf '%s\n' "docmesh_${suffix}"
+      ;;
+    *)
+      printf '%s\n' "$archive"
+      ;;
+  esac
+}
+
 fetch_text() {
   url="$1"
   if [ "$DOWNLOADER" = "curl" ]; then
@@ -150,12 +163,28 @@ else
   GITHUB_ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/download/${TARGET_VERSION}/${ARCHIVE}"
 fi
 
+LEGACY_ARCHIVE="$(legacy_archive_name "$ARCHIVE")"
+if [ "$LEGACY_ARCHIVE" = "$ARCHIVE" ]; then
+  LEGACY_GITHUB_ARCHIVE_URL=""
+elif [ "$TARGET_VERSION" = "latest" ]; then
+  LEGACY_GITHUB_ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/latest/download/${LEGACY_ARCHIVE}"
+else
+  LEGACY_GITHUB_ARCHIVE_URL="https://github.com/${RELEASE_REPO}/releases/download/${TARGET_VERSION}/${LEGACY_ARCHIVE}"
+fi
+
 if [ -n "$ARCHIVE_URL" ]; then
   echo "downloading ${ARCHIVE_URL}"
 else
   echo "downloading ${GITHUB_ARCHIVE_URL}"
 fi
-download_archive "${ARCHIVE_URL:-$GITHUB_ARCHIVE_URL}" "$GITHUB_ARCHIVE_URL" "$TMP_DIR/$ARCHIVE"
+if ! download_archive "${ARCHIVE_URL:-$GITHUB_ARCHIVE_URL}" "$GITHUB_ARCHIVE_URL" "$TMP_DIR/$ARCHIVE"; then
+  if [ -n "$LEGACY_GITHUB_ARCHIVE_URL" ]; then
+    echo "modern archive unavailable, falling back to ${LEGACY_GITHUB_ARCHIVE_URL}" >&2
+    fetch_to_file "$LEGACY_GITHUB_ARCHIVE_URL" "$TMP_DIR/$ARCHIVE"
+  else
+    exit 1
+  fi
+fi
 
 mkdir -p "$INSTALL_DIR"
 tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"

@@ -4,6 +4,9 @@ ARG LLM_WIKI_VERSION=0.1.0-dev
 ARG TARGETOS
 ARG TARGETARCH
 
+RUN apt-get update && apt-get install -y --no-install-recommends zip \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /src
 
 COPY go.mod go.sum ./
@@ -11,6 +14,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go mod download
 
 COPY . .
+
+RUN LLM_WIKI_VERSION=${LLM_WIKI_VERSION} ./scripts/release/package-install.sh
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
@@ -25,6 +30,7 @@ WORKDIR /app
 
 COPY --from=build /out/llm-wiki-server /usr/local/bin/llm-wiki-server
 COPY --from=build /src/install /app/install
+COPY --from=build /src/dist/install /app/dist/install
 COPY --from=build /src/skills/llm-wiki /app/skills/llm-wiki
 
 EXPOSE 8234
