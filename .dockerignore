@@ -10,4 +10,6 @@ npm/llm-wiki-mcp/node_modules
 .env
 .env.local
 .llmwiki
-skills
+skills/*
+!skills/llm-wiki/
+!skills/llm-wiki/**

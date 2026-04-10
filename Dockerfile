@@ -25,7 +25,7 @@ WORKDIR /app
 
 COPY --from=build /out/llm-wiki-server /usr/local/bin/llm-wiki-server
 COPY --from=build /src/install /app/install
-COPY --from=build /src/skills /app/skills
+COPY --from=build /src/skills/llm-wiki /app/skills/llm-wiki
 
 EXPOSE 8234
 
